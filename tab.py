@@ -5,3 +5,6 @@ class Tab():
         self.windows = []
         self.windows.append(Window())
         self.curr_window = 0
+
+    def get_curr_window(self):
+        return self.windows[self.curr_window]
