@@ -12,15 +12,25 @@ from events import *
 
 
 class Context():
-    def on_buffer_destroy_callback1(self, buf): 
+    def on_cursor_move_after_callback(self, cursor):
+        self.stdscr.move(cursor[1], cursor[0])
+
+    def on_buffer_destroy_after_callback(self, buf): 
         self.buffers.remove(buf)
-    def on_buffer_create_callback1(self, buf): 
+
+    def on_buffer_create_after_callback(self, buf): 
         self.buffers.append(buf)
+
+    def draw(self):
+        self.get_curr_tab().draw()
+
+        # self.stdscr.addstr()
+        pass
 
     def __init__(self, stdscr):
         self.stdscr = stdscr
 
-        self.HEIGHT, self.WIDTH = stdscr.getmaxyx()
+        self.height, self.width = stdscr.getmaxyx()
         signal(SIGWINCH, self.screen_resize_handler)
 
         self.tabs = []
@@ -30,12 +40,12 @@ class Context():
         self.curr_tab = -1
 
         # Register to global events!
-        Hooks.register(ON_BUFFER_CREATE_END, self.on_buffer_create_callback1)
-        Hooks.register(ON_BUFFER_DESTROY_END, self.on_buffer_destroy_callback1)
-
+        Hooks.register(ON_BUFFER_CREATE_AFTER, self.on_buffer_create_after_callback)
+        Hooks.register(ON_BUFFER_DESTROY_AFTER, self.on_buffer_destroy_after_callback)
+        Hooks.register(ON_CURSOR_MOVE_AFTER, self.on_cursor_move_after_callback)
 
     def _create_tab(self):
-        self.tabs.append(Tab())
+        self.tabs.append(Tab(self.width, self.height))
         self.curr_tab = len(self.tabs) - 1
         return self.tabs[-1]
 
@@ -49,35 +59,33 @@ class Context():
         self.cursor_y = 0
 
     def screen_resize_handler(self, signum, frame):
-        self.HEIGHT, self.WIDTH = self.stdscr.getmaxyx()
+        curses.endwin()
+        curses.initscr()
+        self.height, self.width = self.stdscr.getmaxyx()
+
+        Hooks.execute(ON_RESIZE, (self.width, self.height))
+
 
     def on_key(self, key):
+        # try:
+            # self.stdscr.addstr(0, 0, f"KEY: {curses.keyname(key).decode()}")
+        # except Exception as e:
+            # pass
+
         if key == ord('j'):
-            # self.get_curr_tab().get_curr_window().move_down()
-            self.cursor_y += 1
+            self.get_curr_tab().get_curr_window().move_down()
+            # self.cursor_y += 1
         elif key == ord('k'):
-            self.cursor_y -= 1
+            self.get_curr_tab().get_curr_window().move_up()
+            # self.cursor_y -= 1
         elif key == ord('l'):
-            self.cursor_x += 1
+            self.get_curr_tab().get_curr_window().move_right()
+            # self.cursor_x += 1
         elif key == ord('h'):
-            self.cursor_x -= 1
+            self.get_curr_tab().get_curr_window().move_left()
+            # self.cursor_x -= 1
         elif key == ord('q'):
             return True
-            
-        try:
-            self.stdscr.addstr(0, 0, f"KEY: {curses.keyname(key).decode()}")
-        except Exception as e:
-            pass
-
-        self.stdscr.addstr(1, 0, f"{Hooks.registry}")
-        self.stdscr.addstr(2, 0, f"{self.buffers}")
-
-        self.cursor_x = max(0, self.cursor_x)
-        self.cursor_x = min(self.WIDTH-1, self.cursor_x)
-        self.cursor_y = max(0, self.cursor_y)
-        self.cursor_y = min(self.HEIGHT-1, self.cursor_y)
-
-        self.stdscr.move(self.cursor_y, self.cursor_x)
         return False
 
 def _main(stdscr):
@@ -89,7 +97,7 @@ def _main(stdscr):
 
     k = 0
     while True:
-        stdscr.clear()
+        # stdscr.clear()
 
         to_exit = context.on_key(k)
         if to_exit: break

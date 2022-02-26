@@ -3,14 +3,14 @@ from hooks import *
 
 class Buffer():
     def __init__(self, file_path=None):
-        Hooks.execute(ON_BUFFER_CREATE_START, self)
+        Hooks.execute(ON_BUFFER_CREATE_BEFORE, self)
 
         self.lines = []
         self.file_path = None
 
 
         if not file_path: 
-            Hooks.execute(ON_BUFFER_CREATE_END, self)
+            Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
             return
         
         try:
@@ -20,8 +20,8 @@ class Buffer():
         Hooks.execute(ON_BUFFER_CREATE_END, self)
 
     def destroy(self):
-        Hooks.execute(ON_BUFFER_DESTROY_START, self)
-        Hooks.execute(ON_BUFFER_DESTROY_END, self)
+        Hooks.execute(ON_BUFFER_DESTROY_BEFORE, self)
+        Hooks.execute(ON_BUFFER_DESTROY_AFTER, self)
 
     def write_to_file(self, file_path):
         if not self.file_path: 
