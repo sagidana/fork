@@ -6,8 +6,10 @@ ON_BUFFER_DESTROY_AFTER = "on_buffer_destroy_after"
 
 ON_RESIZE = "on_resize"
 
+# Draw events
 ON_CURSOR_MOVE_BEFORE = "on_cursor_move_before"
 ON_CURSOR_MOVE_AFTER = "on_cursor_move_after"
+ON_DRAW_TAB = "on_draw_tab"
 
 # Per Buffer
 

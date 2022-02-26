@@ -17,7 +17,7 @@ class Buffer():
             with open(file_path, 'r') as f:
                 self.lines = f.readlines()
         except:pass
-        Hooks.execute(ON_BUFFER_CREATE_END, self)
+        Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
     def destroy(self):
         Hooks.execute(ON_BUFFER_DESTROY_BEFORE, self)

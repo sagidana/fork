@@ -35,12 +35,14 @@ class Tab():
         self.width = size[0]
         self.height = size[1]
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, buffer=None):
         self.width = width
         self.height = height
 
         self.windows = []
-        window = Window(self.width, self.height)
+        window = Window(self.width, 
+                        self.height, 
+                        buffer=buffer)
 
         handlers = {}
         handlers[ON_WINDOW_MOVE_UP_AFTER] = self.on_window_move_up_after_callback
