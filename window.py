@@ -21,7 +21,9 @@ class Window():
     def __init__(self, width, height, buffer=None):
         self.width = width
         self.height = height
-        self.cursor = [0,0]
+        self.window_cursor = [0,0]
+        self.buffer_cursor = [0,0]
+        self.remember = 0
 
         if not buffer:
             self.buffer = Buffer()
@@ -42,21 +44,76 @@ class Window():
 
     @raise_event
     def move_up(self):
-        self.cursor[1] -= 1
-        self.cursor[1] = max(0, self.cursor[1])
+        if self.window_cursor[1] == 0:
+            if self.buffer_cursor[1] == 0: pass
+            else:
+                self.buffer_cursor[1] -= 1
+
+                if self.remember > self.buffer_cursor[0]:
+                    self.buffer_cursor[0] = self.remember
+                    self.window_cursor[0] = self.remember
+                    self.remember = 0
+
+                line_len = len(self.buffer.lines[self.buffer_cursor[1]]) - 1
+                if line_len < self.window_cursor[0]:
+                    self.remember = self.window_cursor[0]
+                    self.window_cursor[0] = line_len
+                    self.buffer_cursor[0] = line_len
+        else:
+            if self.buffer_cursor[1] == 0: raise Exception('Should never happen.')
+
+            self.window_cursor[1] -= 1
+            self.buffer_cursor[1] -= 1
+
+            if self.remember > self.buffer_cursor[0]:
+                self.buffer_cursor[0] = self.remember
+                self.remember = 0
+
+            line_len = len(self.buffer.lines[self.buffer_cursor[1]]) - 1
+            if line_len < self.window_cursor[0]:
+                self.remember = self.window_cursor[0]
+                self.window_cursor[0] = line_len
+
+        # self.window_cursor[1] = max(0, self.window_cursor[1])
 
     @raise_event
     def move_down(self):
-        self.cursor[1] += 1
-        self.cursor[1] = min(   self.height - 1, 
-                                self.cursor[1])
+        if self.window_cursor[1] == self.height:
+            if self.buffer_cursor[1] == len(self.buffer.lines): pass
+            else:
+                self.buffer_cursor[1] += 1
+
+                if self.remember > self.buffer_cursor[0]:
+                    self.buffer_cursor[0] = self.remember
+                    self.window_cursor[0] = self.remember
+                    self.remember = 0
+
+                line_len = len(self.buffer.lines[self.buffer_cursor[1]]) - 1
+                if line_len < self.window_cursor[0]:
+                    self.remember = self.window_cursor[0]
+                    self.window_cursor[0] = line_len
+                    self.buffer_cursor[0] = line_len
+        else:
+            if self.buffer_cursor[1] == 0: raise Exception('Should never happen.')
+
+            self.window_cursor[1] -= 1
+            self.buffer_cursor[1] -= 1
+
+            if self.remember > self.buffer_cursor[0]:
+                self.buffer_cursor[0] = self.remember
+                self.remember = 0
+
+            line_len = len(self.buffer.lines[self.buffer_cursor[1]]) - 1
+            if line_len < self.window_cursor[0]:
+                self.remember = self.window_cursor[0]
+                self.window_cursor[0] = line_len
 
     @raise_event
     def move_right(self):
-        self.cursor[0] += 1
-        self.cursor[0] = min(   self.width - 1, 
-                                self.cursor[0])
+        self.window_cursor[0] += 1
+        self.window_cursor[0] = min(   self.width - 1, 
+                                self.window_cursor[0])
     @raise_event
     def move_left(self):
-        self.cursor[0] -= 1
-        self.cursor[0] = max(0, self.cursor[0])
+        self.window_cursor[0] -= 1
+        self.window_cursor[0] = max(0, self.window_cursor[0])

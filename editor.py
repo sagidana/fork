@@ -11,6 +11,12 @@ from hooks import *
 from events import *
 
 
+NORMAL = 'normal'
+INSERT = 'insert'
+VISUAL = 'visual'
+VISUAL_BLOCK = 'visual_block'
+REPLACE = 'replace'
+
 class Context():
     def on_draw_tab_callback(self, arg):
         index = 0
@@ -34,11 +40,43 @@ class Context():
         # self.stdscr.addstr()
         pass
 
+    def initialize_maps(self):
+        # self.maps[NORMAL][ord('j')] = lambda s : s.get_curr_tab().get_curr_window.move_down()
+        def j_map(self):
+            self.get_curr_tab().get_curr_window().move_down()
+            return False
+        self.maps[NORMAL][ord('j')] = j_map
+        def k_map(self):
+            self.get_curr_tab().get_curr_window().move_up()
+            return False
+        self.maps[NORMAL][ord('k')] = k_map
+        def l_map(self):
+            self.get_curr_tab().get_curr_window().move_right()
+            return False
+        self.maps[NORMAL][ord('l')] = l_map
+        def h_map(self):
+            self.get_curr_tab().get_curr_window().move_left()
+            return False
+        self.maps[NORMAL][ord('h')] = h_map
+        def q_map(self):
+            return True
+        self.maps[NORMAL][ord('q')] = q_map
+
+    
     def __init__(self, stdscr):
         self.stdscr = stdscr
 
         self.height, self.width = stdscr.getmaxyx()
         signal(SIGWINCH, self.screen_resize_handler)
+
+        self.maps = {}
+        self.maps[NORMAL] = {}
+        self.maps[INSERT] = {}
+        self.maps[VISUAL] = {}
+        self.maps[VISUAL_BLOCK] = {}
+        self.maps[REPLACE] = {}
+        self.mode = NORMAL # start in normal mode
+        self.initialize_maps()
 
         self.tabs = []
         self.windows = []
@@ -81,21 +119,8 @@ class Context():
         # except Exception as e:
             # pass
 
-        if key == ord('j'):
-            self.get_curr_tab().get_curr_window().move_down()
-            # self.cursor_y += 1
-        elif key == ord('k'):
-            self.get_curr_tab().get_curr_window().move_up()
-            # self.cursor_y -= 1
-        elif key == ord('l'):
-            self.get_curr_tab().get_curr_window().move_right()
-            # self.cursor_x += 1
-        elif key == ord('h'):
-            self.get_curr_tab().get_curr_window().move_left()
-            # self.cursor_x -= 1
-        elif key == ord('q'):
-            return True
-        return False
+        if key in self.maps[self.mode]:
+            return self.maps[self.mode][key](self)
 
 def _main(stdscr):
     context = Context(stdscr)

@@ -16,19 +16,19 @@ class Tab():
                 for cb in self.events[event]: cb(self)
 
     def on_window_move_up_after_callback(self, win):
-        cursor = win.cursor
+        cursor = win.window_cursor
         Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
 
     def on_window_move_down_after_callback(self, win):
-        cursor = win.cursor
+        cursor = win.window_cursor
         Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
 
     def on_window_move_right_after_callback(self, win):
-        cursor = win.cursor
+        cursor = win.window_cursor
         Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
 
     def on_window_move_left_after_callback(self, win):
-        cursor = win.cursor
+        cursor = win.window_cursor
         Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
 
     def on_resize_callbak(self, size):
