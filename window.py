@@ -1,6 +1,7 @@
 from buffer import *
 from hooks import *
 
+from log import elog
 
 class Window():
     def raise_event(func):
@@ -67,53 +68,67 @@ class Window():
 
             if self.remember > self.buffer_cursor[0]:
                 self.buffer_cursor[0] = self.remember
+                self.window_cursor[0] = self.remember
                 self.remember = 0
 
             line_len = len(self.buffer.lines[self.buffer_cursor[1]]) - 1
             if line_len < self.window_cursor[0]:
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
-
-        # self.window_cursor[1] = max(0, self.window_cursor[1])
+                self.buffer_cursor[0] = line_len
 
     @raise_event
     def move_down(self):
-        if self.window_cursor[1] == self.height:
-            if self.buffer_cursor[1] == len(self.buffer.lines): pass
-            else:
-                self.buffer_cursor[1] += 1
+        if self.buffer_cursor[1] == len(self.buffer.lines) - 1: return
 
-                if self.remember > self.buffer_cursor[0]:
-                    self.buffer_cursor[0] = self.remember
-                    self.window_cursor[0] = self.remember
-                    self.remember = 0
-
-                line_len = len(self.buffer.lines[self.buffer_cursor[1]]) - 1
-                if line_len < self.window_cursor[0]:
-                    self.remember = self.window_cursor[0]
-                    self.window_cursor[0] = line_len
-                    self.buffer_cursor[0] = line_len
-        else:
-            if self.buffer_cursor[1] == 0: raise Exception('Should never happen.')
-
-            self.window_cursor[1] -= 1
-            self.buffer_cursor[1] -= 1
+        if self.window_cursor[1] == self.height - 1:
+            self.buffer_cursor[1] += 1
 
             if self.remember > self.buffer_cursor[0]:
                 self.buffer_cursor[0] = self.remember
+                self.window_cursor[0] = self.remember
                 self.remember = 0
 
             line_len = len(self.buffer.lines[self.buffer_cursor[1]]) - 1
             if line_len < self.window_cursor[0]:
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
+                self.buffer_cursor[0] = line_len
+        else:
+            self.window_cursor[1] += 1
+            self.buffer_cursor[1] += 1
+
+            if self.remember > self.buffer_cursor[0]:
+                self.buffer_cursor[0] = self.remember
+                self.window_cursor[0] = self.remember
+                self.remember = 0
+
+            line_len = len(self.buffer.lines[self.buffer_cursor[1]]) - 1
+            if line_len < self.window_cursor[0]:
+                self.remember = self.window_cursor[0]
+                self.window_cursor[0] = line_len
+                self.buffer_cursor[0] = line_len
 
     @raise_event
     def move_right(self):
-        self.window_cursor[0] += 1
-        self.window_cursor[0] = min(   self.width - 1, 
-                                self.window_cursor[0])
+        elog(f"{len(self.buffer.lines[self.buffer_cursor[1]])}")
+        if self.buffer_cursor[0] == len(self.buffer.lines[self.buffer_cursor[1]]) - 1:
+            return
+
+        self.buffer_cursor[0] += 1
+
+        if self.window_cursor[0] == self.width - 1:
+            pass # TODO scroll horizontally
+        else:
+            self.window_cursor[0] += 1
+
     @raise_event
     def move_left(self):
-        self.window_cursor[0] -= 1
-        self.window_cursor[0] = max(0, self.window_cursor[0])
+        if self.buffer_cursor[0] == 0: return
+
+        self.buffer_cursor[0] -= 1
+
+        if self.window_cursor[0] == 0:
+            pass # TODO scroll horizontally
+        else:
+            self.window_cursor[0] -= 1
