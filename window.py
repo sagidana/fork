@@ -19,7 +19,15 @@ class Window():
 
         return event_wrapper
 
-    def __init__(self, width, height, buffer=None):
+    def __init__(   self, 
+                    stdscr, 
+                    width, 
+                    height, 
+                    position=(0,0), 
+                    buffer=None):
+
+        self.stdscr = stdscr
+        self.position = list(position)
         self.width = width
         self.height = height
         self.window_cursor = [0,0]
@@ -33,15 +41,45 @@ class Window():
 
         self.events = {}
 
+        self.draw()
+
     def register_events(self, handlers):
         for event in handlers:
             if event not in self.events:
                 self.events[event] = []
             self.events[event].append(handlers[event])
 
-    def resize(width, height):
+    def draw_cursor(self):
+        cursor = [pos for pos in self.window_cursor]
+
+        cursor[0] = self.position[0] + self.window_cursor[0]
+        cursor[1] = self.position[1] + self.window_cursor[1]
+        
+        self.stdscr.move(cursor[1], cursor[0])
+
+    def draw(self):
+        index = 0
+        for i in range(self.height):
+            try:
+                line = self.buffer.lines[i]
+                self.stdscr.addstr( i, 
+                                    self.position[1] + 0, 
+                                    line[:self.width])
+            except: break
+
+        self.draw_cursor()
+
+    def scroll_up(self):
+        pass
+
+    def scroll_down(self):
+        pass
+
+    def resize(self, width, height):
         self.width = width
         self.height = height
+
+        self.draw()
 
     @raise_event
     def move_up(self):
@@ -76,6 +114,7 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
+        self.draw_cursor()
 
     @raise_event
     def move_down(self):
@@ -108,6 +147,7 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
+        self.draw_cursor()
 
     @raise_event
     def move_right(self):
@@ -121,6 +161,7 @@ class Window():
             pass # TODO scroll horizontally
         else:
             self.window_cursor[0] += 1
+        self.draw_cursor()
 
     @raise_event
     def move_left(self):
@@ -132,3 +173,4 @@ class Window():
             pass # TODO scroll horizontally
         else:
             self.window_cursor[0] -= 1
+        self.draw_cursor()

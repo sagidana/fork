@@ -15,42 +15,53 @@ class Tab():
             if event in self.events:
                 for cb in self.events[event]: cb(self)
 
-    def on_window_move_up_after_callback(self, win):
-        cursor = win.window_cursor
-        Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
+    # def on_window_move_up_after_callback(self, win):
+        # cursor = win.window_cursor
+        # Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
 
-    def on_window_move_down_after_callback(self, win):
-        cursor = win.window_cursor
-        Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
+    # def on_window_move_down_after_callback(self, win):
+        # cursor = win.window_cursor
+        # Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
 
-    def on_window_move_right_after_callback(self, win):
-        cursor = win.window_cursor
-        Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
+    # def on_window_move_right_after_callback(self, win):
+        # cursor = win.window_cursor
+        # Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
 
-    def on_window_move_left_after_callback(self, win):
-        cursor = win.window_cursor
-        Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
+    # def on_window_move_left_after_callback(self, win):
+        # cursor = win.window_cursor
+        # Hooks.execute(ON_CURSOR_MOVE_AFTER, cursor)
 
     def on_resize_callbak(self, size):
         self.width = size[0]
         self.height = size[1]
+        
+        self.get_curr_window().resize(  self.width,
+                                        self.height)
 
-    def __init__(self, width, height, buffer=None):
+    def __init__(   self, 
+                    stdscr, 
+                    width, 
+                    height, 
+                    buffer=None):
+
+        self.stdscr = stdscr
         self.width = width
         self.height = height
 
         self.windows = []
-        window = Window(self.width, 
+        window = Window(self.stdscr,
+                        self.width, 
                         self.height, 
+                        # position=(1,0),
                         buffer=buffer)
 
-        handlers = {}
-        handlers[ON_WINDOW_MOVE_UP_AFTER] = self.on_window_move_up_after_callback
-        handlers[ON_WINDOW_MOVE_DOWN_AFTER] = self.on_window_move_down_after_callback
-        handlers[ON_WINDOW_MOVE_RIGHT_AFTER] = self.on_window_move_right_after_callback
-        handlers[ON_WINDOW_MOVE_LEFT_AFTER] = self.on_window_move_left_after_callback 
+        # handlers = {}
+        # handlers[ON_WINDOW_MOVE_UP_AFTER] = self.on_window_move_up_after_callback
+        # handlers[ON_WINDOW_MOVE_DOWN_AFTER] = self.on_window_move_down_after_callback
+        # handlers[ON_WINDOW_MOVE_RIGHT_AFTER] = self.on_window_move_right_after_callback
+        # handlers[ON_WINDOW_MOVE_LEFT_AFTER] = self.on_window_move_left_after_callback 
 
-        window.register_events(handlers)
+        # window.register_events(handlers)
 
         self.events = {}
         self.windows.append(window)

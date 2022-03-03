@@ -25,9 +25,6 @@ class Context():
             index += 1
         self.stdscr.move(0,0)
 
-    def on_cursor_move_after_callback(self, cursor):
-        self.stdscr.move(cursor[1], cursor[0])
-
     def on_buffer_destroy_after_callback(self, buf): 
         self.buffers.remove(buf)
 
@@ -87,11 +84,9 @@ class Context():
         # Register to global events!
         Hooks.register(ON_BUFFER_CREATE_AFTER, self.on_buffer_create_after_callback)
         Hooks.register(ON_BUFFER_DESTROY_AFTER, self.on_buffer_destroy_after_callback)
-        Hooks.register(ON_CURSOR_MOVE_AFTER, self.on_cursor_move_after_callback)
-        Hooks.register(ON_DRAW_TAB, self.on_draw_tab_callback)
 
     def _create_tab(self, buffer=None):
-        self.tabs.append(Tab(self.width, self.height, buffer))
+        self.tabs.append(Tab(self.stdscr, self.width, self.height, buffer))
         self.curr_tab = len(self.tabs) - 1
 
         # Tell movim to draw the newly created tab
