@@ -70,7 +70,7 @@ class Window():
             try:
                 line = self.buffer.lines[first_line + i]
                 self.stdscr.addstr( i, 
-                                    self.position[1] + 0, 
+                                    self.position[0] + 0, 
                                     line[:self.width])
             except: break
 
@@ -191,6 +191,48 @@ class Window():
         else:
             self.window_cursor[0] -= 1
             self.remember = 0
+
+    def _align_center(self):
+        center = int(self.height / 2)
+        if self.buffer_cursor[1] < center:
+            self.window_cursor[1] = self.buffer_cursor[1]
+        # elif self.buffer_cursor[1] :
+        else:
+            self.window_cursor[1] = center
+
+    def scroll_up_half_page(self):
+        half = int(self.height / 2)
+        for i in range(half): self._move_up()
+        self._align_center()
+
+        self.draw()
+
+    def scroll_down_half_page(self):
+        half = int(self.height / 2)
+        for i in range(half): self._move_down()
+        self._align_center()
+
+        self.draw()
+
+    def move_word(self): pass
+    def move_WORD(self): pass
+
+    def move_back(self): pass
+    def move_BACK(self): pass
+
+    def move_end(self): pass
+    def move_END(self): pass
+
+    def find(self): pass
+    def find_back(self): pass
+
+    def till(self): pass
+    def till_back(self): pass
+    
+    def new_line(self): pass
+    def new_line_before(self): pass
+
+    def remove(self): pass
 
     @raise_event
     def move_up(self):

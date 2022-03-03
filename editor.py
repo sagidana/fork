@@ -6,6 +6,7 @@ import curses
 from buffer import Buffer
 from window import Window
 from tab import Tab
+from log import elog
 
 from hooks import *
 from events import *
@@ -18,13 +19,6 @@ VISUAL_BLOCK = 'visual_block'
 REPLACE = 'replace'
 
 class Context():
-    def on_draw_tab_callback(self, arg):
-        index = 0
-        for line in self.get_curr_tab().get_curr_window().buffer.lines:
-            self.stdscr.addstr(index, 0, line)
-            index += 1
-        self.stdscr.move(0,0)
-
     def on_buffer_destroy_after_callback(self, buf): 
         self.buffers.remove(buf)
 
@@ -33,12 +27,14 @@ class Context():
 
     def draw(self):
         self.get_curr_tab().draw()
-
-        # self.stdscr.addstr()
         pass
 
     def initialize_maps(self):
-        # self.maps[NORMAL][ord('j')] = lambda s : s.get_curr_tab().get_curr_window.move_down()
+        def q_map(self):
+            return True
+        self.maps[NORMAL][ord('q')] = q_map
+
+        # Legends
         def j_map(self):
             self.get_curr_tab().get_curr_window().move_down()
             return False
@@ -55,9 +51,20 @@ class Context():
             self.get_curr_tab().get_curr_window().move_left()
             return False
         self.maps[NORMAL][ord('h')] = h_map
-        def q_map(self):
-            return True
-        self.maps[NORMAL][ord('q')] = q_map
+
+        # Mainstream
+        def w_map(self):
+            self.get_curr_tab().get_curr_window().move_word()
+            return False
+        self.maps[NORMAL][ord('w')] = w_map
+        def ctrl_u_map(self):
+            self.get_curr_tab().get_curr_window().scroll_up_half_page()
+            return False
+        self.maps[NORMAL][21] = ctrl_u_map
+        def ctrl_d_map(self):
+            self.get_curr_tab().get_curr_window().scroll_down_half_page()
+            return False
+        self.maps[NORMAL][4] = ctrl_d_map
 
     
     def __init__(self, stdscr):
@@ -98,7 +105,7 @@ class Context():
         return self.tabs[self.curr_tab]
 
     def bootstrap(self):
-        buffer = Buffer('/tmp/topics')
+        buffer = Buffer('./editor.py')
         tab = self._create_tab(buffer)
 
     def screen_resize_handler(self, signum, frame):
@@ -109,10 +116,8 @@ class Context():
         Hooks.execute(ON_RESIZE, (self.width, self.height))
 
     def on_key(self, key):
-        # try:
-            # self.stdscr.addstr(0, 0, f"KEY: {curses.keyname(key).decode()}")
-        # except Exception as e:
-            # pass
+        try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
+        except Exception as e: pass
 
         if key in self.maps[self.mode]:
             return self.maps[self.mode][key](self)
@@ -127,8 +132,6 @@ def _main(stdscr):
 
     k = 0
     while True:
-        # stdscr.clear()
-
         to_exit = context.on_key(k)
         if to_exit: break
 

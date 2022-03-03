@@ -52,7 +52,7 @@ class Tab():
         window = Window(self.stdscr,
                         self.width, 
                         self.height, 
-                        # position=(1,0),
+                        # position=(5,0),
                         buffer=buffer)
 
         # handlers = {}

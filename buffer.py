@@ -15,7 +15,8 @@ class Buffer():
         
         try:
             with open(file_path, 'r') as f:
-                self.lines = [l.strip() for l in f.readlines()]
+                self.lines = f.readlines()
+                # self.lines = [l.strip() for l in f.readlines()]
         except:pass
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
