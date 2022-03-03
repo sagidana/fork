@@ -57,6 +57,51 @@ class Context():
             self.get_curr_tab().get_curr_window().move_word()
             return False
         self.maps[NORMAL][ord('w')] = w_map
+        def W_map(self):
+            self.get_curr_tab().get_curr_window().move_WORD()
+            return False
+        self.maps[NORMAL][ord('W')] = W_map
+        def b_map(self):
+            self.get_curr_tab().get_curr_window().move_back()
+            return False
+        self.maps[NORMAL][ord('b')] = b_map
+        def B_map(self):
+            self.get_curr_tab().get_curr_window().move_BACK()
+            return False
+        self.maps[NORMAL][ord('B')] = B_map
+        def e_map(self):
+            self.get_curr_tab().get_curr_window().move_end()
+            return False
+        self.maps[NORMAL][ord('e')] = e_map
+        def E_map(self):
+            self.get_curr_tab().get_curr_window().move_END()
+            return False
+        self.maps[NORMAL][ord('E')] = E_map
+        def f_map(self):
+            self.get_curr_tab().get_curr_window().find()
+            return False
+        self.maps[NORMAL][ord('f')] = f_map
+        def F_map(self):
+            self.get_curr_tab().get_curr_window().find_back()
+            return False
+        self.maps[NORMAL][ord('F')] = F_map
+        def t_map(self):
+            self.get_curr_tab().get_curr_window().till()
+            return False
+        self.maps[NORMAL][ord('t')] = t_map
+        def T_map(self):
+            self.get_curr_tab().get_curr_window().till_back()
+            return False
+        self.maps[NORMAL][ord('T')] = T_map
+        def o_map(self):
+            self.get_curr_tab().get_curr_window().new_line()
+            return False
+        self.maps[NORMAL][ord('o')] = o_map
+        def O_map(self):
+            self.get_curr_tab().get_curr_window().new_line_before()
+            return False
+        self.maps[NORMAL][ord('O')] = O_map
+
         def ctrl_u_map(self):
             self.get_curr_tab().get_curr_window().scroll_up_half_page()
             return False
