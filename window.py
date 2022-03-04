@@ -64,6 +64,15 @@ class Window():
 
         self.stdscr.move(cursor[1], cursor[0])
 
+    def draw_line(self):
+        y = self.window_cursor[1]
+        line = self.get_curr_line()
+
+        self.stdscr.addstr( y, 
+                            self.position[0] + 0, 
+                            line[:self.width])
+        self.draw_cursor()
+
     def draw(self):
         self.stdscr.clear()
         index = 0
@@ -354,6 +363,14 @@ class Window():
     def new_line_before(self): pass
 
     def remove(self): pass
+
+    def insert(self, char):
+        self.buffer.insert( self.buffer_cursor[0],
+                            self.buffer_cursor[1],
+                            char)
+        self.move_right()
+        self.draw_line()
+        pass
 
     @raise_event
     def move_up(self):

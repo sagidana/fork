@@ -1,10 +1,8 @@
-# Movim
-
+# Editor
 
 ## Tabs
 ## Windows
 ## Buffers
-
 
 ## Features
 - Modal Editing

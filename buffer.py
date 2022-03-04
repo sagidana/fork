@@ -39,6 +39,14 @@ class Buffer():
         with open(self.file_path, 'w+') as f:
             f.writelines(self.lines)
 
+    def insert(self, x, y, char):
+        try:
+            line = self.lines[y]
+            line = line[:x] + char + line[x:]
+            self.lines[y] = line
+            return True
+        except: return False
+
     def find_next_word(self, x, y):
         word_regex = r"\w+"
         pattern = re.compile(word_regex)

@@ -5,6 +5,8 @@ import timeout_decorator
 import curses
 import time
 import re
+import os
+from string import printable
 
 from buffer import Buffer
 from window import Window
@@ -150,6 +152,10 @@ class Context():
         self._initialize_ctrl_maps()
         self._initialize_symbol_maps()
 
+        def i_map(self):
+            return self.on_insert()
+        self.maps[NORMAL][ord('i')] = i_map
+
     def _initialize_inner_maps(self):
         self.inner_maps[ord('g')] = {}
         def gg_map(self):
@@ -219,6 +225,7 @@ class Context():
 
     def exec_command(self, command):
         if command == 'q': return True
+        if command == 'w': pass
         return False
 
     def draw_command(self, command):
@@ -234,6 +241,24 @@ class Context():
                             cmd.ljust(command_length))
         self.stdscr.move(   command_position[1],
                             command_position[0] + len(cmd))
+
+    def on_insert(self):
+        elog("on_insert")
+        ret = False
+        while True:
+            self.stdscr.refresh() # refresh the screen
+            key = self.stdscr.getch()
+            if key == 27: break # esc
+
+            try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
+            except Exception as e: elog(f"Exception: {e}")
+
+            try: 
+                char = chr(key)
+                if char in printable:
+                    self.get_curr_tab().get_curr_window().insert(char)
+            except Exception as e: elog(f"Exception: {e}")
+        return ret
 
     def on_command(self):
         ret = False
@@ -287,6 +312,9 @@ def _main(stdscr):
         k = stdscr.getch()
 
 def main():
+    # remove the delay for the esc key!
+    os.environ.setdefault('ESCDELAY', '25') 
+
     curses.wrapper(_main)
 
 
