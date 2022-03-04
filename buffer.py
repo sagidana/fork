@@ -7,7 +7,7 @@ class Buffer():
         Hooks.execute(ON_BUFFER_CREATE_BEFORE, self)
 
         self.lines = []
-        self.file_path = None
+        self.file_path = file_path
 
 
         if not file_path: 

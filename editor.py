@@ -225,7 +225,9 @@ class Context():
 
     def exec_command(self, command):
         if command == 'q': return True
-        if command == 'w': pass
+        if command == 'w': 
+            self.get_curr_tab().get_curr_window().buffer.write()
+            pass
         return False
 
     def draw_command(self, command):
