@@ -78,27 +78,27 @@ class Context():
             return False
         self.maps[NORMAL][ord('G')] = G_map
         def w_map(self):
-            self.get_curr_tab().get_curr_window().move_word()
+            self.get_curr_tab().get_curr_window().move_word_forward()
             return False
         self.maps[NORMAL][ord('w')] = w_map
         def W_map(self):
-            self.get_curr_tab().get_curr_window().move_WORD()
+            self.get_curr_tab().get_curr_window().move_WORD_forward()
             return False
         self.maps[NORMAL][ord('W')] = W_map
         def b_map(self):
-            self.get_curr_tab().get_curr_window().move_back()
+            self.get_curr_tab().get_curr_window().move_word_backward()
             return False
         self.maps[NORMAL][ord('b')] = b_map
         def B_map(self):
-            self.get_curr_tab().get_curr_window().move_BACK()
+            self.get_curr_tab().get_curr_window().move_WORD_backward()
             return False
         self.maps[NORMAL][ord('B')] = B_map
         def e_map(self):
-            self.get_curr_tab().get_curr_window().move_end()
+            self.get_curr_tab().get_curr_window().move_word_end()
             return False
         self.maps[NORMAL][ord('e')] = e_map
         def E_map(self):
-            self.get_curr_tab().get_curr_window().move_END()
+            self.get_curr_tab().get_curr_window().move_WORD_end()
             return False
         self.maps[NORMAL][ord('E')] = E_map
         def f_map(self):

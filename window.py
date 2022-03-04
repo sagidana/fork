@@ -5,6 +5,7 @@ from hooks import *
 
 import timeout_decorator
 import time
+import re
 
 class Window():
     def raise_event(func):
@@ -203,8 +204,44 @@ class Window():
         else:
             self.window_cursor[1] = center
 
+    def is_visible(self, buf_x, buf_y):
+        return True # TODO:
+
+    def move_cursor_to_buf_location(self, buf_x, buf_y):
+        if self.is_visible(buf_x, buf_y):
+            elog(f"{buf_x}, {buf_y}")
+            if self.buffer_cursor[1] > buf_y:
+                y_diff = self.buffer_cursor[1] - buf_y
+                for i in range(y_diff): self._move_up()
+            else:
+                y_diff = buf_y - self.buffer_cursor[1]
+                for i in range(y_diff): self._move_down()
+
+            if self.buffer_cursor[0] > buf_x:
+                x_diff = self.buffer_cursor[0] - buf_x
+                for i in range(x_diff): self._move_left()
+            else:
+                x_diff = buf_x - self.buffer_cursor[0]
+                for i in range(x_diff): self._move_right()
+
+            self.draw_cursor()
+            # self.window_cursor[0] = buf_x
+            # self.window_cursor[1] = buf_y
+
+            # self.buffer_cursor[0] = buf_x
+            # self.buffer_cursor[1] = buf_y
+        else:
+            pass
+
     def get_curr_line(self):
         return self.buffer.lines[self.buffer_cursor[1]]
+
+    def get_line(self, line_num):
+        try:
+            return self.buffer.lines[line_num]
+        except Exception as e:
+            elog(f"{e}")
+            return None
 
     def scroll_up_half_page(self):
         half = int(self.height / 2)
@@ -240,14 +277,28 @@ class Window():
             self.window_cursor[1] = buffer_len
         self.draw()
 
-    def move_word_forward(self): pass
-    def move_WORD_forward(self): pass
+    def move_word_forward(self): 
+        ret = self.buffer.find_next_word(   self.buffer_cursor[0],
+                                            self.buffer_cursor[1])
+        if not ret: return
+        line, start, end = ret
 
-    def move_word_backward(self): pass
-    def move_WORD_backward(self): pass
+        self.move_cursor_to_buf_location(start, line)
+
+    def move_word_backward(self): 
+        ret = self.buffer.find_prev_word(   self.buffer_cursor[0],
+                                            self.buffer_cursor[1])
+        if not ret: return
+        line, start, end = ret
+
+        self.move_cursor_to_buf_location(start, line)
 
     def move_word_end(self): pass
+
+    def move_WORD_forward(self): pass
+    def move_WORD_backward(self): pass
     def move_WORD_end(self): pass
+
 
     @timeout_decorator.timeout(2)
     def get_key(self):
