@@ -81,9 +81,10 @@ class Buffer():
         start = len(line) - curr_x
 
         m = pattern.search(line[::-1], start)
-        if m and m.span()[0] == start:
-            start_next = m.span()[1]
-            m = pattern.search(line[::-1], start_next)
+        # # skip first
+        # if m and m.span()[0] == start:
+            # start_next = m.span()[1]
+            # m = pattern.search(line[::-1], start_next)
         
         if m:
             reversed_start = m.span()[0] 

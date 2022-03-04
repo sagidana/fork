@@ -35,7 +35,15 @@ class Context():
         self.get_curr_tab().draw()
         pass
 
-    def _initialize_legends_maps(self):
+    @timeout_decorator.timeout(MAP_TIMEOOUT)
+    def get_key_timeout(self):
+        return self.stdscr.getch()
+
+    def get_inner_key(self):
+        try: return self.get_key_timeout()
+        except: return None
+
+    def _initialize_normal_legends_maps(self):
         # Legends
         def j_map(self):
             self.get_curr_tab().get_curr_window().move_down()
@@ -54,7 +62,7 @@ class Context():
             return False
         self.maps[NORMAL][ord('h')] = h_map
 
-    def _initialize_ctrl_maps(self):
+    def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):
             self.get_curr_tab().get_curr_window().scroll_up_half_page()
             return False
@@ -64,7 +72,7 @@ class Context():
             return False
         self.maps[NORMAL][4] = ctrl_d_map
 
-    def _initialize_symbol_maps(self):
+    def _initialize_normal_symbol_maps(self):
         def zero_map(self):
             self.get_curr_tab().get_curr_window().move_line_begin()
             return False
@@ -74,28 +82,12 @@ class Context():
             return False
         self.maps[NORMAL][ord('$')] = dollar_map
 
-    def _initialize_mainstream_maps(self):
-        @timeout_decorator.timeout(MAP_TIMEOOUT)
-        def map_inner(pre_keys):
-            if not isinstance(pre_keys, list): pre_keys = [pre_keys]
-            key = self.stdscr.getch()
-
-            try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
-            except Exception as e: pass
-
-            curr = self.inner_maps
-            for k in pre_keys: 
-                if k in curr: 
-                    curr = curr[k]
-
-            if key in curr: return curr[key](self)
+    def _initialize_normal_mainstream_maps(self):
+        def gg_map(self):
+            self.get_curr_tab().get_curr_window().move_begin()
             return False
-
-        def g_map(self):
-            try: ret = map_inner(ord('g'))
-            except: return False
-            return ret
-        self.maps[NORMAL][ord('g')] = g_map
+        self.maps[NORMAL][ord('g')] = {}
+        self.maps[NORMAL][ord('g')][ord('g')] = gg_map
         def G_map(self):
             self.get_curr_tab().get_curr_window().move_end()
             return False
@@ -148,29 +140,30 @@ class Context():
             self.get_curr_tab().get_curr_window().new_line_before()
             return False
         self.maps[NORMAL][ord('O')] = O_map
-
-        self._initialize_ctrl_maps()
-        self._initialize_symbol_maps()
-
         def i_map(self):
-            return self.on_insert()
+            self.mode = INSERT
+            return False
         self.maps[NORMAL][ord('i')] = i_map
 
-    def _initialize_inner_maps(self):
-        self.inner_maps[ord('g')] = {}
-        def gg_map(self):
-            self.get_curr_tab().get_curr_window().move_begin()
-            return False
-        self.inner_maps[ord('g')][ord('g')] = gg_map
+        self._initialize_normal_ctrl_maps()
+        self._initialize_normal_symbol_maps()
 
-    def initialize_maps(self):
+    def _initialize_normal_maps(self):
         def colon_map(self):
             return self.on_command()
         self.maps[NORMAL][ord(':')] = colon_map
 
-        self._initialize_legends_maps()
-        self._initialize_mainstream_maps()
-        self._initialize_inner_maps()
+        self._initialize_normal_legends_maps()
+        self._initialize_normal_mainstream_maps()
+        # self._initialize_normal_inner_maps()
+
+    def _initialize_insert_maps(self): pass
+    def _initialize_visual_maps(self): pass
+
+    def initialize_maps(self):
+        self._initialize_normal_maps()
+        self._initialize_insert_maps()
+        self._initialize_visual_maps()
 
     def __init__(self, stdscr):
         self.stdscr = stdscr
@@ -184,9 +177,9 @@ class Context():
         self.maps[VISUAL] = {}
         self.maps[VISUAL_BLOCK] = {}
         self.maps[REPLACE] = {}
+
         self.mode = NORMAL # start in normal mode
 
-        self.inner_maps = {} # for nested mappings
         self.initialize_maps()
 
         self.tabs = []
@@ -244,22 +237,27 @@ class Context():
         self.stdscr.move(   command_position[1],
                             command_position[0] + len(cmd))
 
-    def on_insert(self):
+    def on_insert(self, key):
         elog("on_insert")
         ret = False
-        while True:
-            self.stdscr.refresh() # refresh the screen
-            key = self.stdscr.getch()
-            if key == 27: break # esc
+        try: 
+            char = chr(key)
+            if char in printable:
+                self.get_curr_tab().get_curr_window().insert(char)
+        except Exception as e: elog(f"Exception: {e}")
+        # while True:
+            # self.stdscr.refresh() # refresh the screen
+            # key = self.stdscr.getch()
+            # if key == 27: break # esc
 
-            try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
-            except Exception as e: elog(f"Exception: {e}")
+            # try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
+            # except Exception as e: elog(f"Exception: {e}")
 
-            try: 
-                char = chr(key)
-                if char in printable:
-                    self.get_curr_tab().get_curr_window().insert(char)
-            except Exception as e: elog(f"Exception: {e}")
+            # try: 
+                # char = chr(key)
+                # if char in printable:
+                    # self.get_curr_tab().get_curr_window().insert(char)
+            # except Exception as e: elog(f"Exception: {e}")
         return ret
 
     def on_command(self):
@@ -294,8 +292,28 @@ class Context():
         try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
         except Exception as e: pass
 
+        if key == 27: # esc
+            self.mode = NORMAL
+            return False
+
         if key in self.maps[self.mode]:
-            return self.maps[self.mode][key](self)
+            curr = self.maps[self.mode]
+            if callable(curr[key]): return curr[key](self)
+
+            while key in curr and isinstance(curr[key], dict): 
+                curr = curr[key]
+                key = self.get_inner_key()
+
+                if not key: break
+                if key not in curr: break
+
+            if key in curr: curr[key](self)
+
+        if self.mode == INSERT:
+            return self.on_insert(key)
+
+        return False
+
 
 def _main(stdscr):
     context = Context(stdscr)
