@@ -4,6 +4,7 @@ from signal import signal, SIGWINCH
 import timeout_decorator
 import curses
 import time
+import re
 
 from buffer import Buffer
 from window import Window
@@ -32,7 +33,7 @@ class Context():
         self.get_curr_tab().draw()
         pass
 
-    def _initialize_legends(self):
+    def _initialize_legends_maps(self):
         # Legends
         def j_map(self):
             self.get_curr_tab().get_curr_window().move_down()
@@ -51,7 +52,27 @@ class Context():
             return False
         self.maps[NORMAL][ord('h')] = h_map
 
-    def _initialize_mainstream(self):
+    def _initialize_ctrl_maps(self):
+        def ctrl_u_map(self):
+            self.get_curr_tab().get_curr_window().scroll_up_half_page()
+            return False
+        self.maps[NORMAL][21] = ctrl_u_map
+        def ctrl_d_map(self):
+            self.get_curr_tab().get_curr_window().scroll_down_half_page()
+            return False
+        self.maps[NORMAL][4] = ctrl_d_map
+
+    def _initialize_symbol_maps(self):
+        def zero_map(self):
+            self.get_curr_tab().get_curr_window().move_line_begin()
+            return False
+        self.maps[NORMAL][ord('0')] = zero_map
+        def dollar_map(self):
+            self.get_curr_tab().get_curr_window().move_line_end()
+            return False
+        self.maps[NORMAL][ord('$')] = dollar_map
+
+    def _initialize_mainstream_maps(self):
         @timeout_decorator.timeout(MAP_TIMEOOUT)
         def map_inner(pre_keys):
             if not isinstance(pre_keys, list): pre_keys = [pre_keys]
@@ -125,14 +146,9 @@ class Context():
             self.get_curr_tab().get_curr_window().new_line_before()
             return False
         self.maps[NORMAL][ord('O')] = O_map
-        def ctrl_u_map(self):
-            self.get_curr_tab().get_curr_window().scroll_up_half_page()
-            return False
-        self.maps[NORMAL][21] = ctrl_u_map
-        def ctrl_d_map(self):
-            self.get_curr_tab().get_curr_window().scroll_down_half_page()
-            return False
-        self.maps[NORMAL][4] = ctrl_d_map
+
+        self._initialize_ctrl_maps()
+        self._initialize_symbol_maps()
 
     def _initialize_inner_maps(self):
         self.inner_maps[ord('g')] = {}
@@ -142,12 +158,12 @@ class Context():
         self.inner_maps[ord('g')][ord('g')] = gg_map
 
     def initialize_maps(self):
-        def q_map(self):
-            return True
-        self.maps[NORMAL][ord('q')] = q_map
+        def colon_map(self):
+            return self.on_command()
+        self.maps[NORMAL][ord(':')] = colon_map
 
-        self._initialize_legends()
-        self._initialize_mainstream()
+        self._initialize_legends_maps()
+        self._initialize_mainstream_maps()
         self._initialize_inner_maps()
 
     def __init__(self, stdscr):
@@ -200,6 +216,52 @@ class Context():
         self.height, self.width = self.stdscr.getmaxyx()
 
         Hooks.execute(ON_RESIZE, (self.width, self.height))
+
+    def exec_command(self, command):
+        if command == 'q': return True
+        return False
+
+    def draw_command(self, command):
+        command_position = [0, 0]
+
+        command_position[1] = int(self.height - 1)
+        command_length = self.width - 1
+        
+
+        cmd = f":{command}"
+        self.stdscr.addstr( command_position[1], 
+                            command_position[0],
+                            cmd.ljust(command_length))
+        self.stdscr.move(   command_position[1],
+                            command_position[0] + len(cmd))
+
+    def on_command(self):
+        ret = False
+        command = ""
+        self.draw_command(command)
+        while True:
+            self.stdscr.refresh() # refresh the screen
+            key = self.stdscr.getch()
+
+            if key == 27: break # esc
+            if key == 263: command = command[:-1] # backslash
+            if key == 10: # enter
+                ret = self.exec_command(command)
+                break
+ 
+            try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
+            except Exception as e: elog(f"Exception: {e}")
+
+            try: 
+                char = chr(key)
+                if re.match("[a-zA-Z 0-9-_()]", char): command += char
+            except: pass
+            self.draw_command(command)
+
+        self.stdscr.refresh() # refresh the screen
+        self.stdscr.clear()
+        self.get_curr_tab().draw()
+        return ret
 
     def on_key(self, key):
         try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")

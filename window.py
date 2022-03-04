@@ -277,6 +277,17 @@ class Window():
             self.window_cursor[1] = buffer_len
         self.draw()
 
+    def move_line(self, line): pass
+
+    def move_line_begin(self):
+        while self.buffer_cursor[0] > 0: self._move_left()
+        self.draw_cursor()
+
+    def move_line_end(self):
+        while self.buffer_cursor[0] < len(self.get_curr_line()) - 1: 
+            self._move_right()
+        self.draw_cursor()
+
     def move_word_forward(self): 
         ret = self.buffer.find_next_word(   self.buffer_cursor[0],
                                             self.buffer_cursor[1])
@@ -295,8 +306,8 @@ class Window():
 
     def move_word_end(self): pass
 
-    def move_WORD_forward(self): pass
-    def move_WORD_backward(self): pass
+    def move_WORD_forward(self): self.move_word_forward()
+    def move_WORD_backward(self): self.move_word_backward()
     def move_WORD_end(self): pass
 
 

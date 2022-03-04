@@ -76,7 +76,7 @@ class Tab():
             self.events[event].append(handlers[event])
 
     def draw(self):
-        pass
+        self.get_curr_window().draw()
 
     def get_curr_window(self):
         return self.windows[self.curr_window]
