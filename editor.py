@@ -1,15 +1,17 @@
 #!/usr/bin/python3
 
 from signal import signal, SIGWINCH
+import timeout_decorator
 import curses
+import time
 
 from buffer import Buffer
 from window import Window
-from tab import Tab
 from log import elog
+from tab import Tab
 
-from hooks import *
 from events import *
+from hooks import *
 
 
 NORMAL = 'normal'
@@ -17,6 +19,7 @@ INSERT = 'insert'
 VISUAL = 'visual'
 VISUAL_BLOCK = 'visual_block'
 REPLACE = 'replace'
+MAP_TIMEOOUT = 2 # in seconds
 
 class Context():
     def on_buffer_destroy_after_callback(self, buf): 
@@ -29,11 +32,7 @@ class Context():
         self.get_curr_tab().draw()
         pass
 
-    def initialize_maps(self):
-        def q_map(self):
-            return True
-        self.maps[NORMAL][ord('q')] = q_map
-
+    def _initialize_legends(self):
         # Legends
         def j_map(self):
             self.get_curr_tab().get_curr_window().move_down()
@@ -52,7 +51,32 @@ class Context():
             return False
         self.maps[NORMAL][ord('h')] = h_map
 
-        # Mainstream
+    def _initialize_mainstream(self):
+        @timeout_decorator.timeout(MAP_TIMEOOUT)
+        def map_inner(pre_keys):
+            if not isinstance(pre_keys, list): pre_keys = [pre_keys]
+            key = self.stdscr.getch()
+
+            try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
+            except Exception as e: pass
+
+            curr = self.inner_maps
+            for k in pre_keys: 
+                if k in curr: 
+                    curr = curr[k]
+
+            if key in curr: return curr[key](self)
+            return False
+
+        def g_map(self):
+            try: ret = map_inner(ord('g'))
+            except: return False
+            return ret
+        self.maps[NORMAL][ord('g')] = g_map
+        def G_map(self):
+            self.get_curr_tab().get_curr_window().move_end()
+            return False
+        self.maps[NORMAL][ord('G')] = G_map
         def w_map(self):
             self.get_curr_tab().get_curr_window().move_word()
             return False
@@ -101,7 +125,6 @@ class Context():
             self.get_curr_tab().get_curr_window().new_line_before()
             return False
         self.maps[NORMAL][ord('O')] = O_map
-
         def ctrl_u_map(self):
             self.get_curr_tab().get_curr_window().scroll_up_half_page()
             return False
@@ -111,7 +134,22 @@ class Context():
             return False
         self.maps[NORMAL][4] = ctrl_d_map
 
-    
+    def _initialize_inner_maps(self):
+        self.inner_maps[ord('g')] = {}
+        def gg_map(self):
+            self.get_curr_tab().get_curr_window().move_begin()
+            return False
+        self.inner_maps[ord('g')][ord('g')] = gg_map
+
+    def initialize_maps(self):
+        def q_map(self):
+            return True
+        self.maps[NORMAL][ord('q')] = q_map
+
+        self._initialize_legends()
+        self._initialize_mainstream()
+        self._initialize_inner_maps()
+
     def __init__(self, stdscr):
         self.stdscr = stdscr
 
@@ -125,6 +163,8 @@ class Context():
         self.maps[VISUAL_BLOCK] = {}
         self.maps[REPLACE] = {}
         self.mode = NORMAL # start in normal mode
+
+        self.inner_maps = {} # for nested mappings
         self.initialize_maps()
 
         self.tabs = []
@@ -151,6 +191,7 @@ class Context():
 
     def bootstrap(self):
         buffer = Buffer('./editor.py')
+        # buffer = Buffer('/tmp/topics')
         tab = self._create_tab(buffer)
 
     def screen_resize_handler(self, signum, frame):

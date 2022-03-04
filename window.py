@@ -1,7 +1,10 @@
+from log import elog
+
 from buffer import *
 from hooks import *
 
-from log import elog
+import timeout_decorator
+import time
 
 class Window():
     def raise_event(func):
@@ -200,6 +203,9 @@ class Window():
         else:
             self.window_cursor[1] = center
 
+    def get_curr_line(self):
+        return self.buffer.lines[self.buffer_cursor[1]]
+
     def scroll_up_half_page(self):
         half = int(self.height / 2)
         for i in range(half): self._move_up()
@@ -214,17 +220,70 @@ class Window():
 
         self.draw()
 
-    def move_word(self): pass
-    def move_WORD(self): pass
+    def move_begin(self): 
+        self.window_cursor[0] = 0
+        self.window_cursor[1] = 0
+        self.buffer_cursor[0] = 0
+        self.buffer_cursor[1] = 0
+        self.draw()
 
-    def move_back(self): pass
-    def move_BACK(self): pass
+    def move_end(self): 
+        self.window_cursor[0] = 0
+        self.buffer_cursor[0] = 0
+        
+        buffer_len = len(self.buffer.lines) - 1 
+        self.buffer_cursor[1] = buffer_len
 
-    def move_end(self): pass
-    def move_END(self): pass
+        if buffer_len > self.height - 1:
+            self.window_cursor[1] = self.height - 1
+        else:
+            self.window_cursor[1] = buffer_len
+        self.draw()
 
-    def find(self): pass
-    def find_back(self): pass
+    def move_word_forward(self): pass
+    def move_WORD_forward(self): pass
+
+    def move_word_backward(self): pass
+    def move_WORD_backward(self): pass
+
+    def move_word_end(self): pass
+    def move_WORD_end(self): pass
+
+    @timeout_decorator.timeout(2)
+    def get_key(self):
+        return self.stdscr.getch()
+
+    def find(self): 
+        try: key = self.get_key()
+        except: key = None
+
+        try:
+            char = chr(key)
+            line = self.get_curr_line()
+            curr_x = self.buffer_cursor[0]
+            found = line.find(char, curr_x)
+            if found == -1: return
+
+            diff = found - curr_x
+            for i in range(diff): self._move_right()
+            self.draw_cursor()
+        except: pass
+        
+    def find_back(self): 
+        try: key = self.get_key()
+        except: key = None
+
+        try:
+            char = chr(key)
+            line = self.get_curr_line()
+            curr_x = self.buffer_cursor[0]
+            found = line.rfind(char, 0, curr_x)
+            if found == -1: return
+
+            diff = curr_x - found
+            for i in range(diff): self._move_left()
+            self.draw_cursor()
+        except: pass
 
     def till(self): pass
     def till_back(self): pass
