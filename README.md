@@ -10,7 +10,7 @@
 - Folding
 
 ## TODOs
-- history (undo/redo)
+- copy paste memory
 - line numbers
 - statusline
 - <num><action>

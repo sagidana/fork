@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
 from signal import signal, SIGWINCH
+from string import printable
 import timeout_decorator
+import argparse
 import curses
 import time
 import re
 import os
-from string import printable
 
 from buffer import Buffer
 from window import Window
@@ -16,6 +17,7 @@ from tab import Tab
 from events import *
 from hooks import *
 
+args = None
 
 NORMAL = 'normal'
 INSERT = 'insert'
@@ -270,8 +272,18 @@ class Context():
         return self.get_curr_window().buffer
 
     def bootstrap(self):
-        buffer = Buffer('./editor.py')
-        # buffer = Buffer('/tmp/topics')
+        global args
+
+        if not args.filename:
+            raise Exception("No files provided.")
+
+        elog(f"EDITOR: {args.filename}")
+
+        if not os.path.isfile(args.filename[0]):
+            raise Exception("No files provided.")
+        file = args.filename[0]
+
+        buffer = Buffer(file)
         tab = self._create_tab(buffer)
 
     def screen_resize_handler(self, signum, frame):
@@ -395,6 +407,12 @@ def _main(stdscr):
         k = stdscr.getch()
 
 def main():
+    global args
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename', nargs='+')
+    args = parser.parse_args()
+
     # remove the delay for the esc key!
     os.environ.setdefault('ESCDELAY', '25') 
 
