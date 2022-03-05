@@ -1,10 +1,21 @@
+from log import elog
+
 from events import *
 from hooks import *
+
+from difflib import Differ
+import json
 import re
 
 class Buffer():
     def __init__(self, file_path=None):
         Hooks.execute(ON_BUFFER_CREATE_BEFORE, self)
+
+        # When change is starting, this is where original is saved
+        self.shadow = None
+        self.change_start_position = None
+        self.undo_stack = []
+        self.redo_stack = []
 
         self.lines = []
         self.file_path = file_path
@@ -17,7 +28,6 @@ class Buffer():
         try:
             with open(file_path, 'r') as f:
                 self.lines = f.readlines()
-                # self.lines = [l.strip() for l in f.readlines()]
         except:pass
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
@@ -39,13 +49,26 @@ class Buffer():
         with open(self.file_path, 'w+') as f:
             f.writelines(self.lines)
 
-    def insert(self, x, y, char):
+    def _insert_char_to_line(self, x, y, char):
         try:
             line = self.lines[y]
             line = line[:x] + char + line[x:]
             self.lines[y] = line
             return True
         except: return False
+
+    def _split_line(self, x, y):
+        line = self.lines[y]
+        first = line[:x] + '\n'
+        second = line[x:]
+        self.lines[y] = first
+        self.lines.insert(y + 1, second) 
+
+    def insert(self, x, y, char):
+        if char == '\n':
+            self._split_line(x, y)
+        else:
+            self._insert_char_to_line(x, y, char)
 
     def find_next_word(self, x, y):
         word_regex = r"\w+"
@@ -108,3 +131,134 @@ class Buffer():
                 ret = (curr_y, start, end)
                 return ret
         return None
+
+    def _replace_line(self, y, new_line):
+        self.lines[y] = new_line
+    def _insert_line(self, y, new_line):
+        self.lines.insert(y, new_line)
+    def _remove_line(self, y):
+        self.lines.pop(y)
+
+    def _change(self, change, undo=True):
+        lines_for_deletion = []
+        lines_for_insertion = {}
+        lines_for_replacement = {}
+
+        _from = "new" if undo else "old"
+        _to = "old" if undo else "new"
+
+        for line_num in change:
+            # new lines needs to be removed
+            if  _from in change[line_num] and \
+                _to not in change[line_num]:
+                lines_for_deletion.append(line_num)
+                # self._remove_line(line_num)
+
+            # changed lines needs to be replaced
+            elif    _from in change[line_num] and \
+                    _to in change[line_num]:
+                lines_for_replacement[line_num] = change[line_num][_to]
+                # self._replace_line(line_num, change[line_num]['old'])
+
+            # removed lines neeeds to be reinserted
+            elif    _to in change[line_num] and \
+                    _from not in change[line_num]:
+                lines_for_insertion[line_num] = change[line_num][_to]
+                # self._insert_line(line_num, change[line_num]['old'])
+
+        # lines removals must be in decreasing order to no mess up with the
+        # line numbers
+        for line in reversed(sorted(lines_for_deletion)):
+            self._remove_line(line)
+
+        # lines insertions must be in increasing order to no mess up with the
+        # line numbers
+        for line in sorted(lines_for_insertion):
+            self._insert_line(line, lines_for_insertion[line])
+
+        # for line replacements order is not important.
+        for line in lines_for_replacement:
+            self._replace_line(line, lines_for_replacement[line])
+
+    def undo(self): 
+        if len(self.undo_stack) == 0: return
+        change_wrapper = self.undo_stack.pop()
+        change = change_wrapper['change']
+
+        self._change(change)
+
+        self.redo_stack.append(change_wrapper)
+        return change_wrapper['start_position']
+
+    def redo(self): 
+        if len(self.redo_stack) == 0: return
+        change_wrapper = self.redo_stack.pop()
+        change = change_wrapper['change']
+
+        self._change(change, undo=False)
+
+        self.undo_stack.append(change_wrapper)
+        return change_wrapper['end_position']
+
+    def change_begin(self, x, y):
+        if self.shadow: elog("BUFFER: WTF, already in a change?")
+        if self.change_start_position: elog("BUFFER: WTF, already in a change?")
+        self.shadow = self.lines.copy()
+        self.change_start_position = (x, y)
+        self.redo_stack = [] # reset the redo stack on new edit.
+
+    def _analyze_change(self):
+        """
+        The change format is as follows:
+        A list of chnages per line:
+        [
+        <line_nume>, <old_line>, <new_line>
+        ...
+        <line_nume>, <old_line>, <new_line>
+        ]
+
+        In case there are no old/new line (removal/addition) the apropriate
+        action is done correspondingly.
+        """
+        change = {}
+
+        d = Differ()
+        old_line_num = 0
+        new_line_num = 0
+        for line in d.compare(self.shadow, self.lines):
+            if not (line.startswith('?') or \
+                    line.startswith('-') or \
+                    line.startswith('+')): 
+                old_line_num += 1
+                new_line_num += 1
+                continue
+
+            if line.startswith('+'): 
+                if new_line_num not in change: change[new_line_num] = {}
+
+                elog(f"BUFFER: {new_line_num}: {line.strip()}")
+                change[new_line_num]['new'] = line[2:]
+
+                new_line_num += 1
+            elif line.startswith('-'):
+                if old_line_num not in change: change[old_line_num] = {}
+
+                elog(f"BUFFER: {old_line_num}: {line.strip()}")
+                change[old_line_num]['old'] = line[2:]
+                old_line_num += 1
+
+        return change
+            
+    def change_end(self, x, y):
+        change = self._analyze_change()
+
+        if change: 
+            change_wrapper = {}
+            change_wrapper['change'] = change
+            change_wrapper['start_position'] = self.change_start_position
+            change_wrapper['end_position'] = (x,y)
+            self.undo_stack.append(change_wrapper)
+
+        self.shadow = None
+        self.change_start_position = None
+

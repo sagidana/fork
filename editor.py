@@ -39,6 +39,16 @@ class Context():
     def get_key_timeout(self):
         return self.stdscr.getch()
 
+    def change_mode(self, target):
+        if self.mode == INSERT and target == NORMAL:
+            self.get_curr_window().change_end()
+        if self.mode == NORMAL and target == INSERT:
+            self.get_curr_window().change_begin()
+
+        self.mode = target
+
+        
+
     def get_inner_key(self):
         try: return self.get_key_timeout()
         except: return None
@@ -71,6 +81,15 @@ class Context():
             self.get_curr_tab().get_curr_window().scroll_down_half_page()
             return False
         self.maps[NORMAL][4] = ctrl_d_map
+        def ctrl_l_map(self):
+            self.get_curr_tab().get_curr_window().draw()
+            return False
+        self.maps[NORMAL][12] = ctrl_l_map
+        def ctrl_r_map(self):
+            self.get_curr_window().redo()
+            return False
+        self.maps[NORMAL][18] = ctrl_r_map
+
 
     def _initialize_normal_symbol_maps(self):
         def zero_map(self):
@@ -83,10 +102,10 @@ class Context():
         self.maps[NORMAL][ord('$')] = dollar_map
 
     def _initialize_normal_mainstream_maps(self):
+        self.maps[NORMAL][ord('g')] = {}
         def gg_map(self):
             self.get_curr_tab().get_curr_window().move_begin()
             return False
-        self.maps[NORMAL][ord('g')] = {}
         self.maps[NORMAL][ord('g')][ord('g')] = gg_map
         def G_map(self):
             self.get_curr_tab().get_curr_window().move_end()
@@ -141,9 +160,13 @@ class Context():
             return False
         self.maps[NORMAL][ord('O')] = O_map
         def i_map(self):
-            self.mode = INSERT
+            self.change_mode(INSERT)
             return False
         self.maps[NORMAL][ord('i')] = i_map
+        def u_map(self):
+            self.get_curr_window().undo()
+            return False
+        self.maps[NORMAL][ord('u')] = u_map
 
         self._initialize_normal_ctrl_maps()
         self._initialize_normal_symbol_maps()
@@ -203,6 +226,10 @@ class Context():
 
     def get_curr_tab(self):
         return self.tabs[self.curr_tab]
+    def get_curr_window(self):
+        return self.get_curr_tab().get_curr_window()
+    def get_curr_buffer(self):
+        return self.get_curr_window().buffer
 
     def bootstrap(self):
         buffer = Buffer('./editor.py')
@@ -244,20 +271,9 @@ class Context():
             char = chr(key)
             if char in printable:
                 self.get_curr_tab().get_curr_window().insert(char)
+            else:
+                elog(f"INSERT: ({key}) not printable.")
         except Exception as e: elog(f"Exception: {e}")
-        # while True:
-            # self.stdscr.refresh() # refresh the screen
-            # key = self.stdscr.getch()
-            # if key == 27: break # esc
-
-            # try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
-            # except Exception as e: elog(f"Exception: {e}")
-
-            # try: 
-                # char = chr(key)
-                # if char in printable:
-                    # self.get_curr_tab().get_curr_window().insert(char)
-            # except Exception as e: elog(f"Exception: {e}")
         return ret
 
     def on_command(self):
@@ -293,7 +309,7 @@ class Context():
         except Exception as e: pass
 
         if key == 27: # esc
-            self.mode = NORMAL
+            self.change_mode(NORMAL)
             return False
 
         if key in self.maps[self.mode]:

@@ -319,7 +319,6 @@ class Window():
     def move_WORD_backward(self): self.move_word_backward()
     def move_WORD_end(self): pass
 
-
     @timeout_decorator.timeout(2)
     def get_key(self):
         return self.stdscr.getch()
@@ -368,9 +367,37 @@ class Window():
         self.buffer.insert( self.buffer_cursor[0],
                             self.buffer_cursor[1],
                             char)
-        self.move_right()
-        self.draw_line()
-        pass
+        if char == '\n':
+            self.move_down()
+            self.move_line_begin()
+            self.draw()
+        else:
+            self.move_right()
+            self.draw_line()
+
+    def undo(self): 
+        position = self.buffer.undo()
+        if not position: return
+        self.move_cursor_to_buf_location(   position[0],
+                                            position[1])
+        self.draw()
+
+    def redo(self): 
+        position = self.buffer.redo()
+        if not position: return
+        self.move_cursor_to_buf_location(   position[0],
+                                            position[1])
+        self.draw()
+
+    @raise_event
+    def change_begin(self):
+        self.buffer.change_begin(   self.buffer_cursor[0],
+                                    self.buffer_cursor[1])
+
+    @raise_event
+    def change_end(self):
+        self.buffer.change_end( self.buffer_cursor[0],
+                                self.buffer_cursor[1])
 
     @raise_event
     def move_up(self):
