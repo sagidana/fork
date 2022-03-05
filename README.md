@@ -10,6 +10,7 @@
 - Folding
 
 ## TODOs
+- registers
 - copy paste memory
 - line numbers
 - statusline

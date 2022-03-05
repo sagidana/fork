@@ -108,6 +108,13 @@ class Context():
         self.maps[NORMAL][ord('y')] = {}
         self.maps[NORMAL][ord('g')] = {}
 
+        def yy_map(self):
+            data = {}
+            data["data"] = self.get_curr_window().get_curr_line()
+            data["meta"] = "line" # to let the paste know the data is entire line.
+            self.registers['"'] = data
+            return False
+        self.maps[NORMAL][ord('y')][ord('y')] = yy_map
         def dd_map(self):
             self.get_curr_window().change_begin()
             self.get_curr_window().remove_line()
@@ -203,6 +210,30 @@ class Context():
             self.get_curr_window().change_end()
             return False
         self.maps[NORMAL][ord('x')] = x_map
+        def P_map(self):
+            self.get_curr_window().change_begin()
+            data = self.registers['"']
+            if data:
+                if data['meta'] == 'line':
+                    line = data['data']
+                    self.get_curr_window().insert_line_before(line)
+                elif data['meta'] == 'char': pass
+                elif data['meta'] == 'block': pass
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('P')] = P_map
+        def p_map(self):
+            self.get_curr_window().change_begin()
+            data = self.registers['"']
+            if data:
+                if data['meta'] == 'line':
+                    line = data['data']
+                    self.get_curr_window().insert_line_after(line)
+                elif data['meta'] == 'char': pass
+                elif data['meta'] == 'block': pass
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('p')] = p_map
         def u_map(self):
             self.get_curr_window().undo()
             return False
@@ -228,11 +259,27 @@ class Context():
         self._initialize_insert_maps()
         self._initialize_visual_maps()
 
+    def initialize_registers(self):
+        # we dont add all of vim's registers for now..
+
+        # named registers
+        for char in "abcdefghijklmnopqrstuvwxyz": self.registers[char] = None
+        for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ": self.registers[char] = None
+        # numbered registers
+        for num in "0123456789": self.registers[num] = None
+        # unamed register
+        self.registers['"'] = None
+        # last search pattern register
+        self.registers['/'] = None
+
     def __init__(self, stdscr):
         self.stdscr = stdscr
 
         self.height, self.width = stdscr.getmaxyx()
         signal(SIGWINCH, self.screen_resize_handler)
+
+        self.registers = {}
+        self.initialize_registers()
 
         self.maps = {}
         self.maps[NORMAL] = {}
@@ -319,6 +366,11 @@ class Context():
 
         if key == 263: # backslash
             self.get_curr_window().remove_char()
+            return ret
+
+        if key == 9: # tab
+            # expand tab to spaces
+            for i in range(4): self.get_curr_window().insert_char(' ')
             return ret
 
         try: 

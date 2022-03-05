@@ -424,6 +424,19 @@ class Window():
             self.move_right()
             self.draw_line()
 
+    def insert_line_before(self, line):
+        self.buffer.insert_line(self.buffer_cursor[1],
+                                line)
+        self.move_line_begin()
+        self.draw()
+
+    def insert_line_after(self, line):
+        self.buffer.insert_line(self.buffer_cursor[1]+1,
+                                line)
+        self.move_down()
+        self.move_line_begin()
+        self.draw()
+
     def undo(self): 
         position = self.buffer.undo()
         if not position: return
