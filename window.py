@@ -137,7 +137,7 @@ class Window():
 
     def _move_up(self):
         # We are at the bottom
-        if self.buffer_cursor[1] == 0: return
+        if self.buffer_cursor[1] == 0: return False
 
         # We need to scroll up
         if self.window_cursor[1] == 0:
@@ -159,6 +159,7 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
+        return True
 
     def _move_down(self):
         # We are at the bottom
@@ -291,6 +292,11 @@ class Window():
 
     def move_line(self, line): pass
 
+    def move_to_x(self, x): 
+        while self.buffer_cursor[0] > x: self._move_left()
+        while self.buffer_cursor[0] < x: self._move_right()
+        self.draw_cursor()
+
     def move_line_begin(self):
         while self.buffer_cursor[0] > 0: self._move_left()
         self.draw_cursor()
@@ -379,12 +385,29 @@ class Window():
         self.move_line_begin()
         self.draw()
 
-    def remove_char(self): pass
+    def remove_char(self, move_cursor=True): 
+        if self.buffer_cursor[0] == 0:
+            if self.buffer_cursor[1] == 0: return
+            # we are about to move line up because of our removal. this is our
+            # new x after joining the lines
+            new_x = len(self.buffer.lines[self.buffer_cursor[1] - 1]) - 1
 
-    def insert(self, char):
-        self.buffer.insert( self.buffer_cursor[0],
-                            self.buffer_cursor[1],
-                            char)
+            self.buffer.remove_char(    self.buffer_cursor[0],
+                                        self.buffer_cursor[1])
+
+            self.move_up()
+            self.move_to_x(new_x)
+            self.draw()
+        else:
+            self.buffer.remove_char(    self.buffer_cursor[0],
+                                        self.buffer_cursor[1])
+            self.move_left()
+            self.draw_line()
+
+    def insert_char(self, char):
+        self.buffer.insert_char(    self.buffer_cursor[0],
+                                    self.buffer_cursor[1],
+                                    char)
         if char == '\n':
             self.move_down()
             self.move_line_begin()

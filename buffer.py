@@ -64,7 +64,22 @@ class Buffer():
         self.lines[y] = first
         self.lines.insert(y + 1, second) 
 
-    def insert(self, x, y, char):
+    def _join_line(self, y):
+        line = self.lines[y]
+        next_line = self.lines.pop(y + 1)
+        joined = line[:-1] + next_line
+        self.lines[y] = joined
+
+    def remove_char(self, x, y):
+        if x == 0: 
+            if y == 0: return 
+            self._join_line(y - 1)
+        else:
+            line = self.lines[y]
+            line = line[:x-1] + line[x:]
+            self.lines[y] = line
+
+    def insert_char(self, x, y, char):
         if char == '\n':
             self._split_line(x, y)
         else:

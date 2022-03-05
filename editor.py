@@ -291,12 +291,16 @@ class Context():
                             command_position[0] + len(cmd))
 
     def on_insert(self, key):
-        elog("on_insert")
         ret = False
+
+        if key == 263: # backslash
+            self.get_curr_window().remove_char()
+            return ret
+
         try: 
             char = chr(key)
             if char in printable:
-                self.get_curr_window().insert(char)
+                self.get_curr_window().insert_char(char)
             else:
                 elog(f"INSERT: ({key}) not printable.")
         except Exception as e: elog(f"Exception: {e}")
