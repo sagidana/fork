@@ -189,6 +189,18 @@ class Context():
             self.change_mode(INSERT)
             return False
         self.maps[NORMAL][ord('i')] = i_map
+        def X_map(self):
+            self.get_curr_window().change_begin()
+            self.get_curr_window().remove_char_special(self.get_curr_window().buffer_cursor[0])
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('X')] = X_map
+        def x_map(self):
+            self.get_curr_window().change_begin()
+            self.get_curr_window().remove_char_special(self.get_curr_window().buffer_cursor[0] + 1)
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('x')] = x_map
         def u_map(self):
             self.get_curr_window().undo()
             return False

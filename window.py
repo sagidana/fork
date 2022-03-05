@@ -385,7 +385,15 @@ class Window():
         self.move_line_begin()
         self.draw()
 
-    def remove_char(self, move_cursor=True): 
+    def remove_char_special(self, x): 
+        if x > self.get_curr_line_len() - 1: return
+        if x <= 0: return
+
+        self.buffer.remove_char(    x,
+                                    self.buffer_cursor[1])
+        self.draw_line()
+
+    def remove_char(self): 
         if self.buffer_cursor[0] == 0:
             if self.buffer_cursor[1] == 0: return
             # we are about to move line up because of our removal. this is our
