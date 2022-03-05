@@ -245,6 +245,9 @@ class Window():
     def get_curr_line(self):
         return self.buffer.lines[self.buffer_cursor[1]]
 
+    def get_curr_line_len(self):
+        return len(self.get_curr_line())
+
     def get_line(self, line_num):
         try:
             return self.buffer.lines[line_num]
@@ -317,7 +320,7 @@ class Window():
 
     def move_WORD_forward(self): self.move_word_forward()
     def move_WORD_backward(self): self.move_word_backward()
-    def move_WORD_end(self): pass
+    def move_WORD_end(self): self.move_word_end()
 
     @timeout_decorator.timeout(2)
     def get_key(self):
@@ -358,10 +361,25 @@ class Window():
     def till(self): pass
     def till_back(self): pass
     
-    def new_line(self): pass
-    def new_line_before(self): pass
+    def remove_line(self):
+        self.buffer.remove_line(self.buffer_cursor[1])
+        if self.buffer_cursor[0] >= self.get_curr_line_len() - 1:
+            self.move_cursor_to_buf_location(   self.get_curr_line_len() - 1,
+                                                self.buffer_cursor[1])
+        self.draw()
 
-    def remove(self): pass
+    def new_line_after(self): 
+        self.buffer.insert_line(self.buffer_cursor[1] + 1, "\n")
+        self.move_down()
+        self.move_line_begin()
+        self.draw()
+
+    def new_line_before(self): 
+        self.buffer.insert_line(self.buffer_cursor[1], "\n")
+        self.move_line_begin()
+        self.draw()
+
+    def remove_char(self): pass
 
     def insert(self, char):
         self.buffer.insert( self.buffer_cursor[0],

@@ -49,8 +49,6 @@ class Context():
 
         self.mode = target
 
-        
-
     def get_inner_key(self):
         try: return self.get_key_timeout()
         except: return None
@@ -58,33 +56,33 @@ class Context():
     def _initialize_normal_legends_maps(self):
         # Legends
         def j_map(self):
-            self.get_curr_tab().get_curr_window().move_down()
+            self.get_curr_window().move_down()
             return False
         self.maps[NORMAL][ord('j')] = j_map
         def k_map(self):
-            self.get_curr_tab().get_curr_window().move_up()
+            self.get_curr_window().move_up()
             return False
         self.maps[NORMAL][ord('k')] = k_map
         def l_map(self):
-            self.get_curr_tab().get_curr_window().move_right()
+            self.get_curr_window().move_right()
             return False
         self.maps[NORMAL][ord('l')] = l_map
         def h_map(self):
-            self.get_curr_tab().get_curr_window().move_left()
+            self.get_curr_window().move_left()
             return False
         self.maps[NORMAL][ord('h')] = h_map
 
     def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):
-            self.get_curr_tab().get_curr_window().scroll_up_half_page()
+            self.get_curr_window().scroll_up_half_page()
             return False
         self.maps[NORMAL][21] = ctrl_u_map
         def ctrl_d_map(self):
-            self.get_curr_tab().get_curr_window().scroll_down_half_page()
+            self.get_curr_window().scroll_down_half_page()
             return False
         self.maps[NORMAL][4] = ctrl_d_map
         def ctrl_l_map(self):
-            self.get_curr_tab().get_curr_window().draw()
+            self.get_curr_window().draw()
             return False
         self.maps[NORMAL][12] = ctrl_l_map
         def ctrl_r_map(self):
@@ -92,75 +90,101 @@ class Context():
             return False
         self.maps[NORMAL][18] = ctrl_r_map
 
-
     def _initialize_normal_symbol_maps(self):
         def zero_map(self):
-            self.get_curr_tab().get_curr_window().move_line_begin()
+            self.get_curr_window().move_line_begin()
             return False
         self.maps[NORMAL][ord('0')] = zero_map
         def dollar_map(self):
-            self.get_curr_tab().get_curr_window().move_line_end()
+            self.get_curr_window().move_line_end()
             return False
         self.maps[NORMAL][ord('$')] = dollar_map
 
     def _initialize_normal_mainstream_maps(self):
+        self.maps[NORMAL][ord('c')] = {}
+        self.maps[NORMAL][ord('d')] = {}
+        self.maps[NORMAL][ord('y')] = {}
         self.maps[NORMAL][ord('g')] = {}
+
+        def dd_map(self):
+            self.get_curr_window().change_begin()
+            self.get_curr_window().remove_line()
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('d')][ord('d')] = dd_map
         def gg_map(self):
-            self.get_curr_tab().get_curr_window().move_begin()
+            self.get_curr_window().move_begin()
             return False
         self.maps[NORMAL][ord('g')][ord('g')] = gg_map
         def G_map(self):
-            self.get_curr_tab().get_curr_window().move_end()
+            self.get_curr_window().move_end()
             return False
         self.maps[NORMAL][ord('G')] = G_map
         def w_map(self):
-            self.get_curr_tab().get_curr_window().move_word_forward()
+            self.get_curr_window().move_word_forward()
             return False
         self.maps[NORMAL][ord('w')] = w_map
         def W_map(self):
-            self.get_curr_tab().get_curr_window().move_WORD_forward()
+            self.get_curr_window().move_WORD_forward()
             return False
         self.maps[NORMAL][ord('W')] = W_map
         def b_map(self):
-            self.get_curr_tab().get_curr_window().move_word_backward()
+            self.get_curr_window().move_word_backward()
             return False
         self.maps[NORMAL][ord('b')] = b_map
         def B_map(self):
-            self.get_curr_tab().get_curr_window().move_WORD_backward()
+            self.get_curr_window().move_WORD_backward()
             return False
         self.maps[NORMAL][ord('B')] = B_map
         def e_map(self):
-            self.get_curr_tab().get_curr_window().move_word_end()
+            self.get_curr_window().move_word_end()
             return False
         self.maps[NORMAL][ord('e')] = e_map
         def E_map(self):
-            self.get_curr_tab().get_curr_window().move_WORD_end()
+            self.get_curr_window().move_WORD_end()
             return False
         self.maps[NORMAL][ord('E')] = E_map
         def f_map(self):
-            self.get_curr_tab().get_curr_window().find()
+            self.get_curr_window().find()
             return False
         self.maps[NORMAL][ord('f')] = f_map
         def F_map(self):
-            self.get_curr_tab().get_curr_window().find_back()
+            self.get_curr_window().find_back()
             return False
         self.maps[NORMAL][ord('F')] = F_map
         def t_map(self):
-            self.get_curr_tab().get_curr_window().till()
+            self.get_curr_window().till()
             return False
         self.maps[NORMAL][ord('t')] = t_map
         def T_map(self):
-            self.get_curr_tab().get_curr_window().till_back()
+            self.get_curr_window().till_back()
             return False
         self.maps[NORMAL][ord('T')] = T_map
         def o_map(self):
-            self.get_curr_tab().get_curr_window().new_line()
+            self.change_mode(INSERT)
+            self.get_curr_window().new_line_after()
             return False
         self.maps[NORMAL][ord('o')] = o_map
         def O_map(self):
-            self.get_curr_tab().get_curr_window().new_line_before()
+            self.change_mode(INSERT)
+            self.get_curr_window().new_line_before()
             return False
         self.maps[NORMAL][ord('O')] = O_map
+        def A_map(self):
+            self.change_mode(INSERT)
+            self.get_curr_window().move_line_end()
+            return False
+        self.maps[NORMAL][ord('A')] = A_map
+        def a_map(self):
+            self.change_mode(INSERT)
+            self.get_curr_window().move_right()
+            return False
+        self.maps[NORMAL][ord('a')] = a_map
+        def I_map(self):
+            self.change_mode(INSERT)
+            self.get_curr_window().move_line_begin()
+            return False
+        self.maps[NORMAL][ord('I')] = I_map
         def i_map(self):
             self.change_mode(INSERT)
             return False
@@ -248,7 +272,7 @@ class Context():
     def exec_command(self, command):
         if command == 'q': return True
         if command == 'w': 
-            self.get_curr_tab().get_curr_window().buffer.write()
+            self.get_curr_window().buffer.write()
             pass
         return False
 
@@ -272,7 +296,7 @@ class Context():
         try: 
             char = chr(key)
             if char in printable:
-                self.get_curr_tab().get_curr_window().insert(char)
+                self.get_curr_window().insert(char)
             else:
                 elog(f"INSERT: ({key}) not printable.")
         except Exception as e: elog(f"Exception: {e}")
@@ -327,6 +351,11 @@ class Context():
 
             if key in curr: curr[key](self)
 
+        if  self.mode == NORMAL and \
+            ord('1') <= key <= ord('9'):
+            elog(f"EDITOR: key: {chr(key)}")
+            return False
+            
         if self.mode == INSERT:
             return self.on_insert(key)
 

@@ -132,11 +132,11 @@ class Buffer():
                 return ret
         return None
 
-    def _replace_line(self, y, new_line):
+    def replace_line(self, y, new_line):
         self.lines[y] = new_line
-    def _insert_line(self, y, new_line):
+    def insert_line(self, y, new_line):
         self.lines.insert(y, new_line)
-    def _remove_line(self, y):
+    def remove_line(self, y):
         self.lines.pop(y)
 
     def _change(self, change, undo=True):
@@ -169,16 +169,16 @@ class Buffer():
         # lines removals must be in decreasing order to no mess up with the
         # line numbers
         for line in reversed(sorted(lines_for_deletion)):
-            self._remove_line(line)
+            self.remove_line(line)
 
         # lines insertions must be in increasing order to no mess up with the
         # line numbers
         for line in sorted(lines_for_insertion):
-            self._insert_line(line, lines_for_insertion[line])
+            self.insert_line(line, lines_for_insertion[line])
 
         # for line replacements order is not important.
         for line in lines_for_replacement:
-            self._replace_line(line, lines_for_replacement[line])
+            self.replace_line(line, lines_for_replacement[line])
 
     def undo(self): 
         if len(self.undo_stack) == 0: return
