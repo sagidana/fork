@@ -385,6 +385,8 @@ class Window():
     def redo(self): 
         position = self.buffer.redo()
         if not position: return
+
+        # in vim the redo does not return cursor location.. wonder why?
         self.move_cursor_to_buf_location(   position[0],
                                             position[1])
         self.draw()

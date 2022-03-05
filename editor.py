@@ -43,6 +43,8 @@ class Context():
         if self.mode == INSERT and target == NORMAL:
             self.get_curr_window().change_end()
         if self.mode == NORMAL and target == INSERT:
+            # in vim the transition from insert mode to normal mode causes the
+            # cursor to move one index to the left. should I mimic this?
             self.get_curr_window().change_begin()
 
         self.mode = target
