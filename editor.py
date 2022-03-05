@@ -239,6 +239,7 @@ class Context():
             start_x, start_y, end_x, end_y = scope
             self.get_curr_window().change_begin()
             elog(f"EDITOR: delete {scope}")
+            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.get_curr_window().change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)

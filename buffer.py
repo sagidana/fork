@@ -161,7 +161,33 @@ class Buffer():
                         start_y,
                         end_x,
                         end_y):
-        pass
+        if start_y > len(self.lines) - 1: return
+        if end_y > len(self.lines) - 1: return
+        if start_y > end_y: return
+
+        if start_y == end_y:
+            if start_x > end_x: return 
+
+            line_len = len(self.lines[start_y]) - 1
+            line = self.lines[start_y]
+            if start_x - end_x < line_len:
+                line = line[:start_x] + line[end_x:]
+                self.lines[start_y] = line
+            else:
+                self.remove_line(start_y)
+        else:
+            start_line = self.lines[start_y]
+            start_line = start_line[:start_x]
+
+            end_line = self.lines[end_y]
+            end_line = end_line[end_x:]
+
+            # remove lines from top to bottom
+            for i in range(end_y - start_y): 
+                self.remove_line(end_y - i)
+
+            new_line = start_line + end_line
+            self.lines[start_y] = new_line
 
     def _change(self, change, undo=True):
         lines_for_deletion = []
@@ -291,10 +317,12 @@ class Buffer():
 
         found = None
         for m in pattern.finditer(''.join(self.lines)):
+            elog(f"BUFFER: {m}")
             start, end = m.span()
             if start <= curr_index <= end:
                 found = m
                 break
+            elif curr_index < start: break
         if not found: return None
         start, end = found.span()
 
@@ -399,8 +427,10 @@ class Buffer():
         return start_x, start_y, end_x, end_y
 
     def arround_parentheses(self, x, y): 
-        r = r"\(.*\)"
+        r = r"\((.+)\)"
         pattern = re.compile(r, re.MULTILINE)
+        # pattern = re.compile(r, re.MULTILINE|re.DOTALL)
+        # pattern = re.compile(r, re.DOTALL)
 
         return self._find_relevant_object(pattern, x, y)
     def arround_quotation(self, x, y): 

@@ -384,7 +384,12 @@ class Window():
                         start_y,
                         end_x,
                         end_y):
-        pass
+        # case 1: we inside the scope
+        # case 2: we above the scope
+        # case 2: we below the scope
+
+        self.buffer.remove_scope(start_x, start_y, end_x, end_y)
+        self.draw()
 
     def new_line_after(self): 
         self.buffer.insert_line(self.buffer_cursor[1] + 1, "\n")
