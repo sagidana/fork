@@ -10,14 +10,13 @@
 - Folding
 
 ## TODOs
-- registers
-- copy paste memory
-- line numbers
-- statusline
-- <num><action>
 - selection
+- <num><action>
 - inner action
 - around action
+
+- line numbers
+- statusline
 - syntax highlighting
 - folds
 - ctags

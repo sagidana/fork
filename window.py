@@ -369,10 +369,22 @@ class Window():
     
     def remove_line(self):
         self.buffer.remove_line(self.buffer_cursor[1])
-        if self.buffer_cursor[0] >= self.get_curr_line_len() - 1:
-            self.move_cursor_to_buf_location(   self.get_curr_line_len() - 1,
-                                                self.buffer_cursor[1])
+
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+
+        if y >= len(self.buffer.lines) - 1: y = len(self.buffer.lines) - 1
+        if x >= len(self.get_line(y)) - 1: x = len(self.get_line(y)) - 1
+
+        self.move_cursor_to_buf_location(x, y)
         self.draw()
+
+    def remove_scope(   self,
+                        start_x,
+                        start_y,
+                        end_x,
+                        end_y):
+        pass
 
     def new_line_after(self): 
         self.buffer.insert_line(self.buffer_cursor[1] + 1, "\n")

@@ -22,6 +22,7 @@ args = None
 NORMAL = 'normal'
 INSERT = 'insert'
 VISUAL = 'visual'
+VISUAL_LINE = 'visual_line'
 VISUAL_BLOCK = 'visual_block'
 REPLACE = 'replace'
 MAP_TIMEOOUT = 2 # in seconds
@@ -55,24 +56,24 @@ class Context():
         try: return self.get_key_timeout()
         except: return None
 
-    def _initialize_normal_legends_maps(self):
+    def _initialize_legends_maps(self, mode):
         # Legends
         def j_map(self):
             self.get_curr_window().move_down()
             return False
-        self.maps[NORMAL][ord('j')] = j_map
+        self.maps[mode][ord('j')] = j_map
         def k_map(self):
             self.get_curr_window().move_up()
             return False
-        self.maps[NORMAL][ord('k')] = k_map
+        self.maps[mode][ord('k')] = k_map
         def l_map(self):
             self.get_curr_window().move_right()
             return False
-        self.maps[NORMAL][ord('l')] = l_map
+        self.maps[mode][ord('l')] = l_map
         def h_map(self):
             self.get_curr_window().move_left()
             return False
-        self.maps[NORMAL][ord('h')] = h_map
+        self.maps[mode][ord('h')] = h_map
 
     def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):
@@ -102,11 +103,150 @@ class Context():
             return False
         self.maps[NORMAL][ord('$')] = dollar_map
 
+    def _initialize_objects_maps(self, maps, cb):
+        maps[ord('i')] = {}
+        maps[ord('a')] = {}
+        def inner_parentheses(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_parentheses(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][ord('(')] = inner_parentheses
+        maps[ord('i')][ord(')')] = inner_parentheses
+        def inner_square_brackets(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_square_brackets(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][ord('[')] = inner_square_brackets
+        maps[ord('i')][ord(']')] = inner_square_brackets
+        def inner_curly_brackets(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_curly_brackets(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][ord('{')] = inner_curly_brackets
+        maps[ord('i')][ord('}')] = inner_curly_brackets
+        def inner_greater_than(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_greater_than(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][('<')] = inner_greater_than
+        maps[ord('i')][('>')] = inner_greater_than
+        def inner_quotation(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_quotation(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][ord('"')] = inner_quotation
+        def inner_apostrophe(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_apostrophe(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][ord("'")] = inner_apostrophe
+        def inner_backtick(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_backtick(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][ord("`")] = inner_backtick
+        def inner_word(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_word(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][ord("w")] = inner_word
+        def inner_WORD(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_WORD(x, y)
+            if scope: cb(scope)
+        maps[ord('i')][ord("W")] = inner_WORD
+
+        def arround_parentheses(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_parentheses(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord('(')] = arround_parentheses
+        maps[ord('a')][ord(')')] = arround_parentheses
+        def arround_square_brackets(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_square_brackets(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord('[')] = arround_square_brackets
+        maps[ord('a')][ord(']')] = arround_square_brackets
+        def arround_curly_brackets(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_curly_brackets(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord('{')] = arround_curly_brackets
+        maps[ord('a')][ord('}')] = arround_curly_brackets
+        def arround_greater_than(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_greater_than(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord('<')] = arround_greater_than
+        maps[ord('a')][ord('>')] = arround_greater_than
+        def arround_quotation(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_quotation(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord('"')] = arround_quotation
+        def arround_apostrophe(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_apostrophe(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord("'")] = arround_apostrophe
+        def arround_backtick(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_backtick(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord("`")] = arround_backtick
+        def arround_word(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_word(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord("w")] = arround_word
+        def arround_WORD(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_WORD(x, y)
+            if scope: cb(scope)
+        maps[ord('a')][ord("W")] = arround_WORD
+
     def _initialize_normal_mainstream_maps(self):
-        self.maps[NORMAL][ord('c')] = {}
-        self.maps[NORMAL][ord('d')] = {}
-        self.maps[NORMAL][ord('y')] = {}
-        self.maps[NORMAL][ord('g')] = {}
+        self.maps[NORMAL][ord('c')] = {}    # change
+        self.maps[NORMAL][ord('d')] = {}    # delete
+        self.maps[NORMAL][ord('y')] = {}    # yank
+        self.maps[NORMAL][ord('g')] = {}    # go
+
+        def change_object_map(scope): 
+            start_x, start_y, end_x, end_y = scope
+            elog(f"EDITOR: change {scope}")
+            return False
+        self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
+        def delete_object_map(scope): 
+            start_x, start_y, end_x, end_y = scope
+            self.get_curr_window().change_begin()
+            elog(f"EDITOR: delete {scope}")
+            self.get_curr_window().change_end()
+            return False
+        self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
+        def yank_object_map(scope): 
+            start_x, start_y, end_x, end_y = scope
+            elog(f"EDITOR: yank {scope}")
+            return False
+        self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_map)
 
         def yy_map(self):
             data = {}
@@ -117,6 +257,12 @@ class Context():
         self.maps[NORMAL][ord('y')][ord('y')] = yy_map
         def dd_map(self):
             self.get_curr_window().change_begin()
+
+            data = {}
+            data["data"] = self.get_curr_window().get_curr_line()
+            data["meta"] = "line" # to let the paste know the data is entire line.
+            self.registers['"'] = data
+
             self.get_curr_window().remove_line()
             self.get_curr_window().change_end()
             return False
@@ -238,6 +384,14 @@ class Context():
             self.get_curr_window().undo()
             return False
         self.maps[NORMAL][ord('u')] = u_map
+        def V_map(self):
+            self.change_mode(VISUAL_LINE)
+            return False
+        self.maps[NORMAL][ord('V')] = V_map
+        def v_map(self):
+            self.change_mode(VISUAL)
+            return False
+        self.maps[NORMAL][ord('v')] = v_map
 
         self._initialize_normal_ctrl_maps()
         self._initialize_normal_symbol_maps()
@@ -247,12 +401,15 @@ class Context():
             return self.on_command()
         self.maps[NORMAL][ord(':')] = colon_map
 
-        self._initialize_normal_legends_maps()
+        self._initialize_legends_maps(NORMAL)
         self._initialize_normal_mainstream_maps()
-        # self._initialize_normal_inner_maps()
 
     def _initialize_insert_maps(self): pass
-    def _initialize_visual_maps(self): pass
+
+    def _initialize_visual_maps(self): 
+        self._initialize_legends_maps(VISUAL)
+        self._initialize_legends_maps(VISUAL_LINE)
+        self._initialize_legends_maps(VISUAL_BLOCK)
 
     def initialize_maps(self):
         self._initialize_normal_maps()
@@ -285,6 +442,7 @@ class Context():
         self.maps[NORMAL] = {}
         self.maps[INSERT] = {}
         self.maps[VISUAL] = {}
+        self.maps[VISUAL_LINE] = {}
         self.maps[VISUAL_BLOCK] = {}
         self.maps[REPLACE] = {}
 

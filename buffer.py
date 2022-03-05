@@ -149,10 +149,19 @@ class Buffer():
 
     def replace_line(self, y, new_line):
         self.lines[y] = new_line
+
     def insert_line(self, y, new_line):
         self.lines.insert(y, new_line)
+
     def remove_line(self, y):
         self.lines.pop(y)
+
+    def remove_scope(   self,
+                        start_x,
+                        start_y,
+                        end_x,
+                        end_y):
+        pass
 
     def _change(self, change, undo=True):
         lines_for_deletion = []
@@ -276,4 +285,161 @@ class Buffer():
 
         self.shadow = None
         self.change_start_position = None
+    
+    def _find_relevant_object(self, pattern, x, y):
+        curr_index = len(''.join(self.lines[:y])) + x
 
+        found = None
+        for m in pattern.finditer(''.join(self.lines)):
+            start, end = m.span()
+            if start <= curr_index <= end:
+                found = m
+                break
+        if not found: return None
+        start, end = found.span()
+
+        start_x = 0
+        start_y = 0
+        end_x = 0
+        end_y = 0
+
+        curr_offset = 0
+        curr_y = 0
+        for i in range(len(self.lines)):
+            if curr_offset <= start <= curr_offset + (len(self.lines[i]) - 1):
+                start_y = i
+                start_x = start - curr_offset
+            if curr_offset <= end <= curr_offset + (len(self.lines[i]) - 1):
+                end_y = i
+                end_x = end - curr_offset
+                break
+            curr_offset += len(self.lines[i])
+        return start_x, start_y, end_x, end_y
+
+    def inner_parentheses(self, x, y): 
+        ret = self.arround_parentheses(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+    def inner_quotation(self, x, y): 
+        ret = self.arround_quotation(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+    def inner_square_brackets(self, x, y): 
+        ret = self.arround_square_brackets(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+    def inner_curly_brackets(self, x, y): 
+        ret = self.arround_curly_brackets(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+    def inner_greater_than(self, x, y): 
+        ret = self.arround_greater_than(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+    def inner_apostrophe(self, x, y): 
+        ret = self.arround_apostrophe(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+    def inner_backtick(self, x, y): 
+        ret = self.arround_backtick(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+    def inner_word(self, x, y): 
+        ret = self.arround_word(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+    def inner_WORD(self, x, y): 
+        ret = self.arround_WORD(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+
+    def arround_parentheses(self, x, y): 
+        r = r"\(.*\)"
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
+    def arround_quotation(self, x, y): 
+        r = r"\".*\""
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
+    def arround_square_brackets(self, x, y): 
+        r = r"\[.*\]"
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
+    def arround_curly_brackets(self, x, y): 
+        r = r"\{.*\}"
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
+    def arround_greater_than(self, x, y): 
+        r = r"\<.*\>"
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
+    def arround_apostrophe(self, x, y): 
+        r = r"\'.*\'"
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
+    def arround_backtick(self, x, y): 
+        r = r"\`.*\`"
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
+    def arround_word(self, x, y): 
+        r = r"\`.*\`"
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
+    def arround_WORD(self, x, y): 
+        r = r"\`.*\`"
+        pattern = re.compile(r, re.MULTILINE)
+
+        return self._find_relevant_object(pattern, x, y)
