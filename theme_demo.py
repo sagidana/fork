@@ -21,7 +21,7 @@ def walk_recursive(node, cb, level=0):
     for child in node.children:
         walk_recursive(child, cb, level + 1)
 
-def get_settings(token_colors, scope):
+def get_scope_style(token_colors, scope):
     for token in token_colors:
         if "settings" not in token: continue
         if "scope" not in token: continue
@@ -30,6 +30,18 @@ def get_settings(token_colors, scope):
         # print(f"{token['settings']}")
         return token['settings']
 
+def map_node_to_scope(node, grammar):
+    # print(f"{node.type}")
+    scopes = grammar['scopes']
+    if node.type in scopes: return scopes[node.type]
+    if f"\"{node.type}\"" in scopes: return scopes[f"\"{node.type}\""]
+
+    return None
+
+def get_grammar(file_path):
+    with open(file_path) as f:
+        return json.loads(f.read())
+
 def highlight_file(file_path):
     parser = Parser()
     parser.set_language(PY_LANGUAGE)
@@ -37,23 +49,24 @@ def highlight_file(file_path):
     theme_path = "themes/monokai-color-theme.json"
 
     with open(file_path, 'rb') as f: file_bytes = f.read()
+
     with open(theme_path, 'r') as f: theme = json.loads(f.read())
-
-    # print(json.dumps(theme, indent=4))
-
     token_colors = theme['tokenColors']
 
-    
+    grammar = get_grammar("grammars/python.json")
+    # print(json.dumps(grammar, indent=4))
+
     tree = parser.parse(file_bytes)
 
     def callback(node, level):
-        # scope = node.type
-        # settings = get_settings(token_colors, scope)
-        # if not settings: return 
+        # print("  "*level + f"{node.type}")
+        scope = map_node_to_scope(node, grammar)
+        if not scope: return
 
-        # print(f"{scope}: {settings}")
+        style = get_scope_style(token_colors, scope)
+        if not style: return 
 
-        print("  "*level + f"{node.type}")
+        print(f"{scope}: {style}")
 
     walk_recursive(tree.root_node, callback)
 
