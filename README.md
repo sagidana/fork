@@ -5,6 +5,8 @@
 ### The Parsers
 The syntax highlighting system works with treesitter.
 
+`pip3 install tree_sitter`
+
 ```python
 from tree_sitter import Language, Parser
 

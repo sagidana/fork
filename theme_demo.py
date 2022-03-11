@@ -2,11 +2,12 @@
 
 from tree_sitter import Language, Parser
 import json
+import sys
 import re
 
 # Language.build_library(
         # # Store the library in the `build` directory
-        # 'build/my-languages.so',
+        # 'grammars/tree-sitter-lib/my-languages.so',
 
         # # Include one or more languages
         # [
@@ -14,7 +15,7 @@ import re
         # ]
     # )
 
-PY_LANGUAGE = Language('build/my-languages.so', 'python')
+PY_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so', 'python')
 
 
 def walk(node, cb, level=0, nth_child=0):
@@ -91,8 +92,11 @@ def get_scope_style(token_colors, scope):
 
             # if scope != token['scope']: continue
             # return token['settings']
-# 
+
 def map_node_to_scope(node, grammar, nth_child=0):
+    _type = node.type
+
+    # match:
     if 'match' in grammar:
         pattern = grammar['match']
 
@@ -100,14 +104,34 @@ def map_node_to_scope(node, grammar, nth_child=0):
             return grammar['scope']
         return None
     
-    _type = node.type
-    if _type not in grammar: 
-        _type = f"nth-child({nth_child})"
-        if _type not in grammar: return None
+    # choose most specific type
+    nth_type = f"{_type}:nth-child({nth_child})"
+    if nth_type in grammar: 
+        if isinstance(grammar[nth_type], str): 
+            return grammar[nth_type]
+        elif isinstance(grammar[nth_type], list): 
+            for curr in grammar[nth_type]:
+                # in the list case, its either dict or str.
+                if not isinstance(curr, dict): return curr
 
-    if isinstance(grammar[_type], str): return grammar[_type]
+                parent = node.parent
+                if 'match' in curr: parent = node
 
-    if isinstance(grammar[_type], list): 
+                ret = map_node_to_scope(parent, curr)
+                if ret: return ret # we need to fallback 
+        elif isinstance(grammar[nth_type], dict):
+            parent = node.parent
+            if 'match' in grammar[nth_type]: parent = node
+
+            ret = map_node_to_scope(parent, grammar[nth_type])
+            if ret: return ret
+
+    if _type not in grammar: return None
+    
+    # str
+    if isinstance(grammar[_type], str): 
+        return grammar[_type]
+    elif isinstance(grammar[_type], list): 
         for curr in grammar[_type]:
             if not isinstance(curr, dict): return curr
 
@@ -115,17 +139,17 @@ def map_node_to_scope(node, grammar, nth_child=0):
             if 'match' in curr: parent = node
 
             return map_node_to_scope(parent, curr)
-
-    if isinstance(grammar[_type], dict):
+    elif isinstance(grammar[_type], dict):
         parent = node.parent
         if 'match' in grammar[_type]: parent = node
 
-        # print(f"{parent.type} > {node.type}")
         return map_node_to_scope(parent, grammar[_type])
+    return None
 
 def get_grammar(file_path):
     with open(file_path) as f:
         return json.loads(f.read())
+
 
 def highlight_file(file_path):
     parser = Parser()
@@ -134,36 +158,86 @@ def highlight_file(file_path):
     theme_path = "themes/monokai-color-theme.json"
 
     with open(file_path, 'rb') as f: file_bytes = f.read()
+    with open(file_path, 'r') as f: file_lines = f.readlines()
 
     with open(theme_path, 'r') as f: theme = json.loads(f.read())
     token_colors = theme['tokenColors']
 
     grammar = get_grammar("grammars/python.json")
-    # print(json.dumps(grammar, indent=4))
-
     tree = parser.parse(file_bytes)
-    # cursor = tree.walk()
-    # print(dir(tree.root_node))
-    # return
-
-    def callback(node, level, nth_child):
-        # node = cursor.node
+    
+    style_map = {}
+    def set_style(style): 
+        if 'bg' in style:
+            sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert(style['bg'])))
+        if 'fg' in style:
+            sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert(style['fg'])))
+            
+    def get_style(x, y): 
+        style = {}
+        return style
+    
+    def update_styles(x, y): return None
+    def map_styles(node, level, nth_child):
         scope = map_node_to_scope(node, grammar, nth_child)
         if not scope: return
 
-
         style = get_scope_style(token_colors, scope)
-        if not style: 
-            print(f"{scope}")
-            return 
+        if not style: return
 
+        start_point = node.start_point
+        end_point = node.end_point
+        print(f"{start_point} -> {end_point}")
         # print(f"{scope}: {style}")
 
-    walk(tree.root_node, callback)
-    # make_move(cursor, "down", callback)
-    # for cursor in traverse_tree(tree):
-        # print(cursor.node.child_count)
-        # break
-        # callback(cursor)
+    walk(tree.root_node, map_styles)
+
+    # set background color.
+    bg_color = theme['colors']['editor.background']
+    sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert(bg_color)))
+
+    # draw
+    y = 0
+    for line in file_lines:
+        x = 0
+        for c in line:
+            style = get_style(x, y)
+
+            if style: set_style(style)
+
+            sys.stdout.write(c)
+            x += 1
+        y += 1
+            
+
+
+BACKGROUND_TRUE_COLOR = "\x1b[48;2;{}m"
+FOREGROUND_TRUE_COLOR = "\x1b[38;2;{}m"
+BACKGROUND_256_COLOR = "\x1b[48;5;{}m"
+FOREGROUND_256_COLOR = "\x1b[38;5;{}m"
+
+def convert(a):
+    r, g, b = int(a[1:3], 16), int(a[3:5], 16), int(a[5:7], 16)
+    return f"{r};{g};{b}"
+
+def colors():
+    # # 24bit color
+    # sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert("#1B1A25")))
+    # sys.stdout.write(FOREGROUND_TRUE_COLOR.format(convert("#625996")))
+    # sys.stdout.write("test")
+
+    # # 8bit color
+    # for i in range(0, 16):
+        # for j in range(0, 16):
+            # code = str(i * 16 + j)
+            # revert = str(j * 16 + i)
+
+            # sys.stdout.write(FOREGROUND_256_COLOR.format(code))
+            # sys.stdout.write(BACKGROUND_256_COLOR.format(revert))
+            # sys.stdout.write("test")
+
+    print("")
 
 highlight_file("editor")
+
+# colors()
