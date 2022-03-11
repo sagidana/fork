@@ -32,50 +32,6 @@ def walk(node, cb, level=0, nth_child=0):
         walk(child, cb, level + 1, curr_nth_child)
         curr_nth_child += 1
     
-def traverse_tree(tree):
-    cursor = tree.walk()
-    reached_root = False
-
-    while reached_root == False:
-        yield cursor
-
-        if cursor.goto_first_child(): continue
-
-        if cursor.goto_next_sibling(): continue
-
-        retracing = True
-
-        while retracing:
-            if not cursor.goto_parent(): 
-                retracing = False
-                reached_root = True
-
-            if cursor.goto_next_sibling():
-                retracing = False
-
-def make_move(cursor, move, fn):
-    if (move == "down"):
-        fn(cursor)
-        if (cursor.goto_first_child()):
-            make_move(cursor, "down", fn)
-        elif (cursor.goto_next_sibling()):
-            make_move(cursor, "right", fn)
-        elif (cursor.goto_parent()):
-            make_move(cursor, "up", fn)
-    elif (move == "right"):
-        fn(cursor)
-        if (cursor.goto_first_child()):
-            make_move(cursor, "down", fn)
-        elif (cursor.goto_next_sibling()):
-            make_move(cursor, "right", fn)
-        elif (cursor.goto_parent()):
-            make_move(cursor, "up", fn)
-    elif move == "up":
-        if (cursor.goto_next_sibling()):
-            make_move(cursor, "right", fn)
-        elif (cursor.goto_parent()):
-            make_move(cursor, "up", fn)
-
 def get_scope_style(token_colors, scope):
     for token in token_colors:
         if "settings" not in token: continue
@@ -96,15 +52,7 @@ def get_scope_style(token_colors, scope):
 
                 for i in range(len(target_scopes) - 1, 0, -1):
                     curr = '.'.join(target_scopes[:i])
-                    if curr == s:
-                        return token['settings']
-
-            # if scope in scopes: return token['settings']
-
-            # continue
-
-            # if scope != token['scope']: continue
-            # return token['settings']
+                    if curr == s: return token['settings']
 
 def map_node_to_scope(node, grammar, nth_child=0):
     _type = node.type
