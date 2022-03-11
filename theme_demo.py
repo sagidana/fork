@@ -18,6 +18,14 @@ import re
 
 PY_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so', 'python')
 
+BACKGROUND_TRUE_COLOR = "\x1b[48;2;{}m"
+FOREGROUND_TRUE_COLOR = "\x1b[38;2;{}m"
+BACKGROUND_256_COLOR = "\x1b[48;5;{}m"
+FOREGROUND_256_COLOR = "\x1b[38;5;{}m"
+
+def convert(a):
+    r, g, b = int(a[1:3], 16), int(a[3:5], 16), int(a[5:7], 16)
+    return f"{r};{g};{b}"
 
 def walk(node, cb, level=0, nth_child=0):
     cb(node, level, nth_child)
@@ -85,8 +93,14 @@ def get_scope_style(token_colors, scope):
             scopes = [x.strip() for x in token['scope'].split(',')]
 
             for s in scopes:
-                if s == scope:
-                    return token['settings']
+                target_scopes = scope.split('.')
+                if s == scope: return token["settings"]
+
+                for i in range(len(target_scopes) - 1, 0, -1):
+                    curr = '.'.join(target_scopes[:i])
+                    if curr == s:
+                        return token['settings']
+
             # if scope in scopes: return token['settings']
 
             # continue
@@ -151,7 +165,6 @@ def get_grammar(file_path):
     with open(file_path) as f:
         return json.loads(f.read())
 
-
 def highlight_file(file_path):
     parser = Parser()
     parser.set_language(PY_LANGUAGE)
@@ -212,7 +225,9 @@ def highlight_file(file_path):
         if not scope: return
 
         style = get_scope_style(token_colors, scope)
-        if not style: return
+        if not style: 
+            # print(f"'{node.text.decode('utf-8')}' ({scope}) - not found!")
+            return
 
         start_point = node.start_point
         start_pos = get_file_pos(   start_point[1], 
@@ -227,8 +242,6 @@ def highlight_file(file_path):
 
     walk(tree.root_node, map_styles)
 
-    # set_def
-
     # draw
     y = 0
     for line in file_lines:
@@ -241,16 +254,6 @@ def highlight_file(file_path):
             sys.stdout.write(c)
             x += 1
         y += 1
-            
-
-BACKGROUND_TRUE_COLOR = "\x1b[48;2;{}m"
-FOREGROUND_TRUE_COLOR = "\x1b[38;2;{}m"
-BACKGROUND_256_COLOR = "\x1b[48;5;{}m"
-FOREGROUND_256_COLOR = "\x1b[38;5;{}m"
-
-def convert(a):
-    r, g, b = int(a[1:3], 16), int(a[3:5], 16), int(a[5:7], 16)
-    return f"{r};{g};{b}"
 
 def colors():
     # # 24bit color
@@ -273,3 +276,13 @@ def colors():
 highlight_file("editor")
 
 # colors()
+
+# if style.b:
+    # color_s += '\x1b[1m'
+    # undo_s += '\x1b[22m'
+# if style.i:
+    # color_s += '\x1b[3m'
+    # undo_s += '\x1b[23m'
+# if style.u:
+    # color_s += '\x1b[4m'
+    # undo_s += '\x1b[24m'
