@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from intervaltree import Interval, IntervalTree
 from tree_sitter import Language, Parser
 import json
 import sys
@@ -166,18 +167,46 @@ def highlight_file(file_path):
     grammar = get_grammar("grammars/python.json")
     tree = parser.parse(file_bytes)
     
-    style_map = {}
+    # set default colors
+    default_bg_color = theme['colors']['editor.background']
+    default_fg_color = theme['colors']['editor.foreground']
+
+    style_map = IntervalTree()
+
+    def get_file_pos(x, y):
+        for line in file_lines[:y]: x += len(line)
+        return x
+
+    def set_default_style():
+        sys.stdout.write(FOREGROUND_TRUE_COLOR.format(convert(default_fg_color)))
+        sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert(default_bg_color)))
+
     def set_style(style): 
         if 'bg' in style:
             sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert(style['bg'])))
         if 'fg' in style:
-            sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert(style['fg'])))
+            sys.stdout.write(FOREGROUND_TRUE_COLOR.format(convert(style['fg'])))
             
     def get_style(x, y): 
         style = {}
+        pos = get_file_pos(x, y)
+        styles = sorted(style_map[pos])
+        if len(styles) == 0: return None
+
+        # settings = styles[::-1][0]
+        settings = styles[0]
+        settings = settings[2]
+
+        if 'background' in settings:
+            style['bg'] = settings['background']
+        if 'foreground' in settings:
+            style['fg'] = settings['foreground']
+        if 'fontStyle' in settings:
+            style['font_style'] = settings['fontStyle']
         return style
     
     def update_styles(x, y): return None
+
     def map_styles(node, level, nth_child):
         scope = map_node_to_scope(node, grammar, nth_child)
         if not scope: return
@@ -186,15 +215,19 @@ def highlight_file(file_path):
         if not style: return
 
         start_point = node.start_point
+        start_pos = get_file_pos(   start_point[1], 
+                                    start_point[0])
+
         end_point = node.end_point
-        print(f"{start_point} -> {end_point}")
-        # print(f"{scope}: {style}")
+        end_pos = get_file_pos( end_point[1], 
+                                end_point[0])
+
+        # print(f"{start_pos}:{end_pos}")
+        style_map[start_pos:end_pos] = style
 
     walk(tree.root_node, map_styles)
 
-    # set background color.
-    bg_color = theme['colors']['editor.background']
-    sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert(bg_color)))
+    # set_def
 
     # draw
     y = 0
@@ -202,14 +235,13 @@ def highlight_file(file_path):
         x = 0
         for c in line:
             style = get_style(x, y)
-
             if style: set_style(style)
+            else: set_default_style()
 
             sys.stdout.write(c)
             x += 1
         y += 1
             
-
 
 BACKGROUND_TRUE_COLOR = "\x1b[48;2;{}m"
 FOREGROUND_TRUE_COLOR = "\x1b[38;2;{}m"
