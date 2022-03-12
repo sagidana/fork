@@ -33,11 +33,13 @@ def set_style(style):
         # sys.stdout.write(FOREGROUND_TRUE_COLOR.format(convert(style['fg'])))
 
     if 'bg' in style:
-        color = rgb2short(style['bg'])[0]
+        # color = rgb2short(style['bg'])[0]
+        color = style['bg']
         # print(f"bg: {rgb2short(style['bg'])}")
         sys.stdout.write(BACKGROUND_256_COLOR.format(color))
     if 'fg' in style:
-        color = rgb2short(style['fg'])[0]
+        # color = rgb2short(style['fg'])[0]
+        color = style['fg']
         # print(f"fg: {rgb2short(style['fg'])}")
         sys.stdout.write(FOREGROUND_256_COLOR.format(color))
 
@@ -90,7 +92,6 @@ def traverse_tree(tree, cb):
 # # if style.u:
     # # color_s += '\x1b[4m'
     # # undo_s += '\x1b[24m'
-
 
 class Syntax():
     def __init__(self, file_path, file_lines):
@@ -235,6 +236,10 @@ class Syntax():
         walk(self.tree.root_node, self.map_styles)
         # traverse_tree(self.tree, self.map_styles) # have some kind of bug..
 
+    def refresh(self):
+        self.initialize_tree_sitter()
+        self.initialize_style_map()
+
     def get_color(self, color):
         if self.colors_system == "true_colors":
             return color
@@ -247,12 +252,12 @@ class Syntax():
         with open(theme_path, 'r') as f: self.theme = json.loads(f.read())
 
         # setting default style
-        self.default_bg_color = self.theme['colors']['editor.background']
-        self.default_fg_color = self.theme['colors']['editor.foreground']
+        self.default_bg_color = self.get_color(self.theme['colors']['editor.background'])
+        self.default_fg_color = self.get_color(self.theme['colors']['editor.foreground'])
 
         self.default_style = {}
-        self.default_style['bg'] = self.get_color(self.default_bg_color)
-        self.default_style['fg'] = self.get_color(self.default_fg_color)
+        self.default_style['bg'] = self.default_bg_color
+        self.default_style['fg'] = self.default_fg_color
 
         self.token_colors = self.theme['tokenColors']
     
@@ -268,8 +273,14 @@ class Syntax():
 
         if 'background' in settings:
             style['bg'] = self.get_color(settings['background'])
+        else: 
+            style['bg'] = self.default_bg_color
+
         if 'foreground' in settings:
             style['fg'] = self.get_color(settings['foreground'])
+        else:
+            style['fg'] = self.default_fg_color
+
         if 'fontStyle' in settings:
             style['font_style'] = settings['fontStyle']
         return style

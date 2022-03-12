@@ -359,7 +359,7 @@ curses_colors = {}
 curses_color_pairs = {}
 
 def get_curses_color(color):
-    elog(f"color: {color}")
+    # elog(f"color: {color}")
 
     return int(color)
     # if color in curses_colors: return curses_colors[color]

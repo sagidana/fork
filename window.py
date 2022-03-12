@@ -81,8 +81,10 @@ class Window():
     def style_to_attr(self, style):
         pair = None
 
-        fg = style['fg'] if 'fg' in style else -1
-        bg = style['bg'] if 'bg' in style else -1
+        # fg = style['fg'] if 'fg' in style else -1
+        # bg = style['bg'] if 'bg' in style else -1
+        fg = style['fg']
+        bg = style['bg']
 
         pair = self.color_pair_to_curses(fg, bg)
         attr = curses.color_pair(pair)
@@ -108,15 +110,6 @@ class Window():
                                         line[buffer_x],
                                         attr)
                 except: break
-
-        # for y in range(self.height):
-            # try:
-                # line = self.buffer.lines[first_line + y]
-                # self.stdscr.addstr( y, 
-                                    # self.position[0] + 0, 
-                                    # line[:self.width])
-            # except: break
-
         self.draw_cursor()
 
     def _scroll_up(self):

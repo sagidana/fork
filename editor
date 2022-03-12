@@ -85,6 +85,7 @@ class Context():
             return False
         self.maps[NORMAL][4] = ctrl_d_map
         def ctrl_l_map(self):
+            self.get_curr_buffer().syntax.refresh()
             self.get_curr_window().draw()
             return False
         self.maps[NORMAL][12] = ctrl_l_map
