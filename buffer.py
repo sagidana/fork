@@ -3,6 +3,8 @@ from log import elog
 from events import *
 from hooks import *
 
+from syntax import Syntax
+
 from difflib import Differ
 import json
 import re
@@ -19,7 +21,7 @@ class Buffer():
 
         self.lines = []
         self.file_path = file_path
-
+        self.syntax = Syntax(file_path)
 
         if not file_path: 
             Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
