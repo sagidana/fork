@@ -46,11 +46,11 @@ def set_style(style):
         sys.stdout.write(FOREGROUND_256_COLOR.format(color))
 
 def walk(node, cb, level=0, nth_child=0):
-    if cb(node, level, nth_child): return False
+    if cb(node, level, nth_child): return True
     curr_nth_child = 0
     for child in node.children:
         if walk(child, cb, level + 1, curr_nth_child): 
-            return False
+            return True
         curr_nth_child += 1
     return False
     
@@ -97,6 +97,8 @@ def traverse_tree(tree, cb):
     # # color_s += '\x1b[4m'
     # # undo_s += '\x1b[24m'
 
+_style = None
+
 class Syntax():
     def __init__(self, file_path, file_lines):
         self.file_path = file_path
@@ -106,8 +108,8 @@ class Syntax():
         self.colors_system = "true_colors"
 
         # TODO: take settings from config.
-        # theme_path = "themes/monokai-color-theme.json"
-        theme_path = "themes/darcula.json"
+        theme_path = "themes/monokai-color-theme.json"
+        # theme_path = "themes/darcula.json"
         grammar_path = "grammars/python.json"
 
         with open(grammar_path, 'r') as f: self.grammar = json.loads(f.read())
@@ -197,7 +199,6 @@ class Syntax():
 
     def map_styles(self, node, level, nth_child):
         scope = self.map_node_to_scope(node, self.grammar, nth_child)
-        # scope = map_node_to_scope(node, self.grammar, nth_child)
         if not scope: return
 
         style = self.get_scope_style(scope)
@@ -236,7 +237,6 @@ class Syntax():
         return x
 
     def initialize_style_map(self):
-        elog("initialize_style_map()")
         self.style_map = IntervalTree()
 
         walk(self.tree.root_node, self.map_styles)
@@ -275,37 +275,41 @@ class Syntax():
         return self.default_style
     
     def _get_style(self, x, y):
-        pos = self.get_file_pos(x, y)
+        # pos = self.get_file_pos(x, y)
 
-        style = None
+        global _style
+        _style = None
         def cb(node, level, nth_child):
+            global _style
+            if _style: return True
+
             start_point = node.start_point
-            start_pos = self.get_file_pos(  start_point[1], 
-                                            start_point[0])
-
             end_point = node.end_point
-            end_pos = self.get_file_pos(    end_point[1], 
-                                            end_point[0])
 
-            if pos > end_pos:
+            # start_pos = self.get_file_pos(  start_point[1], 
+                                            # start_point[0])
+
+            # end_pos = self.get_file_pos(    end_point[1], 
+                                            # end_point[0])
+
+            # elog(f"found: {x}, {y} -> {start_point}, {end_point}")
+            # elog(f"found: {x}, {y} -> {start_point}, {end_point}")
+            if y > end_point[0] or y < start_point[0]:
                 return False # continue to search
-            if pos <= start_pos:
+            if x >= end_point[1] or x < start_point[1]:
                 return False # continue to search
 
+            # elog(f"found: {x}, {y} -> {start_point}, {end_point}")
             scope = self.map_node_to_scope(node, self.grammar, nth_child)
             # scope = map_node_to_scope(node, self.grammar, nth_child)
             if not scope: return False
 
-            style = self.get_scope_style(scope)
-            if not style: return False
+            _style = self.get_scope_style(scope)
+            if not _style: return False
 
             return True # found - exit!
-
-        elog("before walk()")
         walk(self.tree.root_node, cb)
-        elog("after walk()")
-
-        return style
+        return _style
 
     def get_style(self, x, y):
         style = {}
@@ -315,12 +319,11 @@ class Syntax():
         if len(styles) == 0: 
             return self.default_style
         settings = styles[0]
+        settings = settings[2]
 
         # res = self._get_style(x, y)
         # if not res: return self.default_style
         # settings = res
-
-        settings = settings[2]
 
         if 'background' in settings:
             style['bg'] = self.get_color(settings['background'])
