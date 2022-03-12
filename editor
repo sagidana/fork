@@ -434,7 +434,7 @@ class Context():
     def __init__(self, stdscr):
         self.stdscr = stdscr
         curses.start_color()
-        curses.use_default_colors()
+        # curses.use_default_colors()
 
         self.height, self.width = stdscr.getmaxyx()
         signal(SIGWINCH, self.screen_resize_handler)

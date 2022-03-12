@@ -1,6 +1,8 @@
 from intervaltree import Interval, IntervalTree
 from tree_sitter import Language, Parser
 from colors import rgb2short, short2rgb
+from log import elog
+import time
 import json
 import sys
 import re
@@ -44,11 +46,13 @@ def set_style(style):
         sys.stdout.write(FOREGROUND_256_COLOR.format(color))
 
 def walk(node, cb, level=0, nth_child=0):
-    cb(node, level, nth_child)
+    if cb(node, level, nth_child): return False
     curr_nth_child = 0
     for child in node.children:
-        walk(child, cb, level + 1, curr_nth_child)
+        if walk(child, cb, level + 1, curr_nth_child): 
+            return False
         curr_nth_child += 1
+    return False
     
 def traverse_tree(tree, cb):
     cursor = tree.walk()
@@ -98,11 +102,12 @@ class Syntax():
         self.file_path = file_path
         self.file_lines = file_lines
 
-        self.colors_system = "256_colors"
-        # self.colors_system = "true_colors"
+        # self.colors_system = "256_colors"
+        self.colors_system = "true_colors"
 
         # TODO: take settings from config.
-        theme_path = "themes/monokai-color-theme.json"
+        # theme_path = "themes/monokai-color-theme.json"
+        theme_path = "themes/darcula.json"
         grammar_path = "grammars/python.json"
 
         with open(grammar_path, 'r') as f: self.grammar = json.loads(f.read())
@@ -231,14 +236,19 @@ class Syntax():
         return x
 
     def initialize_style_map(self):
+        elog("initialize_style_map()")
         self.style_map = IntervalTree()
 
         walk(self.tree.root_node, self.map_styles)
         # traverse_tree(self.tree, self.map_styles) # have some kind of bug..
 
     def refresh(self):
+        # start = time.time()
         self.initialize_tree_sitter()
+        # elog(f"initialize_tree_sitter() time: {time.time() - start}")
+        # start = time.time()
         self.initialize_style_map()
+        # elog(f"initialize_style_map() time: {time.time() - start}")
 
     def get_color(self, color):
         if self.colors_system == "true_colors":
@@ -260,15 +270,56 @@ class Syntax():
         self.default_style['fg'] = self.default_fg_color
 
         self.token_colors = self.theme['tokenColors']
+
+    def get_default_style(self):
+        return self.default_style
     
+    def _get_style(self, x, y):
+        pos = self.get_file_pos(x, y)
+
+        style = None
+        def cb(node, level, nth_child):
+            start_point = node.start_point
+            start_pos = self.get_file_pos(  start_point[1], 
+                                            start_point[0])
+
+            end_point = node.end_point
+            end_pos = self.get_file_pos(    end_point[1], 
+                                            end_point[0])
+
+            if pos > end_pos:
+                return False # continue to search
+            if pos <= start_pos:
+                return False # continue to search
+
+            scope = self.map_node_to_scope(node, self.grammar, nth_child)
+            # scope = map_node_to_scope(node, self.grammar, nth_child)
+            if not scope: return False
+
+            style = self.get_scope_style(scope)
+            if not style: return False
+
+            return True # found - exit!
+
+        elog("before walk()")
+        walk(self.tree.root_node, cb)
+        elog("after walk()")
+
+        return style
+
     def get_style(self, x, y):
         style = {}
+
         pos = self.get_file_pos(x, y)
         styles = sorted(self.style_map[pos])
         if len(styles) == 0: 
             return self.default_style
-
         settings = styles[0]
+
+        # res = self._get_style(x, y)
+        # if not res: return self.default_style
+        # settings = res
+
         settings = settings[2]
 
         if 'background' in settings:

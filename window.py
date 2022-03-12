@@ -109,7 +109,17 @@ class Window():
                                         self.position[0] + buffer_x, 
                                         line[buffer_x],
                                         attr)
-                except: break
+                except Exception as e: elog(f"Exception: {e}")
+
+            style = self.buffer.syntax.get_default_style()
+            attr = self.style_to_attr(style)
+            for x in range(self.width - x_range):
+                try:
+                    self.stdscr.addstr( y, 
+                                        self.position[0] + x_range + x,
+                                        ' ',
+                                        attr)
+                except Exception as e: elog(f"Exception: {e}")
         self.draw_cursor()
 
     def _scroll_up(self):
