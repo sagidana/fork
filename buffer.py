@@ -21,7 +21,6 @@ class Buffer():
 
         self.lines = []
         self.file_path = file_path
-        self.syntax = Syntax(file_path)
 
         if not file_path: 
             Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
@@ -31,6 +30,9 @@ class Buffer():
             with open(file_path, 'r') as f:
                 self.lines = f.readlines()
         except:pass
+
+        self.syntax = Syntax(file_path, self.lines)
+
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
     def destroy(self):
@@ -313,6 +315,8 @@ class Buffer():
 
         self.shadow = None
         self.change_start_position = None
+        
+        self.syntax.on_change(change_wrapper)
     
     def _find_relevant_object(self, pattern, x, y):
         curr_index = len(''.join(self.lines[:y])) + x

@@ -1,9 +1,11 @@
 from log import elog
 
+from colors import get_curses_color, get_curses_color_pair
 from buffer import *
 from hooks import *
 
 import timeout_decorator
+import curses
 import time
 import re
 
@@ -73,19 +75,47 @@ class Window():
                             line[:self.width])
         self.draw_cursor()
 
+    def color_pair_to_curses(self, fg, bg):
+        return get_curses_color_pair(fg, bg)
+
+    def style_to_attr(self, style):
+        pair = None
+
+        fg = style['fg'] if 'fg' in style else -1
+        bg = style['bg'] if 'bg' in style else -1
+
+        pair = self.color_pair_to_curses(fg, bg)
+        attr = curses.color_pair(pair)
+        return attr
+
     def draw(self):
         self.stdscr.clear()
         index = 0
         before = self.window_cursor[1]
         first_line = self.buffer_cursor[1] - before
 
-        for i in range(self.height):
-            try:
-                line = self.buffer.lines[first_line + i]
-                self.stdscr.addstr( i, 
-                                    self.position[0] + 0, 
-                                    line[:self.width])
-            except: break
+        for y in range(self.height):
+            buffer_y = first_line + y
+
+            line = self.buffer.lines[first_line + y]
+            x_range = min(self.width, len(line) - 1)
+            for buffer_x in range(x_range):
+                style = self.buffer.syntax.get_style(buffer_x, buffer_y)
+                attr = self.style_to_attr(style)
+                try:
+                    self.stdscr.addstr( y, 
+                                        self.position[0] + buffer_x, 
+                                        line[buffer_x],
+                                        attr)
+                except: break
+
+        # for y in range(self.height):
+            # try:
+                # line = self.buffer.lines[first_line + y]
+                # self.stdscr.addstr( y, 
+                                    # self.position[0] + 0, 
+                                    # line[:self.width])
+            # except: break
 
         self.draw_cursor()
 
