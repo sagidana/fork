@@ -12,7 +12,7 @@ ON_CURSOR_MOVE_AFTER = "on_cursor_move_after"
 ON_DRAW_TAB = "on_draw_tab"
 
 # Per Buffer
-
+ON_BUFFER_CHANGE = "on_buffer_change"
 
 # Per Window
 ON_WINDOW_MOVE_UP_BEFORE = "on_window_move_up_before"

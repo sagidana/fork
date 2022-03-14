@@ -2,6 +2,7 @@ from intervaltree import Interval, IntervalTree
 from tree_sitter import Language, Parser
 from colors import rgb2short, short2rgb
 from log import elog
+from events import *
 import time
 import json
 import sys
@@ -100,7 +101,26 @@ def traverse_tree(tree, cb):
 _style = None
 
 class Syntax():
-    def __init__(self, file_path, file_lines):
+    def on_buffer_change_callback(self, args):
+        elog(f"on_buffer_change_callback({args})")
+
+        # self.tree.edit(
+                # start_byte=5,
+                # old_end_byte=5,
+                # new_end_byte=5 + 2,
+                # start_point=(0, 5),
+                # old_end_point=(0, 5),
+                # new_end_point=(0, 5 + 2),
+                # )
+        # new_tree = self.parser.parse(new_source, self.tree)
+        # for changed_range in self.tree.get_changed_ranges(new_tree):
+            # print('Changed range:')
+            # print(f'  Start point {changed_range.start_point}')
+            # print(f'  Start byte {changed_range.start_byte}')
+            # print(f'  End point {changed_range.end_point}')
+            # print(f'  End byte {changed_range.end_byte}')
+
+    def __init__(self, buffer, file_path, file_lines):
         self.file_path = file_path
         self.file_lines = file_lines
 
@@ -117,6 +137,10 @@ class Syntax():
         self.load_theme(theme_path)
 
         self.language = "python" # TODO auto detection
+
+        handlers = {}
+        handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
+        buffer.register_events(handlers)
 
         self.initialize_tree_sitter()
 
@@ -340,9 +364,26 @@ class Syntax():
         return style
 
     def on_change(self, change):
+        self.tree.edit(
+                start_byte=5,
+                old_end_byte=5,
+                new_end_byte=5 + 2,
+                start_point=(0, 5),
+                old_end_point=(0, 5),
+                new_end_point=(0, 5 + 2),
+                )
+        new_tree = self.parser.parse(new_source, self.tree)
+        for changed_range in self.tree.get_changed_ranges(new_tree):
+            print('Changed range:')
+            print(f'  Start point {changed_range.start_point}')
+            print(f'  Start byte {changed_range.start_byte}')
+            print(f'  End point {changed_range.end_point}')
+            print(f'  End byte {changed_range.end_byte}')
+
         # TODO incremental changes.
-        self.initialize_tree_sitter()
-        self.initialize_style_map()
+
+        # self.initialize_tree_sitter()
+        # self.initialize_style_map()
 
     def draw(self):
         # draw

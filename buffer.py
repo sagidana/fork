@@ -10,6 +10,31 @@ import json
 import re
 
 class Buffer():
+    def raise_event(func):
+        def event_wrapper(self):
+            # self = args[0]
+            func_name = func.__name__
+            event = f"on_buffer_{func_name}_before"
+            self._raise_event(event, self)
+            # if event in self.events:
+                # for cb in self.events[event]: cb(self)
+            func(self)
+            event = f"on_buffer_{func_name}_after"
+            self._raise_event(event, self)
+            # if event in self.events:
+                # for cb in self.events[event]: cb(self)
+        return event_wrapper
+
+    def _raise_event(self, event, args):
+            if event in self.events:
+                for cb in self.events[event]: cb(args)
+
+    def register_events(self, handlers):
+        for event in handlers:
+            if event not in self.events:
+                self.events[event] = []
+            self.events[event].append(handlers[event])
+
     def __init__(self, file_path=None):
         Hooks.execute(ON_BUFFER_CREATE_BEFORE, self)
 
@@ -19,10 +44,12 @@ class Buffer():
         self.undo_stack = []
         self.redo_stack = []
 
+        self.events = {}
         self.lines = []
         self.file_path = file_path
 
         if not file_path: 
+            raise Exception('Not implemented!')
             Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
             return
         
@@ -31,7 +58,7 @@ class Buffer():
                 self.lines = f.readlines()
         except:pass
 
-        self.syntax = Syntax(file_path, self.lines)
+        self.syntax = Syntax(self, file_path, self.lines)
 
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
@@ -88,6 +115,16 @@ class Buffer():
             self._split_line(x, y)
         else:
             self._insert_char_to_line(x, y, char)
+
+        change = {
+                'start_byte': None,
+                'old_end_byte': None,
+                'new_end_byte': None,
+                'start_point': None,
+                'old_end_point': None,
+                'new_end_point': None,
+                }
+        self._raise_event(ON_BUFFER_CHANGE, change)
 
     def find_next_word(self, x, y):
         word_regex = r"\w+"
@@ -315,8 +352,6 @@ class Buffer():
 
         self.shadow = None
         self.change_start_position = None
-        
-        self.syntax.on_change(change_wrapper)
     
     def _find_relevant_object(self, pattern, x, y):
         curr_index = len(''.join(self.lines[:y])) + x
