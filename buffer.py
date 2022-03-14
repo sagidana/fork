@@ -305,9 +305,9 @@ class Buffer():
             
     def change_end(self, x, y):
         change = self._analyze_change()
+        change_wrapper = {}
 
         if change: 
-            change_wrapper = {}
             change_wrapper['change'] = change
             change_wrapper['start_position'] = self.change_start_position
             change_wrapper['end_position'] = (x,y)

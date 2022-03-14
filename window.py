@@ -61,8 +61,8 @@ class Window():
         cursor[0] = self.position[0] + self.window_cursor[0]
         cursor[1] = self.position[1] + self.window_cursor[1]
         
-        elog(f"window: ({self.window_cursor[0]}, {self.window_cursor[1]})")
-        elog(f"buffer: ({self.buffer_cursor[0]}, {self.buffer_cursor[1]})")
+        # elog(f"window: ({self.window_cursor[0]}, {self.window_cursor[1]})")
+        # elog(f"buffer: ({self.buffer_cursor[0]}, {self.buffer_cursor[1]})")
 
         self.stdscr.move(cursor[1], cursor[0])
 
@@ -95,12 +95,17 @@ class Window():
         index = 0
         before = self.window_cursor[1]
         first_line = self.buffer_cursor[1] - before
+        buffer_height = len(self.buffer.lines) - 1
 
         for y in range(self.height):
             buffer_y = first_line + y
 
-            line = self.buffer.lines[first_line + y]
-            x_range = min(self.width, len(line) - 1)
+            if buffer_y > buffer_height: 
+                line = ""
+            else:
+                line = self.buffer.lines[first_line + y]
+
+            x_range = min(self.width, max(0, len(line) - 1))
             for buffer_x in range(x_range):
                 style = self.buffer.syntax.get_style(buffer_x, buffer_y)
                 attr = self.style_to_attr(style)
@@ -109,7 +114,7 @@ class Window():
                                         self.position[0] + buffer_x, 
                                         line[buffer_x],
                                         attr)
-                except Exception as e: elog(f"Exception: {e}")
+                except Exception as e: elog(f"Exception: 1 {e}")
 
             style = self.buffer.syntax.get_default_style()
             attr = self.style_to_attr(style)
@@ -119,7 +124,7 @@ class Window():
                                         self.position[0] + x_range + x,
                                         ' ',
                                         attr)
-                except Exception as e: elog(f"Exception: {e}")
+                except Exception as e: elog(f"Exception: {x} {x_range} {e}")
         self.draw_cursor()
 
     def _scroll_up(self):
@@ -441,7 +446,7 @@ class Window():
 
         self.buffer.remove_char(    x,
                                     self.buffer_cursor[1])
-        self.draw_line()
+        self.draw()
 
     def remove_char(self): 
         if self.buffer_cursor[0] == 0:
@@ -460,7 +465,7 @@ class Window():
             self.buffer.remove_char(    self.buffer_cursor[0],
                                         self.buffer_cursor[1])
             self.move_left()
-            self.draw_line()
+            self.draw()
 
     def insert_char(self, char):
         self.buffer.insert_char(    self.buffer_cursor[0],
@@ -472,7 +477,7 @@ class Window():
             self.draw()
         else:
             self.move_right()
-            self.draw_line()
+            self.draw()
 
     def insert_line_before(self, line):
         self.buffer.insert_line(self.buffer_cursor[1],
