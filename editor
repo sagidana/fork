@@ -6,9 +6,11 @@ import timeout_decorator
 import argparse
 import curses
 import time
+import json
 import re
 import os
 
+from settings import g_settings
 from buffer import Buffer
 from window import Window
 from log import elog
@@ -27,7 +29,7 @@ VISUAL_BLOCK = 'visual_block'
 REPLACE = 'replace'
 MAP_TIMEOOUT = 2 # in seconds
 
-class Context():
+class Editor():
     def on_buffer_destroy_after_callback(self, buf): 
         self.buffers.remove(buf)
 
@@ -55,6 +57,10 @@ class Context():
     def get_inner_key(self):
         try: return self.get_key_timeout()
         except: return None
+
+    def initialize_theme(self):
+        with open(self.config['theme_path'], 'r') as f: 
+            self.theme = json.loads(f.read())
 
     def _initialize_legends_maps(self, mode):
         # Legends
@@ -605,16 +611,16 @@ class Context():
 
 
 def _main(stdscr):
-    context = Context(stdscr)
+    editor = Editor(stdscr)
 
     stdscr.clear()
 
-    context.bootstrap()
+    editor.bootstrap()
     stdscr.refresh()
 
     k = 0
     while True:
-        to_exit = context.on_key(k)
+        to_exit = editor.on_key(k)
         if to_exit: break
 
         stdscr.refresh() # refresh the screen

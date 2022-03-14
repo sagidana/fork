@@ -3,6 +3,7 @@ from log import elog
 from events import *
 from hooks import *
 
+from treesitter import TreeSitter
 from syntax import Syntax
 
 from difflib import Differ
@@ -10,6 +11,10 @@ import json
 import re
 
 class Buffer():
+    def on_buffer_change_callback(self, args):
+        # self.treesitter.tree_edit() TODO
+        pass
+
     def raise_event(func):
         def event_wrapper(self):
             # self = args[0]
@@ -59,6 +64,13 @@ class Buffer():
         except:pass
 
         self.syntax = Syntax(self, file_path, self.lines)
+
+        with open(file_path, "rb") as f: file_bytes = f.read()
+        self.treesitter = TreeSitter(file_bytes)
+
+        handlers = {}
+        handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
+        self.register_events(handlers)
 
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 

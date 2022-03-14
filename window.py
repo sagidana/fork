@@ -1,8 +1,10 @@
 from log import elog
 
-from colors import get_curses_color, get_curses_color_pair
+from colors import get_curses_color_pair
+from settings import g_settings
 from buffer import *
 from hooks import *
+from highlight import get_highlights
 
 import timeout_decorator
 import curses
@@ -79,18 +81,77 @@ class Window():
         return get_curses_color_pair(fg, bg)
 
     def style_to_attr(self, style):
-        pair = None
-
-        # fg = style['fg'] if 'fg' in style else -1
-        # bg = style['bg'] if 'bg' in style else -1
-        fg = style['fg']
-        bg = style['bg']
+        fg = style['foreground'] if 'foreground' in style else g_settings['theme']['colors']['editor.foreground']
+        bg = style['background'] if 'background' in style else g_settings['theme']['colors']['editor.background']
 
         pair = self.color_pair_to_curses(fg, bg)
         attr = curses.color_pair(pair)
         return attr
 
+    def highlight(self):
+        buffer_height = len(self.buffer.lines) - 1
+
+        start_y = self.buffer_cursor[1] - self.window_cursor[1]
+        end_y = min(start_y + self.height, buffer_height)
+
+        for node, style in get_highlights(self.buffer.treesitter, g_settings['theme']):
+            if node.start_point[0] >= end_y: return
+            if node.end_point[0] < start_y: continue
+
+            attr = self.style_to_attr(style)
+
+            y = node.start_point[0]
+            x = node.start_point[1]
+            length = node.end_point[1] - x
+
+            self.stdscr.chgat(  y - start_y, 
+                                x, 
+                                length, attr)
+
     def draw(self):
+        # - Draw with defaut colors of theme
+        self.stdscr.clear()
+
+        before = self.window_cursor[1]
+        first_line = self.buffer_cursor[1] - before
+        buffer_height = len(self.buffer.lines) - 1
+
+        style = {}
+        style['background'] = g_settings['theme']['colors']['editor.background']
+        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+        attr = self.style_to_attr(style)
+
+        for y in range(self.height):
+            buffer_y = first_line + y
+
+            if buffer_y > buffer_height: 
+                line = ""
+            else:
+                line = self.buffer.lines[first_line + y]
+
+            x_range = min(self.width, max(0, len(line) - 1))
+            for buffer_x in range(x_range):
+                try:
+                    self.stdscr.addstr( y, 
+                                        self.position[0] + buffer_x, 
+                                        line[buffer_x],
+                                        attr)
+                except Exception as e: elog(f"Exception: 1 {e}")
+
+            for x in range(self.width - x_range):
+                try:
+                    self.stdscr.addstr( y, 
+                                        self.position[0] + x_range + x,
+                                        ' ',
+                                        attr)
+                except Exception as e: elog(f"Exception: {x} {x_range} {e}")
+
+        # - on top of thaat draw highlights
+        self.highlight()
+
+        self.draw_cursor()
+    
+    def _draw(self):
         self.stdscr.clear()
         index = 0
         before = self.window_cursor[1]
