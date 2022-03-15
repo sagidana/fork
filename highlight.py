@@ -1,10 +1,10 @@
 #!/usr/bin/python3
-
 import json
 
 from treesitter import TreeSitter
+ 
 
-def get_scope_style(theme, scope):
+def _get_scope_style(theme, scope):
     token_colors = theme['tokenColors']
     for token in token_colors:
         if "settings" not in token: continue
@@ -26,6 +26,15 @@ def get_scope_style(theme, scope):
                 for i in range(len(target_scopes) - 1, 0, -1):
                     curr = '.'.join(target_scopes[:i])
                     if curr == s: return token['settings']
+
+def get_scope_style(theme, scope):
+    if scope in theme: return theme[scope]
+    target_scopes = scope.split('.')
+    for i in range(len(target_scopes) - 1, 0, -1):
+        curr = '.'.join(target_scopes[:i])
+        if curr in theme: return theme[curr]
+
+    return None
 
 def get_highlights(treesitter, theme):
     for c in treesitter.get_captures():

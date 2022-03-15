@@ -66,6 +66,7 @@ class TreeSitter():
         self.parser.set_language(PY_LANGUAGE)
 
         self.tree = self.parser.parse(file_bytes)
+        self.captures = None
 
     def tree_edit(self, edit, new_file_bytes):
         pass
@@ -86,7 +87,10 @@ class TreeSitter():
             # print(f'  End byte {changed_range.end_byte}')
 
     def get_captures(self):
-        return self.query.captures(self.tree.root_node)
+        if not self.captures:
+            self.captures = list(self.query.captures(self.tree.root_node))
+            elog(f"{len(self.captures)}")
+        return self.captures
 
 if __name__ == '__main__':
     with open("editor", "rb") as f: file_bytes = f.read()

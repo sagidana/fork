@@ -94,7 +94,9 @@ class Window():
         start_y = self.buffer_cursor[1] - self.window_cursor[1]
         end_y = min(start_y + self.height, buffer_height)
 
-        for node, style in get_highlights(self.buffer.treesitter, g_settings['theme']):
+        for node, style in get_highlights(  self.buffer.treesitter, 
+                                            # g_settings['theme']):
+                                            g_settings['theme_opt']):
             if node.start_point[0] >= end_y: return
             if node.end_point[0] < start_y: continue
 
