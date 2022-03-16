@@ -67,6 +67,7 @@ class Window():
         # elog(f"buffer: ({self.buffer_cursor[0]}, {self.buffer_cursor[1]})")
 
         self.stdscr.move(cursor[1], cursor[0])
+        self.visualize()
 
     def draw_line(self):
         y = self.window_cursor[1]
@@ -110,6 +111,23 @@ class Window():
                                 x, 
                                 length, attr)
 
+    def _visualize(self): pass
+    def _visualize_block(self): pass
+    def _visualize_line(self): pass
+
+    def visualize(self):
+        scope = self.buffer.visual_get_scope()
+        if not scope: return
+
+        elog(f"scope: {scope}")
+
+        if self.buffer.visual_mode == 'visual':
+            self._visualize()
+        if self.buffer.visual_mode == 'visual_line':
+            self._visualize_line()
+        if self.buffer.visual_mode == 'visual_block':
+            self._visualize_block()
+
     def draw(self):
         # - Draw with defaut colors of theme
         self.stdscr.clear()
@@ -150,7 +168,6 @@ class Window():
 
         # - on top of thaat draw highlights
         self.highlight()
-
         self.draw_cursor()
     
     def _draw(self):
@@ -260,6 +277,9 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
+
+        self.buffer.visual_set_current( self.buffer_cursor[0],
+                                        self.buffer_cursor[1])
         return True
 
     def _move_down(self):
@@ -284,6 +304,8 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
+        self.buffer.visual_set_current( self.buffer_cursor[0],
+                                        self.buffer_cursor[1])
 
     def _move_right(self):
         if self.buffer_cursor[0] == len(self.buffer.lines[self.buffer_cursor[1]]) - 1:
@@ -296,6 +318,9 @@ class Window():
         else:
             self.window_cursor[0] += 1
 
+        self.buffer.visual_set_current( self.buffer_cursor[0],
+                                        self.buffer_cursor[1])
+
     def _move_left(self):
         if self.buffer_cursor[0] == 0: return
 
@@ -306,6 +331,9 @@ class Window():
         else:
             self.window_cursor[0] -= 1
             self.remember = 0
+
+        self.buffer.visual_set_current( self.buffer_cursor[0],
+                                        self.buffer_cursor[1])
 
     def _align_center(self):
         center = int(self.height / 2)
@@ -421,7 +449,6 @@ class Window():
         x, y = ret
         self.move_cursor_to_buf_location(x, y)
 
-
     def move_WORD_forward(self): 
         ret = self.buffer.find_next_WORD(   self.buffer_cursor[0],
                                             self.buffer_cursor[1])
@@ -449,7 +476,6 @@ class Window():
         if not ret: return
         x, y = ret
         self.move_cursor_to_buf_location(x, y)
-
 
     @timeout_decorator.timeout(2)
     def get_key(self):
@@ -614,6 +640,13 @@ class Window():
         self.move_cursor_to_buf_location(   position[0],
                                             position[1])
         self.draw()
+
+    def visual_begin(self, mode):
+        self.buffer.visual_begin(   mode, 
+                                    self.buffer_cursor[0],
+                                    self.buffer_cursor[1])
+    def visual_end(self):
+        self.buffer.visual_end()
 
     @raise_event
     def change_begin(self):

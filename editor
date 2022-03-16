@@ -51,6 +51,10 @@ class Editor():
             # in vim the transition from insert mode to normal mode causes the
             # cursor to move one index to the left. should I mimic this?
             self.get_curr_window().change_begin()
+        if self.mode == NORMAL and target == VISUAL:
+            self.get_curr_window().visual_begin(VISUAL)
+        if self.mode == VISUAL and target == NORMAL:
+            self.get_curr_window().visual_end()
 
         self.mode = target
 
@@ -349,7 +353,7 @@ class Editor():
             elog(f"EDITOR: change {scope}")
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.get_curr_window().change_end()
-            self,change_mode(INSERT)
+            self.change_mode(INSERT)
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
         def delete_object_map(scope): 
@@ -708,14 +712,12 @@ class Editor():
                 if key not in curr: break
 
             if key in curr: curr[key](self)
-
-        if  self.mode == NORMAL and \
+        elif self.mode == INSERT:
+            return self.on_insert(key)
+        elif self.mode == NORMAL and \
             ord('1') <= key <= ord('9'):
             elog(f"EDITOR: key: {chr(key)}")
             return False
-            
-        if self.mode == INSERT:
-            return self.on_insert(key)
 
         return False
 

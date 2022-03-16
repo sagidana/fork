@@ -49,6 +49,10 @@ class Buffer():
         self.undo_stack = []
         self.redo_stack = []
 
+        self.visual_mode = None
+        self.visual_start_point = None
+        self.visual_current_point = None
+
         self.events = {}
         self.lines = []
         self.file_path = file_path
@@ -112,6 +116,46 @@ class Buffer():
 
         with open(self.file_path, 'w+') as f:
             f.writelines(self.lines)
+
+    def visual_begin(self, mode, x, y):
+        self.visual_mode = mode
+        self.visual_start_point = [x, y]
+        self.visual_current_point = [x, y]
+
+    def visual_set_current(self, x, y):
+        if not self.visual_mode: return
+
+        self.visual_current_point[0] = x
+        self.visual_current_point[1] = y
+
+    def visual_get_scope(self):
+        if not self.visual_mode: return None
+
+        if self.visual_start_point[1] < self.visual_current_point[1]:
+            return  self.visual_start_point[0],     \
+                    self.visual_start_point[1],     \
+                    self.visual_current_point[0],   \
+                    self.visual_current_point[1]    
+        if self.visual_current_point[1] < self.visual_start_point[1]:
+            return  self.visual_current_point[0],   \
+                    self.visual_current_point[1],   \
+                    self.visual_start_point[0],     \
+                    self.visual_start_point[1]
+
+        if self.visual_start_point[0] < self.visual_current_point[0]:
+            return  self.visual_start_point[0],     \
+                    self.visual_start_point[1],     \
+                    self.visual_current_point[0],   \
+                    self.visual_current_point[1]
+        return  self.visual_current_point[0],   \
+                self.visual_current_point[1],   \
+                self.visual_start_point[0],     \
+                self.visual_start_point[1]
+
+    def visual_end(self):
+        self.visual_mode = None
+        self.visual_start_point = None
+        self.visual_current_point = None
 
     def _insert_char_to_line(self, x, y, char):
         try:
@@ -434,49 +478,64 @@ class Buffer():
         return (prev, next)
 
     # CORE: movement
-    def find_next_word(self, x, y):
+    def find_next_word(self, x, y, skip_current=True):
+        word_regex = '[a-zA-Z0-9_-]'
+        single_regex = '[\)\(\}\{\]\[\,\.\/\'\;]'
+
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
         # skip current word
-        found = pos
-        for c in stream[found:]:
-            if not re.match('[a-zA-Z0-9_]', c):
-                break
-            found += 1
+        if skip_current:
+            found = pos + 1
+            if re.match(single_regex, stream[pos]): pass
+            else:
+                for c in stream[found:]:
+                    if not re.match(word_regex, c):
+                        break
+                    found += 1
+        else: found = pos
 
         if found >= len(stream) - 1: return None
         for c in stream[found:]:
-            if re.match('[a-zA-Z0-9_]', c):
+            if re.match(word_regex, c):
                 return self.get_file_x_y(found)
+            elif re.match(single_regex, c):
+                return self.get_file_x_y(found)
+
             found += 1
         return None
 
     # CORE: movement
     def find_prev_word(self, x, y, skip_current=True):
+        word_regex = '[a-zA-Z0-9_-]'
+        symbols_regex = '[\)\(\}\{\]\[\,\.\/\'\;]'
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
         # skip current word
         found = pos - 1 if skip_current else pos
         for c in stream[:found+1][::-1]:
-            if re.match('[a-zA-Z0-9_]', c):
+            if re.match(word_regex, c):
                 break
+            elif re.match(symbols_regex, c):
+                return self.get_file_x_y(found)
+
             found -= 1
         if found <= 0: return None
         for c in stream[:found][::-1]:
-            if not re.match('[a-zA-Z0-9_]', c):
+            if not re.match(word_regex, c):
                 return self.get_file_x_y(found)
             found -= 1
         return None
 
     # CORE: movement
-    def find_next_WORD(self, x, y):
+    def find_next_WORD(self, x, y, skip_current=True):
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
         # skip current word
-        found = pos
+        found = pos + 1 if skip_current else pos
         for c in stream[found:]:
             if re.match('\s', c): break
             found += 1
@@ -507,18 +566,19 @@ class Buffer():
 
     # CORE: movement
     def find_word_end(self, x, y, skip_current=True): 
+        word_regex = '[a-zA-Z0-9_-]'
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
         # skip current end
         found = pos + 1 if skip_current else pos
         for c in stream[found:]:
-            if re.match('[a-zA-Z0-9_]', c): break
+            if re.match(word_regex, c): break
             found += 1
 
         if found >= len(stream) - 1: return None
         for c in stream[found:]:
-            if not re.match('[a-zA-Z0-9_]', c):
+            if not re.match(word_regex, c):
                 return self.get_file_x_y(found - 1)
             found += 1
         return None
