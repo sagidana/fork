@@ -1,36 +1,33 @@
 ; Identifier naming conventions
 
-((identifier) @constructor
- (#match? @constructor "^[A-Z]"))
+; ((identifier) @constructor
+ ; (#match? @constructor "^[A-Z]"))
 
-((identifier) @constant
- (#match? @constant "^[A-Z][A-Z_]*$"))
+; ((identifier) @constant
+ ; (#match? @constant "^[A-Z][A-Z_]*$"))
 
-; Builtin functions
+; ; Builtin functions
 
-((call
-  function: (identifier) @function.builtin)
- (#match?
-   @function.builtin
-   "^(abs|all|any|ascii|bin|bool|breakpoint|bytearray|bytes|callable|chr|classmethod|compile|complex|delattr|dict|dir|divmod|enumerate|eval|exec|filter|float|format|frozenset|getattr|globals|hasattr|hash|help|hex|id|input|int|isinstance|issubclass|iter|len|list|locals|map|max|memoryview|min|next|object|oct|open|ord|pow|print|property|range|repr|reversed|round|set|setattr|slice|sorted|staticmethod|str|sum|super|tuple|type|vars|zip|__import__)$"))
+; ((call
+  ; function: (identifier) @function.builtin)
+ ; (#match?
+   ; @function.builtin
+   ; "^(abs|all|any|ascii|bin|bool|breakpoint|bytearray|bytes|callable|chr|classmethod|compile|complex|delattr|dict|dir|divmod|enumerate|eval|exec|filter|float|format|frozenset|getattr|globals|hasattr|hash|help|hex|id|input|int|isinstance|issubclass|iter|len|list|locals|map|max|memoryview|min|next|object|oct|open|ord|pow|print|property|range|repr|reversed|round|set|setattr|slice|sorted|staticmethod|str|sum|super|tuple|type|vars|zip|__import__)$"))
 
-; Function calls
 
-(decorator) @function
+(decorator) @entity.name.function
 
 (call
-  function: (attribute attribute: (identifier) @function.method))
+  function: (identifier) @entity.name.function)
+
 (call
-  function: (identifier) @function)
+  function: (attribute attribute: (identifier) @entity.name.function))
 
-; Function definitions
+(function_definition 
+  name: (identifier) @entity.name.function)
 
-(function_definition
-  name: (identifier) @function)
-
-(identifier) @variable
-(attribute attribute: (identifier) @property)
-(type (identifier) @type)
+(class_definition 
+  name: (identifier) @entity.name.class)
 
 ; Literals
 
@@ -38,12 +35,12 @@
   (none)
   (true)
   (false)
-] @constant.builtin
+] @constant.language
 
 [
   (integer)
   (float)
-] @number
+] @constant.numeric
 
 (comment) @comment
 (string) @string
