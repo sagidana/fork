@@ -51,9 +51,13 @@ class Editor():
             # in vim the transition from insert mode to normal mode causes the
             # cursor to move one index to the left. should I mimic this?
             self.get_curr_window().change_begin()
+        if self.mode == NORMAL and target == VISUAL_LINE:
+            self.get_curr_window().visual_begin(VISUAL_LINE)
         if self.mode == NORMAL and target == VISUAL:
             self.get_curr_window().visual_begin(VISUAL)
         if self.mode == VISUAL and target == NORMAL:
+            self.get_curr_window().visual_end()
+        if self.mode == VISUAL_LINE and target == NORMAL:
             self.get_curr_window().visual_end()
 
         self.mode = target

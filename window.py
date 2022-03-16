@@ -111,15 +111,72 @@ class Window():
                                 x, 
                                 length, attr)
 
-    def _visualize(self): pass
     def _visualize_block(self): pass
-    def _visualize_line(self): pass
+    def _visualize(self): 
+        orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
+
+        buffer_height = len(self.buffer.lines) - 1
+        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+        screen_end_y = min(orig_start_y + self.height, buffer_height)
+
+        if orig_start_y > screen_end_y: return
+        if orig_end_y < screen_start_y: return
+
+        start_y = max(orig_start_y, screen_start_y)
+        if start_y == orig_start_y: start_x = orig_start_x
+        else: start_x = 0
+        
+        end_y = min(orig_end_y, screen_end_y)
+        if end_y == orig_end_y: end_x = orig_end_x
+        else: end_x = len(self.get_line(end_y)) - 1
+
+        if start_y == end_y:
+            self.stdscr.chgat(  start_y - screen_start_y, 
+                                start_x,
+                                end_x - start_x,
+                                curses.A_REVERSE)
+            return
+        
+
+        # first line
+        self.stdscr.chgat(  start_y - screen_start_y, 
+                            start_x,
+                            (len(self.get_line(start_y)) - 1) - start_x,
+                            curses.A_REVERSE)
+
+        # lines in between
+        for y in range(start_y + 1, end_y):
+            self.stdscr.chgat(  y - screen_start_y, 
+                                0, 
+                                len(self.get_line(y)) - 1, 
+                                curses.A_REVERSE)
+        # last line
+        self.stdscr.chgat(  end_y - screen_start_y, 
+                            0,
+                            end_x,
+                            curses.A_REVERSE)
+
+    def _visualize_line(self): 
+        start_x, start_y, end_x, end_y = self.buffer.visual_get_scope()
+
+        buffer_height = len(self.buffer.lines) - 1
+        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+        screen_end_y = min(start_y + self.height, buffer_height)
+
+        if start_y > screen_end_y: return
+        if end_y < screen_start_y: return
+
+        start_y = max(start_y, screen_start_y)
+        end_y = min(end_y, screen_end_y)
+
+        for y in range(start_y, end_y + 1):
+            self.stdscr.chgat(  y - screen_start_y, 
+                                0, 
+                                len(self.get_line(y)) - 1, 
+                                curses.A_REVERSE)
 
     def visualize(self):
-        scope = self.buffer.visual_get_scope()
-        if not scope: return
-
-        elog(f"scope: {scope}")
+        if not self.buffer.visual_mode: return
 
         if self.buffer.visual_mode == 'visual':
             self._visualize()
@@ -168,6 +225,7 @@ class Window():
 
         # - on top of thaat draw highlights
         self.highlight()
+        self.visualize()
         self.draw_cursor()
     
     def _draw(self):
@@ -645,8 +703,11 @@ class Window():
         self.buffer.visual_begin(   mode, 
                                     self.buffer_cursor[0],
                                     self.buffer_cursor[1])
+        self.draw()
+
     def visual_end(self):
         self.buffer.visual_end()
+        self.draw()
 
     @raise_event
     def change_begin(self):
@@ -662,18 +723,22 @@ class Window():
     def move_up(self):
         self._move_up()
         self.draw_cursor()
+        if self.buffer.visual_mode: self.draw()
 
     @raise_event
     def move_down(self):
         self._move_down()
         self.draw_cursor()
+        if self.buffer.visual_mode: self.draw()
 
     @raise_event
     def move_right(self):
         self._move_right()
         self.draw_cursor()
+        if self.buffer.visual_mode: self.draw()
 
     @raise_event
     def move_left(self):
         self._move_left()
         self.draw_cursor()
+        if self.buffer.visual_mode: self.draw()
