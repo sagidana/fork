@@ -248,7 +248,7 @@ class Buffer():
             line_len = len(self.lines[start_y]) - 1
             line = self.lines[start_y]
             if start_x - end_x < line_len:
-                line = line[:start_x] + line[end_x:]
+                line = line[:start_x] + line[end_x + 1:]
                 self.replace_line(start_y, line)
                 # self.lines[start_y] = line
             else:
@@ -258,7 +258,7 @@ class Buffer():
             start_line = start_line[:start_x]
 
             end_line = self.lines[end_y]
-            end_line = end_line[end_x:]
+            end_line = end_line[end_x + 1:]
 
             # remove lines from top to bottom
             for i in range(end_y - start_y): 
@@ -414,6 +414,14 @@ class Buffer():
                 return self.get_file_x_y(found)
             found -= 1
         return None
+
+    def find_prev_and_next(self, x, y, char):
+        prev = self.find_prev(x, y, char)
+        if not prev: return None
+        next = self.find_next(x, y, char)
+        if not next: return None
+
+        return (prev, next)
 
     # CORE: movement
     def find_next_word(self, x, y):
@@ -594,42 +602,48 @@ class Buffer():
         return start_x, start_y, end_x, end_y
 
     def arround_parentheses(self, x, y): 
-        r = r"\((.+)\)"
-        pattern = re.compile(r, re.MULTILINE)
-        # pattern = re.compile(r, re.MULTILINE|re.DOTALL)
-        # pattern = re.compile(r, re.DOTALL)
+        prev = self.find_prev(x, y, '(')
+        if not prev: return None
+        next = self.find_next(x, y, ')')
+        if not next: return None
+        return prev[0], prev[1], next[0], next[1]
 
-        return self._find_relevant_object(pattern, x, y)
     def arround_quotation(self, x, y): 
-        r = r"\".*\""
-        pattern = re.compile(r, re.MULTILINE)
+        ret = self.find_prev_and_next(x, y, '"')
+        if not ret: return None
+        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
 
-        return self._find_relevant_object(pattern, x, y)
     def arround_square_brackets(self, x, y): 
-        r = r"\[.*\]"
-        pattern = re.compile(r, re.MULTILINE)
+        prev = self.find_prev(x, y, '[')
+        if not prev: return None
+        next = self.find_next(x, y, ']')
+        if not next: return None
+        return prev[0], prev[1], next[0], next[1]
 
-        return self._find_relevant_object(pattern, x, y)
     def arround_curly_brackets(self, x, y): 
-        r = r"\{.*\}"
-        pattern = re.compile(r, re.MULTILINE)
+        prev = self.find_prev(x, y, '{')
+        if not prev: return None
+        next = self.find_next(x, y, '}')
+        if not next: return None
+        return prev[0], prev[1], next[0], next[1]
 
-        return self._find_relevant_object(pattern, x, y)
     def arround_greater_than(self, x, y): 
-        r = r"\<.*\>"
-        pattern = re.compile(r, re.MULTILINE)
+        prev = self.find_prev(x, y, '<')
+        if not prev: return None
+        next = self.find_next(x, y, '>')
+        if not next: return None
+        return prev[0], prev[1], next[0], next[1]
 
-        return self._find_relevant_object(pattern, x, y)
     def arround_apostrophe(self, x, y): 
-        r = r"\'.*\'"
-        pattern = re.compile(r, re.MULTILINE)
+        ret = self.find_prev_and_next(x, y, '\'')
+        if not ret: return None
+        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
 
-        return self._find_relevant_object(pattern, x, y)
     def arround_backtick(self, x, y): 
-        r = r"\`.*\`"
-        pattern = re.compile(r, re.MULTILINE)
+        ret = self.find_prev_and_next(x, y, '`')
+        if not ret: return None
+        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
 
-        return self._find_relevant_object(pattern, x, y)
     def arround_word(self, x, y): 
         r = r"\`.*\`"
         pattern = re.compile(r, re.MULTILINE)
