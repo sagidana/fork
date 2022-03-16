@@ -69,22 +69,25 @@ class TreeSitter():
         self.captures = None
 
     def tree_edit(self, edit, new_file_bytes):
-        pass
-        # self.tree.edit(
-                # start_byte=5,
-                # old_end_byte=5,
-                # new_end_byte=5 + 2,
-                # start_point=(0, 5),
-                # old_end_point=(0, 5),
-                # new_end_point=(0, 5 + 2),
-                # )
-        # new_tree = self.parser.parse(new_source, self.tree)
+        self.tree.edit(
+                start_byte=edit['start_byte'],
+                old_end_byte=edit['old_end_byte'],
+                new_end_byte=edit['new_end_byte'],
+                start_point=edit['start_point'],
+                old_end_point=edit['old_end_point'],
+                new_end_point=edit['new_end_point']
+                )
+        new_tree = self.parser.parse(new_file_bytes, self.tree)
+
         # for changed_range in self.tree.get_changed_ranges(new_tree):
             # print('Changed range:')
             # print(f'  Start point {changed_range.start_point}')
             # print(f'  Start byte {changed_range.start_byte}')
             # print(f'  End point {changed_range.end_point}')
             # print(f'  End byte {changed_range.end_byte}')
+
+        self.captures = None # reset cache.
+        self.tree = new_tree
 
     def get_captures(self):
         if not self.captures:

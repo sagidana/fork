@@ -11,8 +11,8 @@ import json
 import re
 
 class Buffer():
-    def on_buffer_change_callback(self, args):
-        # self.treesitter.tree_edit() TODO
+    def on_buffer_change_callback(self, change):
+        self.treesitter.tree_edit(change, self.get_file_bytes())
         pass
 
     def raise_event(func):
@@ -74,6 +74,14 @@ class Buffer():
 
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
+    def get_file_bytes(self):
+        file_bytes = ''.join(self.lines).encode()
+        return file_bytes
+
+    def get_file_pos(self, x, y):
+        for line in self.lines[:y]: x += len(line)
+        return x
+
     def destroy(self):
         Hooks.execute(ON_BUFFER_DESTROY_BEFORE, self)
         Hooks.execute(ON_BUFFER_DESTROY_AFTER, self)
@@ -114,28 +122,58 @@ class Buffer():
         self.lines[y] = joined
 
     def remove_char(self, x, y):
+        start_byte = self.get_file_pos(x, y)
         if x == 0: 
             if y == 0: return 
+            new_x = len(self.lines[y - 1]) - 1
             self._join_line(y - 1)
+            change = {
+                    'start_byte': start_byte,
+                    'old_end_byte': start_byte,
+                    'new_end_byte': start_byte - 1,
+                    'start_point': (y, x),
+                    'old_end_point': (y, x),
+                    'new_end_point': (y - 1, new_x),
+                    }
         else:
             line = self.lines[y]
             line = line[:x-1] + line[x:]
             self.lines[y] = line
 
+            change = {
+                    'start_byte': start_byte,
+                    'old_end_byte': start_byte,
+                    'new_end_byte': start_byte - 1,
+                    'start_point': (y, x),
+                    'old_end_point': (y, x),
+                    'new_end_point': (y, x - 1),
+                    }
+
+        self._raise_event(ON_BUFFER_CHANGE, change)
+
     def insert_char(self, x, y, char):
+        start_byte = self.get_file_pos(x, y)
         if char == '\n':
             self._split_line(x, y)
+            change = {
+                    'start_byte': start_byte,
+                    'old_end_byte': start_byte,
+                    'new_end_byte': start_byte + 1,
+                    'start_point': (y, x),
+                    'old_end_point': (y, x),
+                    'new_end_point': (y + 1, 0),
+                    }
         else:
             self._insert_char_to_line(x, y, char)
+            change = {
+                    'start_byte': start_byte,
+                    'old_end_byte': start_byte,
+                    'new_end_byte': start_byte + 1,
+                    'start_point': (y, x),
+                    'old_end_point': (y, x),
+                    'new_end_point': (y, x + 1),
+                    }
 
-        change = {
-                'start_byte': None,
-                'old_end_byte': None,
-                'new_end_byte': None,
-                'start_point': None,
-                'old_end_point': None,
-                'new_end_point': None,
-                }
         self._raise_event(ON_BUFFER_CHANGE, change)
 
     def find_next_word(self, x, y):
@@ -201,13 +239,44 @@ class Buffer():
         return None
 
     def replace_line(self, y, new_line):
-        self.lines[y] = new_line
+        self.remove_line(y)
+        self.insert_line(y, new_line)
 
     def insert_line(self, y, new_line):
+        change = {}
+        start_byte = self.get_file_pos(0, y)
+        change['start_byte'] = start_byte
+        change['old_end_byte'] = start_byte
+        change['new_end_byte'] = start_byte + len(new_line) - 1
+
+        change['start_point'] = (y, 0)
+        change['old_end_point'] = (y, 0)
+        change['new_end_point'] = (y + 1, 0)
+
         self.lines.insert(y, new_line)
 
+        self._raise_event(ON_BUFFER_CHANGE, change)
+
     def remove_line(self, y):
+        if y >= len(self.lines): return
+
+        change = {}
+        new_x = len(self.lines[y-1]) - 1
+        new_end_byte = self.get_file_pos(new_x, y - 1)
+
+        line = self.lines[y]
+        start_byte = self.get_file_pos(0, y)
+
+        change['start_byte'] = start_byte
+        change['old_end_byte'] = start_byte + len(line) - 1
+        change['new_end_byte'] = new_end_byte
+        change['start_point'] = (y, 0)
+        change['old_end_point'] = (y, len(line) - 1)
+        change['new_end_point'] = (y - 1, new_x)
+
         self.lines.pop(y)
+
+        self._raise_event(ON_BUFFER_CHANGE, change)
 
     def remove_scope(   self,
                         start_x,
@@ -241,6 +310,11 @@ class Buffer():
 
             new_line = start_line + end_line
             self.lines[start_y] = new_line
+
+        change = {}
+        # TODO
+
+        self._raise_event(ON_BUFFER_CHANGE, change)
 
     def _change(self, change, undo=True):
         lines_for_deletion = []
