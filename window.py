@@ -112,9 +112,10 @@ class Window():
                                 length, attr)
 
     def _visualize_block(self): pass
+        
     def _visualize(self): 
         orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
-
+        orig_end_x += 1
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(orig_start_y + self.height, buffer_height)
@@ -336,8 +337,8 @@ class Window():
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
 
-        self.buffer.visual_set_current( self.buffer_cursor[0],
-                                        self.buffer_cursor[1])
+        # self.buffer.visual_set_current( self.buffer_cursor[0],
+                                        # self.buffer_cursor[1])
         return True
 
     def _move_down(self):
@@ -362,8 +363,8 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
-        self.buffer.visual_set_current( self.buffer_cursor[0],
-                                        self.buffer_cursor[1])
+        # self.buffer.visual_set_current( self.buffer_cursor[0],
+                                        # self.buffer_cursor[1])
 
     def _move_right(self):
         if self.buffer_cursor[0] == len(self.buffer.lines[self.buffer_cursor[1]]) - 1:
@@ -376,8 +377,8 @@ class Window():
         else:
             self.window_cursor[0] += 1
 
-        self.buffer.visual_set_current( self.buffer_cursor[0],
-                                        self.buffer_cursor[1])
+        # self.buffer.visual_set_current( self.buffer_cursor[0],
+                                        # self.buffer_cursor[1])
 
     def _move_left(self):
         if self.buffer_cursor[0] == 0: return
@@ -390,8 +391,8 @@ class Window():
             self.window_cursor[0] -= 1
             self.remember = 0
 
-        self.buffer.visual_set_current( self.buffer_cursor[0],
-                                        self.buffer_cursor[1])
+        # self.buffer.visual_set_current( self.buffer_cursor[0],
+                                        # self.buffer_cursor[1])
 
     def _align_center(self):
         center = int(self.height / 2)
@@ -482,6 +483,14 @@ class Window():
     def move_to_x(self, x): 
         while self.buffer_cursor[0] > x: self._move_left()
         while self.buffer_cursor[0] < x: self._move_right()
+        self.draw_cursor()
+
+    def move_to_x_y(self, x, y): 
+        while self.buffer_cursor[0] > 0: self._move_left()
+        while self.buffer_cursor[1] > y: self._move_up()
+        while self.buffer_cursor[1] < y: self._move_down()
+        while self.buffer_cursor[0] < x: self._move_right()
+
         self.draw_cursor()
 
     def move_line_begin(self):
@@ -723,22 +732,18 @@ class Window():
     def move_up(self):
         self._move_up()
         self.draw_cursor()
-        if self.buffer.visual_mode: self.draw()
 
     @raise_event
     def move_down(self):
         self._move_down()
         self.draw_cursor()
-        if self.buffer.visual_mode: self.draw()
 
     @raise_event
     def move_right(self):
         self._move_right()
         self.draw_cursor()
-        if self.buffer.visual_mode: self.draw()
 
     @raise_event
     def move_left(self):
         self._move_left()
         self.draw_cursor()
-        if self.buffer.visual_mode: self.draw()
