@@ -439,14 +439,13 @@ class Window():
 
         try:
             char = chr(key)
-            line = self.get_curr_line()
-            curr_x = self.buffer_cursor[0]
-            found = line.find(char, curr_x)
-            if found == -1: return
 
-            diff = found - curr_x
-            for i in range(diff): self._move_right()
-            self.draw_cursor()
+            x = self.buffer_cursor[0]
+            y = self.buffer_cursor[1]
+            loc = self.buffer.find_next(x, y, char)
+            if not loc: return
+            x, y = loc[0], loc[1]
+            self.move_cursor_to_buf_location(x, y)
         except: pass
         
     def find_back(self): 
@@ -455,18 +454,43 @@ class Window():
 
         try:
             char = chr(key)
-            line = self.get_curr_line()
-            curr_x = self.buffer_cursor[0]
-            found = line.rfind(char, 0, curr_x)
-            if found == -1: return
-
-            diff = curr_x - found
-            for i in range(diff): self._move_left()
-            self.draw_cursor()
+            x = self.buffer_cursor[0]
+            y = self.buffer_cursor[1]
+            loc = self.buffer.find_prev(x, y, char)
+            if not loc: return
+            x, y = loc[0], loc[1]
+            self.move_cursor_to_buf_location(x, y)
         except: pass
 
-    def till(self): pass
-    def till_back(self): pass
+    def till(self): 
+        try: key = self.get_key()
+        except: key = None
+
+        try:
+            char = chr(key)
+            x = self.buffer_cursor[0]
+            y = self.buffer_cursor[1]
+            loc = self.buffer.find_next(x, y, char)
+            if not loc: return
+            x, y = loc[0], loc[1]
+            x = x - 1 if x > 0 else x
+            self.move_cursor_to_buf_location(x, y)
+        except: pass
+
+    def till_back(self): 
+        try: key = self.get_key()
+        except: key = None
+
+        try:
+            char = chr(key)
+            x = self.buffer_cursor[0]
+            y = self.buffer_cursor[1]
+            loc = self.buffer.find_prev(x, y, char)
+            if not loc: return
+            x, y = loc[0], loc[1]
+            x = x + 1 if x < len(self.get_line(y)) - 1 else x
+            self.move_cursor_to_buf_location(x, y)
+        except: pass
     
     def remove_line(self):
         self.buffer.remove_line(self.buffer_cursor[1])

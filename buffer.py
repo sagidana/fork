@@ -75,12 +75,25 @@ class Buffer():
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
     def get_file_bytes(self):
-        file_bytes = ''.join(self.lines).encode()
-        return file_bytes
+        return ''.join(self.lines).encode()
+
+    def get_file_stream(self):
+        return ''.join(self.lines)
 
     def get_file_pos(self, x, y):
         for line in self.lines[:y]: x += len(line)
         return x
+
+    def get_file_x_y(self, pos):
+        curr = 0
+        y = 0
+        for line in self.lines: 
+            if curr <= pos < curr + len(line):
+                x = pos - curr
+                return (x, y)
+            curr += len(line)
+            y += 1
+        return None
 
     def destroy(self):
         Hooks.execute(ON_BUFFER_DESTROY_BEFORE, self)
@@ -121,6 +134,7 @@ class Buffer():
         joined = line[:-1] + next_line
         self.lines[y] = joined
 
+    # CORE: change
     def remove_char(self, x, y):
         start_byte = self.get_file_pos(x, y)
         if x == 0: 
@@ -151,6 +165,7 @@ class Buffer():
 
         self._raise_event(ON_BUFFER_CHANGE, change)
 
+    # CORE: change
     def insert_char(self, x, y, char):
         start_byte = self.get_file_pos(x, y)
         if char == '\n':
@@ -176,72 +191,7 @@ class Buffer():
 
         self._raise_event(ON_BUFFER_CHANGE, change)
 
-    def find_next_word(self, x, y):
-        word_regex = r"\w+"
-        pattern = re.compile(word_regex)
-
-        curr_x = x
-        curr_y = y
-    
-        line = self.lines[y]
-
-        m = pattern.search(line, curr_x)
-        if m and m.span()[0] == curr_x:
-            start_next = m.span()[1]
-            m = pattern.search(line, start_next)
-        
-        while not m and curr_y < len(self.lines) - 1:
-            curr_y += 1
-            m = pattern.search(self.lines[curr_y])
-
-        if m:
-            ret = (curr_y, m.span()[0], m.span()[1])
-            return ret
-        return None
-
-    def find_prev_word(self, x, y):
-        word_regex = r"\w+"
-        pattern = re.compile(word_regex)
-
-        curr_x = x
-        curr_y = y
-        line = self.lines[y]
-
-        start = len(line) - curr_x
-
-        m = pattern.search(line[::-1], start)
-        # # skip first
-        # if m and m.span()[0] == start:
-            # start_next = m.span()[1]
-            # m = pattern.search(line[::-1], start_next)
-        
-        if m:
-            reversed_start = m.span()[0] 
-            reversed_end = m.span()[1] 
-            start = len(line) - reversed_end
-            end = len(line) - reversed_start
-
-            ret = (curr_y, start, end)
-            return ret
-
-        while curr_y > 0:
-            curr_y -= 1
-            line = self.lines[curr_y]
-            m = pattern.search(line[::-1])
-            if m:
-                reversed_start = m.span()[0] 
-                reversed_end = m.span()[1] 
-                start = len(line) - reversed_end
-                end = len(line) - reversed_start
-
-                ret = (curr_y, start, end)
-                return ret
-        return None
-
-    def replace_line(self, y, new_line):
-        self.remove_line(y)
-        self.insert_line(y, new_line)
-
+    # CORE: change
     def insert_line(self, y, new_line):
         change = {}
         start_byte = self.get_file_pos(0, y)
@@ -257,6 +207,7 @@ class Buffer():
 
         self._raise_event(ON_BUFFER_CHANGE, change)
 
+    # CORE: change
     def remove_line(self, y):
         if y >= len(self.lines): return
 
@@ -278,6 +229,10 @@ class Buffer():
 
         self._raise_event(ON_BUFFER_CHANGE, change)
 
+    def replace_line(self, y, new_line):
+        self.remove_line(y)
+        self.insert_line(y, new_line)
+
     def remove_scope(   self,
                         start_x,
                         start_y,
@@ -294,7 +249,8 @@ class Buffer():
             line = self.lines[start_y]
             if start_x - end_x < line_len:
                 line = line[:start_x] + line[end_x:]
-                self.lines[start_y] = line
+                self.replace_line(start_y, line)
+                # self.lines[start_y] = line
             else:
                 self.remove_line(start_y)
         else:
@@ -309,12 +265,8 @@ class Buffer():
                 self.remove_line(end_y - i)
 
             new_line = start_line + end_line
-            self.lines[start_y] = new_line
-
-        change = {}
-        # TODO
-
-        self._raise_event(ON_BUFFER_CHANGE, change)
+            self.replace_line(start_y, new_line)
+            # self.lines[start_y] = new_line
 
     def _change(self, change, undo=True):
         lines_for_deletion = []
@@ -439,6 +391,94 @@ class Buffer():
         self.shadow = None
         self.change_start_position = None
     
+    # CORE: movement
+    def find_next(self, x, y, char):
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
+
+        found = pos + 1
+        for c in stream[pos + 1:]:
+            if c == char: 
+                return self.get_file_x_y(found)
+            found += 1
+        return None
+
+    # CORE: movement
+    def find_prev(self, x, y, char):
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
+
+        found = pos - 1
+        for c in stream[:pos][::-1]:
+            if c == char: 
+                return self.get_file_x_y(found)
+            found -= 1
+        return None
+
+    # CORE: movement
+    def find_next_word(self, x, y):
+        word_regex = r"\w+"
+        pattern = re.compile(word_regex)
+
+        curr_x = x
+        curr_y = y
+    
+        line = self.lines[y]
+
+        m = pattern.search(line, curr_x)
+        if m and m.span()[0] == curr_x:
+            start_next = m.span()[1]
+            m = pattern.search(line, start_next)
+        
+        while not m and curr_y < len(self.lines) - 1:
+            curr_y += 1
+            m = pattern.search(self.lines[curr_y])
+
+        if m:
+            ret = (curr_y, m.span()[0], m.span()[1])
+            return ret
+        return None
+
+    # CORE: movement
+    def find_prev_word(self, x, y):
+        word_regex = r"\w+"
+        pattern = re.compile(word_regex)
+
+        curr_x = x
+        curr_y = y
+        line = self.lines[y]
+
+        start = len(line) - curr_x
+
+        m = pattern.search(line[::-1], start)
+        # # skip first
+        # if m and m.span()[0] == start:
+            # start_next = m.span()[1]
+            # m = pattern.search(line[::-1], start_next)
+        
+        if m:
+            reversed_start = m.span()[0] 
+            reversed_end = m.span()[1] 
+            start = len(line) - reversed_end
+            end = len(line) - reversed_start
+
+            ret = (curr_y, start, end)
+            return ret
+
+        while curr_y > 0:
+            curr_y -= 1
+            line = self.lines[curr_y]
+            m = pattern.search(line[::-1])
+            if m:
+                reversed_start = m.span()[0] 
+                reversed_end = m.span()[1] 
+                start = len(line) - reversed_end
+                end = len(line) - reversed_start
+
+                ret = (curr_y, start, end)
+                return ret
+        return None
+
     def _find_relevant_object(self, pattern, x, y):
         curr_index = len(''.join(self.lines[:y])) + x
 
