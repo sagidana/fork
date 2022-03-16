@@ -238,26 +238,30 @@ class Buffer():
                         start_y,
                         end_x,
                         end_y):
-        if start_y > len(self.lines) - 1: return
-        if end_y > len(self.lines) - 1: return
-        if start_y > end_y: return
+        if start_y > len(self.lines) - 1: return 0, 0
+        if end_y > len(self.lines) - 1: return 0, 0
+        if start_y > end_y: return 0, 0
 
         if start_y == end_y:
-            if start_x > end_x: return 
+            if start_x > end_x: return  0, 0
 
             line_len = len(self.lines[start_y]) - 1
             line = self.lines[start_y]
             if start_x - end_x < line_len:
                 line = line[:start_x] + line[end_x + 1:]
                 self.replace_line(start_y, line)
-                # self.lines[start_y] = line
             else:
                 self.remove_line(start_y)
         else:
             start_line = self.lines[start_y]
-            start_line = start_line[:start_x]
+            # adjust start_x
+            if start_x >= len(start_line): start_x = len(start_line) - 1
 
             end_line = self.lines[end_y]
+            # adjust end_x
+            if end_x + 1 >= len(end_line): end_x = len(end_line) - 2
+
+            start_line = start_line[:start_x]
             end_line = end_line[end_x + 1:]
 
             # remove lines from top to bottom
@@ -266,7 +270,8 @@ class Buffer():
 
             new_line = start_line + end_line
             self.replace_line(start_y, new_line)
-            # self.lines[start_y] = new_line
+
+        return start_x, start_y
 
     def _change(self, change, undo=True):
         lines_for_deletion = []
@@ -392,7 +397,12 @@ class Buffer():
         self.change_start_position = None
     
     # CORE: movement
-    def find_next(self, x, y, char):
+    def find_next_char_regex(self, x, y, char_regex): pass
+    # CORE: movement
+    def find_prev_char_regex(self, x, y, char): pass
+
+    # CORE: movement
+    def find_next_char(self, x, y, char):
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
@@ -404,7 +414,7 @@ class Buffer():
         return None
 
     # CORE: movement
-    def find_prev(self, x, y, char):
+    def find_prev_char(self, x, y, char):
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
@@ -415,76 +425,120 @@ class Buffer():
             found -= 1
         return None
 
-    def find_prev_and_next(self, x, y, char):
-        prev = self.find_prev(x, y, char)
+    def find_prev_and_next_char(self, x, y, char):
+        prev = self.find_prev_char(x, y, char)
         if not prev: return None
-        next = self.find_next(x, y, char)
+        next = self.find_next_char(x, y, char)
         if not next: return None
 
         return (prev, next)
 
     # CORE: movement
     def find_next_word(self, x, y):
-        word_regex = r"\w+"
-        pattern = re.compile(word_regex)
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
 
-        curr_x = x
-        curr_y = y
-    
-        line = self.lines[y]
+        # skip current word
+        found = pos
+        for c in stream[found:]:
+            if not re.match('[a-zA-Z0-9_]', c):
+                break
+            found += 1
 
-        m = pattern.search(line, curr_x)
-        if m and m.span()[0] == curr_x:
-            start_next = m.span()[1]
-            m = pattern.search(line, start_next)
-        
-        while not m and curr_y < len(self.lines) - 1:
-            curr_y += 1
-            m = pattern.search(self.lines[curr_y])
-
-        if m:
-            ret = (curr_y, m.span()[0], m.span()[1])
-            return ret
+        if found >= len(stream) - 1: return None
+        for c in stream[found:]:
+            if re.match('[a-zA-Z0-9_]', c):
+                return self.get_file_x_y(found)
+            found += 1
         return None
 
     # CORE: movement
-    def find_prev_word(self, x, y):
-        word_regex = r"\w+"
-        pattern = re.compile(word_regex)
+    def find_prev_word(self, x, y, skip_current=True):
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
 
-        curr_x = x
-        curr_y = y
-        line = self.lines[y]
+        # skip current word
+        found = pos - 1 if skip_current else pos
+        for c in stream[:found+1][::-1]:
+            if re.match('[a-zA-Z0-9_]', c):
+                break
+            found -= 1
+        if found <= 0: return None
+        for c in stream[:found][::-1]:
+            if not re.match('[a-zA-Z0-9_]', c):
+                return self.get_file_x_y(found)
+            found -= 1
+        return None
 
-        start = len(line) - curr_x
+    # CORE: movement
+    def find_next_WORD(self, x, y):
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
 
-        m = pattern.search(line[::-1], start)
-        # # skip first
-        # if m and m.span()[0] == start:
-            # start_next = m.span()[1]
-            # m = pattern.search(line[::-1], start_next)
-        
-        if m:
-            reversed_start = m.span()[0] 
-            reversed_end = m.span()[1] 
-            start = len(line) - reversed_end
-            end = len(line) - reversed_start
+        # skip current word
+        found = pos
+        for c in stream[found:]:
+            if re.match('\s', c): break
+            found += 1
 
-            ret = (curr_y, start, end)
-            return ret
+        if found >= len(stream) - 1: return None
+        for c in stream[found:]:
+            if not re.match('\s', c):
+                return self.get_file_x_y(found)
+            found += 1
+        return None
 
-        while curr_y > 0:
-            curr_y -= 1
-            line = self.lines[curr_y]
-            m = pattern.search(line[::-1])
-            if m:
-                reversed_start = m.span()[0] 
-                reversed_end = m.span()[1] 
-                start = len(line) - reversed_end
-                end = len(line) - reversed_start
+    # CORE: movement
+    def find_prev_WORD(self, x, y, skip_current=True):
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
 
-                ret = (curr_y, start, end)
-                return ret
+        # skip current word begin
+        found = pos - 1 if skip_current else pos
+        for c in stream[:found+1][::-1]:
+            if not re.match('\s', c): break
+            found -= 1
+        if found <= 0: return None
+        for c in stream[:found][::-1]:
+            if re.match('\s', c):
+                return self.get_file_x_y(found)
+            found -= 1
+        return None
+
+    # CORE: movement
+    def find_word_end(self, x, y, skip_current=True): 
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
+
+        # skip current end
+        found = pos + 1 if skip_current else pos
+        for c in stream[found:]:
+            if re.match('[a-zA-Z0-9_]', c): break
+            found += 1
+
+        if found >= len(stream) - 1: return None
+        for c in stream[found:]:
+            if not re.match('[a-zA-Z0-9_]', c):
+                return self.get_file_x_y(found - 1)
+            found += 1
+        return None
+
+    # CORE: movement
+    def find_WORD_end(self, x, y, skip_current=True): 
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
+
+        # skip current end
+        found = pos + 1 if skip_current else pos
+        for c in stream[found:]:
+            if not re.match('\s', c): break
+            found += 1
+
+        if found >= len(stream) - 1: return None
+        for c in stream[found:]:
+            if re.match('\s', c):
+                return self.get_file_x_y(found - 1)
+            found += 1
         return None
 
     def _find_relevant_object(self, pattern, x, y):
@@ -519,6 +573,63 @@ class Buffer():
             curr_offset += len(self.lines[i])
         return start_x, start_y, end_x, end_y
 
+    def arround_parentheses(self, x, y): 
+        prev = self.find_prev_char(x, y, '(')
+        if not prev: return None
+        next = self.find_next_char(x, y, ')')
+        if not next: return None
+        return prev[0], prev[1], next[0], next[1]
+
+    def arround_quotation(self, x, y): 
+        ret = self.find_prev_and_next_char(x, y, '"')
+        if not ret: return None
+        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
+
+    def arround_square_brackets(self, x, y): 
+        prev = self.find_prev_char(x, y, '[')
+        if not prev: return None
+        next = self.find_next_char(x, y, ']')
+        if not next: return None
+        return prev[0], prev[1], next[0], next[1]
+
+    def arround_curly_brackets(self, x, y): 
+        prev = self.find_prev_char(x, y, '{')
+        if not prev: return None
+        next = self.find_next_char(x, y, '}')
+        if not next: return None
+        return prev[0], prev[1], next[0], next[1]
+
+    def arround_greater_than(self, x, y): 
+        prev = self.find_prev_char(x, y, '<')
+        if not prev: return None
+        next = self.find_next_char(x, y, '>')
+        if not next: return None
+        return prev[0], prev[1], next[0], next[1]
+
+    def arround_apostrophe(self, x, y): 
+        ret = self.find_prev_and_next_char(x, y, '\'')
+        if not ret: return None
+        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
+
+    def arround_backtick(self, x, y): 
+        ret = self.find_prev_and_next_char(x, y, '`')
+        if not ret: return None
+        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
+
+    def arround_word(self, x, y): 
+        begin = self.find_prev_word(x, y, skip_current=False)
+        if not begin: return None
+        end = self.find_word_end(x, y, skip_current=False)
+        if not end: return None
+        return begin[0]-1, begin[1], end[0]+1, end[1]
+
+    def arround_WORD(self, x, y): 
+        begin = self.find_prev_WORD(x, y, skip_current=False)
+        if not begin: return None
+        end = self.find_WORD_end(x, y, skip_current=False)
+        if not end: return None
+        return begin[0]-1, begin[1], end[0]+1, end[1]
+
     def inner_parentheses(self, x, y): 
         ret = self.arround_parentheses(x, y)
         if not ret: return None
@@ -528,6 +639,7 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
     def inner_quotation(self, x, y): 
         ret = self.arround_quotation(x, y)
         if not ret: return None
@@ -537,6 +649,7 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
     def inner_square_brackets(self, x, y): 
         ret = self.arround_square_brackets(x, y)
         if not ret: return None
@@ -546,6 +659,7 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
     def inner_curly_brackets(self, x, y): 
         ret = self.arround_curly_brackets(x, y)
         if not ret: return None
@@ -555,6 +669,7 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
     def inner_greater_than(self, x, y): 
         ret = self.arround_greater_than(x, y)
         if not ret: return None
@@ -564,6 +679,7 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
     def inner_apostrophe(self, x, y): 
         ret = self.arround_apostrophe(x, y)
         if not ret: return None
@@ -573,6 +689,7 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
     def inner_backtick(self, x, y): 
         ret = self.arround_backtick(x, y)
         if not ret: return None
@@ -582,6 +699,7 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
     def inner_word(self, x, y): 
         ret = self.arround_word(x, y)
         if not ret: return None
@@ -591,6 +709,7 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
     def inner_WORD(self, x, y): 
         ret = self.arround_WORD(x, y)
         if not ret: return None
@@ -600,57 +719,3 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
-
-    def arround_parentheses(self, x, y): 
-        prev = self.find_prev(x, y, '(')
-        if not prev: return None
-        next = self.find_next(x, y, ')')
-        if not next: return None
-        return prev[0], prev[1], next[0], next[1]
-
-    def arround_quotation(self, x, y): 
-        ret = self.find_prev_and_next(x, y, '"')
-        if not ret: return None
-        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
-
-    def arround_square_brackets(self, x, y): 
-        prev = self.find_prev(x, y, '[')
-        if not prev: return None
-        next = self.find_next(x, y, ']')
-        if not next: return None
-        return prev[0], prev[1], next[0], next[1]
-
-    def arround_curly_brackets(self, x, y): 
-        prev = self.find_prev(x, y, '{')
-        if not prev: return None
-        next = self.find_next(x, y, '}')
-        if not next: return None
-        return prev[0], prev[1], next[0], next[1]
-
-    def arround_greater_than(self, x, y): 
-        prev = self.find_prev(x, y, '<')
-        if not prev: return None
-        next = self.find_next(x, y, '>')
-        if not next: return None
-        return prev[0], prev[1], next[0], next[1]
-
-    def arround_apostrophe(self, x, y): 
-        ret = self.find_prev_and_next(x, y, '\'')
-        if not ret: return None
-        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
-
-    def arround_backtick(self, x, y): 
-        ret = self.find_prev_and_next(x, y, '`')
-        if not ret: return None
-        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
-
-    def arround_word(self, x, y): 
-        r = r"\`.*\`"
-        pattern = re.compile(r, re.MULTILINE)
-
-        return self._find_relevant_object(pattern, x, y)
-    def arround_WORD(self, x, y): 
-        r = r"\`.*\`"
-        pattern = re.compile(r, re.MULTILINE)
-
-        return self._find_relevant_object(pattern, x, y)

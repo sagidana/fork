@@ -411,23 +411,45 @@ class Window():
         ret = self.buffer.find_next_word(   self.buffer_cursor[0],
                                             self.buffer_cursor[1])
         if not ret: return
-        line, start, end = ret
-
-        self.move_cursor_to_buf_location(start, line)
+        x, y = ret
+        self.move_cursor_to_buf_location(x, y)
 
     def move_word_backward(self): 
         ret = self.buffer.find_prev_word(   self.buffer_cursor[0],
                                             self.buffer_cursor[1])
         if not ret: return
-        line, start, end = ret
+        x, y = ret
+        self.move_cursor_to_buf_location(x, y)
 
-        self.move_cursor_to_buf_location(start, line)
 
-    def move_word_end(self): pass
+    def move_WORD_forward(self): 
+        ret = self.buffer.find_next_WORD(   self.buffer_cursor[0],
+                                            self.buffer_cursor[1])
+        if not ret: return
+        x, y = ret
+        self.move_cursor_to_buf_location(x, y)
 
-    def move_WORD_forward(self): self.move_word_forward()
-    def move_WORD_backward(self): self.move_word_backward()
-    def move_WORD_end(self): self.move_word_end()
+    def move_WORD_backward(self): 
+        ret = self.buffer.find_prev_WORD(   self.buffer_cursor[0],
+                                            self.buffer_cursor[1])
+        if not ret: return
+        x, y = ret
+        self.move_cursor_to_buf_location(x, y)
+
+    def move_word_end(self): 
+        ret = self.buffer.find_word_end(    self.buffer_cursor[0],
+                                            self.buffer_cursor[1])
+        if not ret: return
+        x, y = ret
+        self.move_cursor_to_buf_location(x, y)
+
+    def move_WORD_end(self):
+        ret = self.buffer.find_WORD_end(    self.buffer_cursor[0],
+                                            self.buffer_cursor[1])
+        if not ret: return
+        x, y = ret
+        self.move_cursor_to_buf_location(x, y)
+
 
     @timeout_decorator.timeout(2)
     def get_key(self):
@@ -442,7 +464,7 @@ class Window():
 
             x = self.buffer_cursor[0]
             y = self.buffer_cursor[1]
-            loc = self.buffer.find_next(x, y, char)
+            loc = self.buffer.find_next_char(x, y, char)
             if not loc: return
             x, y = loc[0], loc[1]
             self.move_cursor_to_buf_location(x, y)
@@ -456,7 +478,7 @@ class Window():
             char = chr(key)
             x = self.buffer_cursor[0]
             y = self.buffer_cursor[1]
-            loc = self.buffer.find_prev(x, y, char)
+            loc = self.buffer.find_prev_char(x, y, char)
             if not loc: return
             x, y = loc[0], loc[1]
             self.move_cursor_to_buf_location(x, y)
@@ -470,7 +492,7 @@ class Window():
             char = chr(key)
             x = self.buffer_cursor[0]
             y = self.buffer_cursor[1]
-            loc = self.buffer.find_next(x, y, char)
+            loc = self.buffer.find_next_char(x, y, char)
             if not loc: return
             x, y = loc[0], loc[1]
             x = x - 1 if x > 0 else x
@@ -485,7 +507,7 @@ class Window():
             char = chr(key)
             x = self.buffer_cursor[0]
             y = self.buffer_cursor[1]
-            loc = self.buffer.find_prev(x, y, char)
+            loc = self.buffer.find_prev_char(x, y, char)
             if not loc: return
             x, y = loc[0], loc[1]
             x = x + 1 if x < len(self.get_line(y)) - 1 else x
@@ -509,11 +531,9 @@ class Window():
                         start_y,
                         end_x,
                         end_y):
-        # case 1: we inside the scope
-        # case 2: we above the scope
-        # case 2: we below the scope
+        x, y = self.buffer.remove_scope(start_x, start_y, end_x, end_y)
 
-        self.buffer.remove_scope(start_x, start_y, end_x, end_y)
+        self.move_cursor_to_buf_location(x, y)
         self.draw()
 
     def new_line_after(self): 

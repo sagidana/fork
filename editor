@@ -111,8 +111,113 @@ class Editor():
         self.maps[NORMAL][ord('$')] = dollar_map
 
     def _initialize_objects_maps(self, maps, cb):
+        def move_(self): pass
+
+        def move_j(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = (x, y, x, y + 1)
+            if scope: cb(scope)
+        maps[ord('j')] = move_j
+        def move_k(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = (x, y - 1, x, y)
+            if scope: cb(scope)
+        maps[ord('k')] = move_k
+        def move_h(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = (x - 1, y, x, y)
+            if scope: cb(scope)
+        maps[ord('h')] = move_h
+        def move_l(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = (x, y, x + 1, y)
+            if scope: cb(scope)
+        maps[ord('l')] = move_l
+
+        def move_w(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_next_word(start_x, start_y)
+            if not ret: return
+            end_x, end_y = ret
+            scope = (start_x, start_y, end_x - 1, end_y)
+            if scope: cb(scope)
+        maps[ord('w')] = move_w
+        def move_W(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_next_WORD(start_x, start_y)
+            if not ret: return
+            end_x, end_y = ret
+            scope = (start_x, start_y, end_x - 1, end_y)
+            if scope: cb(scope)
+        maps[ord('W')] = move_W
+        def move_b(self):
+            end_x = self.get_curr_window().buffer_cursor[0] - 1
+            end_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_word(end_x, end_y)
+            if not ret: return
+            start_x, start_y = ret
+            scope = (start_x, start_y, end_x, end_y)
+            if scope: cb(scope)
+        maps[ord('b')] = move_b
+        def move_B(self):
+            end_x = self.get_curr_window().buffer_cursor[0] - 1
+            end_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_WORD(end_x, end_y)
+            if not ret: return
+            start_x, start_y = ret
+            scope = (start_x, start_y, end_x, end_y)
+            if scope: cb(scope)
+        maps[ord('B')] = move_B
+        def move_e(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_word_end(start_x, start_y)
+            if not ret: return
+            end_x, end_y = ret
+            scope = (start_x, start_y, end_x, end_y)
+            if scope: cb(scope)
+        maps[ord('e')] = move_e
+        def move_E(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_WORD_end(start_x, start_y)
+            if not ret: return
+            end_x, end_y = ret
+            scope = (start_x, start_y, end_x, end_y)
+            if scope: cb(scope)
+        maps[ord('E')] = move_E
+
+        # def move_f(self):
+            # start_x = self.get_curr_window().buffer_cursor[0]
+            # start_y = self.get_curr_window().buffer_cursor[1]
+            # ret = self.get_curr_buffer().find_WORD_end(x, y)
+            # if not ret: return
+            # end_x, end_y = ret
+            # scope = (start_x, start_y, end_x, end_y)
+            # if scope: cb(scope)
+        # maps[ord('f')] = move_f
+        # maps[ord('F')] = move_F
+        # maps[ord('t')] = move_t
+        # maps[ord('T')] = move_T
+
+        maps[ord('g')] = {} # TODO
+        maps[ord('g')][ord('g')] = move_ # TODO
+        maps[ord('G')] = move_ # TODO
+
+        # maps[ord('H')] = move_ # TODO
+        # maps[ord('M')] = move_ # TODO
+        # maps[ord('L')] = move_ # TODO
+
+        # maps[ord('n')] = move_ # TODO
+        # maps[ord('N')] = move_ # TODO
+
         maps[ord('i')] = {}
-        maps[ord('a')] = {}
         def inner_parentheses(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -172,6 +277,7 @@ class Editor():
             if scope: cb(scope)
         maps[ord('i')][ord("W")] = inner_WORD
 
+        maps[ord('a')] = {}
         def arround_parentheses(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -239,7 +345,11 @@ class Editor():
 
         def change_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
+            self.get_curr_window().change_begin()
             elog(f"EDITOR: change {scope}")
+            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().change_end()
+            self,change_mode(INSERT)
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
         def delete_object_map(scope): 
