@@ -54,26 +54,18 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 
-## Tabs
-## Windows
-## Buffers
-
 ## Features
 - Modal Editing
 - Syntax Highlight
 - Folding
 
 ## TODOs
-- selection
+- search & replace
 - <num><action>
-- inner action
-- around action
-
 - line numbers
-- statusline
-- syntax highlighting
+- statusline?
 - folds
+- splits
 - ctags
 - cscope
-- splits
 - tabs

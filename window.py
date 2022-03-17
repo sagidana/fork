@@ -599,6 +599,16 @@ class Window():
             self.move_cursor_to_buf_location(x, y)
         except: pass
     
+    def remove_line_at(self, y):
+        y = self.buffer.remove_line(y)
+        x = self.buffer_cursor[0]
+
+        if y >= len(self.buffer.lines) - 1: y = len(self.buffer.lines) - 1
+        if x >= len(self.get_line(y)) - 1: x = len(self.get_line(y)) - 1
+
+        self.move_cursor_to_buf_location(x, y)
+        self.draw()
+
     def remove_line(self):
         self.buffer.remove_line(self.buffer_cursor[1])
 

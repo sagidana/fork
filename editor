@@ -536,6 +536,39 @@ class Editor():
 
     def _initialize_insert_maps(self): pass
 
+    def _initialize_visual_line_maps(self): 
+        def visual_line_object_map(scope): 
+            start_x, start_y, end_x, end_y = scope
+            # scope was just a movement
+            if  start_x == self.get_curr_window().buffer_cursor[0] and \
+                start_y == self.get_curr_window().buffer_cursor[1]:
+                self.get_curr_buffer().visual_set_current(end_x, end_y)
+            # scope was an object
+            else:
+                self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
+
+            self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
+            self.draw()
+            return False
+        self._initialize_objects_maps(self.maps[VISUAL_LINE], visual_line_object_map)
+        def d_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            self.get_curr_window().change_begin()
+
+            start_x, start_y, end_x, end_y = scope
+
+            # data = {}
+            # data["data"] = self.get_curr_window().get_curr_line()
+            # data["meta"] = "scope" # to let the paste know the data is entire line.
+            # self.registers['"'] = data
+            for y in range(end_y, start_y - 1, -1):
+                self.get_curr_window().remove_line_at(y)
+            self.get_curr_window().change_end()
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_LINE][ord('d')] = d_map
+
     def _initialize_visual_maps(self): 
         def visual_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
@@ -551,26 +584,29 @@ class Editor():
             self.draw()
             return False
         self._initialize_objects_maps(self.maps[VISUAL], visual_object_map)
+        def d_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            self.get_curr_window().change_begin()
 
-        def visual_line_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
-            # scope was just a movement
-            if  start_x == self.get_curr_window().buffer_cursor[0] and \
-                start_y == self.get_curr_window().buffer_cursor[1]:
-                self.get_curr_buffer().visual_set_current(end_x, end_y)
-            # scope was an object
-            else:
-                self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
 
-            self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
-            self.draw()
+            # data = {}
+            # data["data"] = self.get_curr_window().get_curr_line()
+            # data["meta"] = "scope" # to let the paste know the data is entire line.
+            # self.registers['"'] = data
+
+            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().change_end()
+            self.change_mode(NORMAL)
             return False
-        self._initialize_objects_maps(self.maps[VISUAL_LINE], visual_line_object_map)
+        self.maps[VISUAL][ord('d')] = d_map
 
     def initialize_maps(self):
         self._initialize_normal_maps()
         self._initialize_insert_maps()
         self._initialize_visual_maps()
+        self._initialize_visual_line_maps()
 
     def initialize_registers(self):
         # we dont add all of vim's registers for now..

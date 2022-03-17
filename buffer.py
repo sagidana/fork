@@ -259,25 +259,26 @@ class Buffer():
 
     # CORE: change
     def remove_line(self, y):
-        if y >= len(self.lines): return
+        if y >= len(self.lines): return y
 
         change = {}
-        new_x = len(self.lines[y-1]) - 1
-        new_end_byte = self.get_file_pos(new_x, y - 1)
+        # new_x = len(self.lines[y-1]) - 1
+        # new_end_byte = self.get_file_pos(new_x, y - 1)
 
         line = self.lines[y]
         start_byte = self.get_file_pos(0, y)
 
         change['start_byte'] = start_byte
         change['old_end_byte'] = start_byte + len(line) - 1
-        change['new_end_byte'] = new_end_byte
+        change['new_end_byte'] = start_byte
         change['start_point'] = (y, 0)
         change['old_end_point'] = (y, len(line) - 1)
-        change['new_end_point'] = (y - 1, new_x)
+        change['new_end_point'] = (y, 0)
 
         self.lines.pop(y)
 
         self._raise_event(ON_BUFFER_CHANGE, change)
+        return y
 
     def replace_line(self, y, new_line):
         self.remove_line(y)
