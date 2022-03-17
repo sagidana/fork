@@ -271,10 +271,10 @@ class Buffer():
         start_byte = self.get_file_pos(0, y)
 
         change['start_byte'] = start_byte
-        change['old_end_byte'] = start_byte + len(line) - 1
+        change['old_end_byte'] = start_byte + len(line) 
         change['new_end_byte'] = start_byte
         change['start_point'] = (y, 0)
-        change['old_end_point'] = (y, len(line) - 1)
+        change['old_end_point'] = (y, len(line))
         change['new_end_point'] = (y, 0)
 
         self.lines.pop(y)
