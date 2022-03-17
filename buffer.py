@@ -290,7 +290,13 @@ class Buffer():
                         end_y):
         if start_y > len(self.lines) - 1: return 0, 0
         if end_y > len(self.lines) - 1: return 0, 0
-        if start_y > end_y: return 0, 0
+
+        # switch
+        if  (start_y > end_y) or \
+            (start_y == end_y and start_x > end_x):
+            tmp_y, tmp_x, = start_y, start_x
+            start_y, start_x = end_y, end_x
+            end_y, end_x = tmp_y, tmp_x
 
         if start_y == end_y:
             if start_x > end_x: return  0, 0

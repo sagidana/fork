@@ -124,24 +124,28 @@ class Editor():
         def move_j(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
+            # TODO: check boundries
             scope = (x, y, x, y + 1)
             if scope: cb(scope)
         maps[ord('j')] = move_j
         def move_k(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
-            scope = (x, y - 1, x, y)
+            # TODO: check boundries
+            scope = (x, y, x, y - 1)
             if scope: cb(scope)
         maps[ord('k')] = move_k
         def move_h(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
-            scope = (x - 1, y, x, y)
+            # TODO: check boundries
+            scope = (x, y, x - 1, y)
             if scope: cb(scope)
         maps[ord('h')] = move_h
         def move_l(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
+            # TODO: check boundries
             scope = (x, y, x + 1, y)
             if scope: cb(scope)
         maps[ord('l')] = move_l
@@ -533,26 +537,32 @@ class Editor():
     def _initialize_insert_maps(self): pass
 
     def _initialize_visual_maps(self): 
-        # self._initialize_legends_maps(VISUAL)
-        # self._initialize_legends_maps(VISUAL_LINE)
-        # self._initialize_legends_maps(VISUAL_BLOCK)
-
         def visual_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
-            elog(f"{start_x} {start_y} {end_x} {end_y}")
-            self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
-            # self.get_curr_buffer().visual_set_current(end_x, end_y)
-            self.get_curr_window().move_to_x_y(end_x, end_y)
+            # scope was just a movement
+            if  start_x == self.get_curr_window().buffer_cursor[0] and \
+                start_y == self.get_curr_window().buffer_cursor[1]:
+                self.get_curr_buffer().visual_set_current(end_x, end_y)
+            # scope was an object
+            else:
+                self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
+
+            self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
             self.draw()
             return False
         self._initialize_objects_maps(self.maps[VISUAL], visual_object_map)
 
         def visual_line_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
-            elog(f"{start_x} {start_y} {end_x} {end_y}")
-            self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
-            # self.get_curr_buffer().visual_set_current(end_x, end_y)
-            self.get_curr_window().move_to_x_y(end_x, end_y)
+            # scope was just a movement
+            if  start_x == self.get_curr_window().buffer_cursor[0] and \
+                start_y == self.get_curr_window().buffer_cursor[1]:
+                self.get_curr_buffer().visual_set_current(end_x, end_y)
+            # scope was an object
+            else:
+                self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
+
+            self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
             self.draw()
             return False
         self._initialize_objects_maps(self.maps[VISUAL_LINE], visual_line_object_map)

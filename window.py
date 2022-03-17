@@ -485,14 +485,6 @@ class Window():
         while self.buffer_cursor[0] < x: self._move_right()
         self.draw_cursor()
 
-    def move_to_x_y(self, x, y): 
-        while self.buffer_cursor[0] > 0: self._move_left()
-        while self.buffer_cursor[1] > y: self._move_up()
-        while self.buffer_cursor[1] < y: self._move_down()
-        while self.buffer_cursor[0] < x: self._move_right()
-
-        self.draw_cursor()
-
     def move_line_begin(self):
         while self.buffer_cursor[0] > 0: self._move_left()
         self.draw_cursor()
