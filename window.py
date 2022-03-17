@@ -33,19 +33,29 @@ class Window():
                     height, 
                     position=(0,0), 
                     buffer=None):
+        if not buffer: raise Exception("Not implemented.")
 
         self.stdscr = stdscr
+
+        self.buffer = buffer
+        self.set_lines_margin()
+
         self.position = list(position)
+
         self.width = width
         self.height = height
+        
+        self.content_position = [position[0], position[1]]
+        self.content_width = self.width
+        self.content_height = self.height
+
+        # slice window for line numbers.
+        self.content_position[0] += self.lines_margin
+        self.content_width -= self.lines_margin
+
         self.window_cursor = [0,0]
         self.buffer_cursor = [0,0]
         self.remember = 0
-
-        if not buffer:
-            self.buffer = Buffer()
-        else:
-            self.buffer = buffer
 
         self.events = {}
 
@@ -60,23 +70,16 @@ class Window():
     def draw_cursor(self):
         cursor = [pos for pos in self.window_cursor]
 
-        cursor[0] = self.position[0] + self.window_cursor[0]
-        cursor[1] = self.position[1] + self.window_cursor[1]
-        
-        # elog(f"window: ({self.window_cursor[0]}, {self.window_cursor[1]})")
-        # elog(f"buffer: ({self.buffer_cursor[0]}, {self.buffer_cursor[1]})")
+        cursor[0] = self.content_position[0] + self.window_cursor[0]
+        cursor[1] = self.content_position[1] + self.window_cursor[1]
 
-        self.stdscr.move(cursor[1], cursor[0])
+        self.draw_lines()
         self.visualize()
 
-    def draw_line(self):
-        y = self.window_cursor[1]
-        line = self.get_curr_line()
+        self.stdscr.move(cursor[1], cursor[0])
 
-        self.stdscr.addstr( y, 
-                            self.position[0] + 0, 
-                            line[:self.width])
-        self.draw_cursor()
+    def set_lines_margin(self):
+        self.lines_margin = len(str(len(self.buffer.lines)))
 
     def color_pair_to_curses(self, fg, bg):
         return get_curses_color_pair(fg, bg)
@@ -108,7 +111,7 @@ class Window():
             length = node.end_point[1] - x
 
             self.stdscr.chgat(  y - start_y, 
-                                x, 
+                                self.content_position[0] + x, 
                                 length, attr)
 
     def _visualize_block(self): pass
@@ -133,7 +136,7 @@ class Window():
 
         if start_y == end_y:
             self.stdscr.chgat(  start_y - screen_start_y, 
-                                start_x,
+                                self.content_position[0] + start_x,
                                 end_x - start_x,
                                 curses.A_REVERSE)
             return
@@ -141,19 +144,19 @@ class Window():
 
         # first line
         self.stdscr.chgat(  start_y - screen_start_y, 
-                            start_x,
+                            self.content_position[0] + start_x,
                             (len(self.get_line(start_y)) - 1) - start_x,
                             curses.A_REVERSE)
 
         # lines in between
         for y in range(start_y + 1, end_y):
             self.stdscr.chgat(  y - screen_start_y, 
-                                0, 
+                                self.content_position[0], 
                                 len(self.get_line(y)) - 1, 
                                 curses.A_REVERSE)
         # last line
         self.stdscr.chgat(  end_y - screen_start_y, 
-                            0,
+                            self.content_position[0],
                             end_x,
                             curses.A_REVERSE)
 
@@ -172,7 +175,7 @@ class Window():
 
         for y in range(start_y, end_y + 1):
             self.stdscr.chgat(  y - screen_start_y, 
-                                0, 
+                                self.content_position[0],
                                 len(self.get_line(y)) - 1, 
                                 curses.A_REVERSE)
 
@@ -185,6 +188,27 @@ class Window():
             self._visualize_line()
         if self.buffer.visual_mode == 'visual_block':
             self._visualize_block()
+
+    def draw_lines(self):
+        style = {}
+        style['background'] = g_settings['theme']['colors']['editor.background']
+        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+        attr = self.style_to_attr(style)
+
+        buf_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+
+        for y in range(self.content_height):
+            try:
+                # lineno = str(self.buffer_cursor[1]).ljust(self.lines_margin)
+                lineno = str(buf_start_y + y).ljust(self.lines_margin)
+                self.stdscr.addstr( y,
+                                    0,
+                                    lineno,
+                                    attr)
+            except Exception as e: elog(f"Exception: 1 {e}")
+
+        # for y in range(self.content_height):
+            # buffer_y = first_line + y
 
     def draw(self):
         # - Draw with defaut colors of theme
@@ -199,7 +223,7 @@ class Window():
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
         attr = self.style_to_attr(style)
 
-        for y in range(self.height):
+        for y in range(self.content_height):
             buffer_y = first_line + y
 
             if buffer_y > buffer_height: 
@@ -207,19 +231,19 @@ class Window():
             else:
                 line = self.buffer.lines[first_line + y]
 
-            x_range = min(self.width, max(0, len(line) - 1))
+            x_range = min(self.content_width, max(0, len(line) - 1))
             for buffer_x in range(x_range):
                 try:
                     self.stdscr.addstr( y, 
-                                        self.position[0] + buffer_x, 
+                                        self.content_position[0] + buffer_x, 
                                         line[buffer_x],
                                         attr)
                 except Exception as e: elog(f"Exception: 1 {e}")
 
-            for x in range(self.width - x_range):
+            for x in range(self.content_width - x_range):
                 try:
                     self.stdscr.addstr( y, 
-                                        self.position[0] + x_range + x,
+                                        self.content_position[0] + x_range + x,
                                         ' ',
                                         attr)
                 except Exception as e: elog(f"Exception: {x} {x_range} {e}")
@@ -227,45 +251,9 @@ class Window():
         # - on top of thaat draw highlights
         self.highlight()
         self.visualize()
+        self.draw_lines()
         self.draw_cursor()
     
-    def _draw(self):
-        self.stdscr.clear()
-        index = 0
-        before = self.window_cursor[1]
-        first_line = self.buffer_cursor[1] - before
-        buffer_height = len(self.buffer.lines) - 1
-
-        for y in range(self.height):
-            buffer_y = first_line + y
-
-            if buffer_y > buffer_height: 
-                line = ""
-            else:
-                line = self.buffer.lines[first_line + y]
-
-            x_range = min(self.width, max(0, len(line) - 1))
-            for buffer_x in range(x_range):
-                style = self.buffer.syntax.get_style(buffer_x, buffer_y)
-                attr = self.style_to_attr(style)
-                try:
-                    self.stdscr.addstr( y, 
-                                        self.position[0] + buffer_x, 
-                                        line[buffer_x],
-                                        attr)
-                except Exception as e: elog(f"Exception: 1 {e}")
-
-            style = self.buffer.syntax.get_default_style()
-            attr = self.style_to_attr(style)
-            for x in range(self.width - x_range):
-                try:
-                    self.stdscr.addstr( y, 
-                                        self.position[0] + x_range + x,
-                                        ' ',
-                                        attr)
-                except Exception as e: elog(f"Exception: {x} {x_range} {e}")
-        self.draw_cursor()
-
     def _scroll_up(self):
         self.buffer_cursor[1] -= 1
 
@@ -297,16 +285,18 @@ class Window():
     def resize(self, width, height):
         self.width = width
         self.height = height
+        self.content_width = width
+        self.content_height = height
 
         elog(f"width:{self.width}, height:{self.height}")
 
-        if self.window_cursor[0] >= self.width - 1:
-            diff = self.window_cursor[0] - (self.width - 1)
+        if self.window_cursor[0] >= self.content_width- 1:
+            diff = self.window_cursor[0] - (self.content_width - 1)
             for i in range(diff): self._move_left()
         else: pass
 
-        if self.window_cursor[1] >= self.height - 1:
-            diff = self.window_cursor[1] - (self.height - 1)
+        if self.window_cursor[1] >= self.content_height - 1:
+            diff = self.window_cursor[1] - (self.content_height - 1)
             for i in range(diff): self._move_up()
         else: pass
 
