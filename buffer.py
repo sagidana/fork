@@ -12,7 +12,7 @@ import re
 
 class Buffer():
     def on_buffer_change_callback(self, change):
-        self.treesitter.tree_edit(change, self.get_file_bytes())
+        self.treesitter.edit(change, self.get_file_bytes())
         pass
 
     def raise_event(func):
@@ -67,7 +67,7 @@ class Buffer():
                 self.lines = f.readlines()
         except:pass
 
-        self.syntax = Syntax(self, file_path, self.lines)
+        # self.syntax = Syntax(self, file_path, self.lines)
 
         with open(file_path, "rb") as f: file_bytes = f.read()
         self.treesitter = TreeSitter(file_bytes)
@@ -78,6 +78,8 @@ class Buffer():
 
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
+    def resync_treesitter(self):
+        self.treesitter.resync(self.get_file_bytes())
     def get_file_bytes(self):
         return ''.join(self.lines).encode()
 

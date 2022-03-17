@@ -68,7 +68,11 @@ class TreeSitter():
         self.tree = self.parser.parse(file_bytes)
         self.captures = None
 
-    def tree_edit(self, edit, new_file_bytes):
+    def resync(self, file_bytes):
+        self.tree = self.parser.parse(file_bytes)
+        self.captures = None
+
+    def edit(self, edit, new_file_bytes):
         self.tree.edit(
                 start_byte=edit['start_byte'],
                 old_end_byte=edit['old_end_byte'],
