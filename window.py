@@ -85,13 +85,13 @@ class Window():
     def draw_cursor(self):
         cursor = [pos for pos in self.window_cursor]
 
-        cursor[0] = self.content_position[0] + self.window_cursor[0]
-        cursor[1] = self.content_position[1] + self.window_cursor[1]
+        cursor[0] = self.window_cursor[0]
+        cursor[1] = self.window_cursor[1]
 
         if self.line_numbers: self.draw_lines()
         self.visualize()
 
-        self.stdscr.move(cursor[1], cursor[0])
+        self._screen_move(cursor[0], cursor[1])
 
     def set_lines_margin(self):
         self.lines_margin = len(str(len(self.buffer.lines))) + 1
@@ -100,6 +100,8 @@ class Window():
         return get_curses_color_pair(fg, bg)
 
     def style_to_attr(self, style):
+        if 'reverse' in style: return curses.A_REVERSE
+
         fg = style['foreground'] if 'foreground' in style else g_settings['theme']['colors']['editor.foreground']
         bg = style['background'] if 'background' in style else g_settings['theme']['colors']['editor.background']
 
@@ -119,15 +121,14 @@ class Window():
             if node.start_point[0] >= end_y: return
             if node.end_point[0] < start_y: continue
 
-            attr = self.style_to_attr(style)
-
             y = node.start_point[0]
             x = node.start_point[1]
             length = node.end_point[1] - x
 
-            self.stdscr.chgat(  y - start_y, 
-                                self.content_position[0] + x, 
-                                length, attr)
+            self._screen_style( x,
+                                y - start_y,
+                                length,
+                                style)
 
     def _visualize_block(self): pass
         
@@ -150,30 +151,31 @@ class Window():
         else: end_x = len(self.get_line(end_y)) - 1
 
         if start_y == end_y:
-            self.stdscr.chgat(  start_y - screen_start_y, 
-                                self.content_position[0] + start_x,
+            self._screen_style( start_x,
+                                start_y - screen_start_y, 
                                 end_x - start_x,
-                                curses.A_REVERSE)
+                                {'reverse': None})
             return
         
 
         # first line
-        self.stdscr.chgat(  start_y - screen_start_y, 
-                            self.content_position[0] + start_x,
+        self._screen_style( start_x,
+                            start_y - screen_start_y, 
                             (len(self.get_line(start_y)) - 1) - start_x,
-                            curses.A_REVERSE)
+                            {'reverse': None})
 
         # lines in between
         for y in range(start_y + 1, end_y):
-            self.stdscr.chgat(  y - screen_start_y, 
-                                self.content_position[0], 
+            self._screen_style( 0,
+                                y - screen_start_y,
                                 len(self.get_line(y)) - 1, 
-                                curses.A_REVERSE)
+                                {'reverse': None})
+                                
         # last line
-        self.stdscr.chgat(  end_y - screen_start_y, 
-                            self.content_position[0],
+        self._screen_style( 0,
+                            end_y - screen_start_y, 
                             end_x,
-                            curses.A_REVERSE)
+                            {'reverse': None})
 
     def _visualize_line(self): 
         start_x, start_y, end_x, end_y = self.buffer.visual_get_scope()
@@ -189,10 +191,10 @@ class Window():
         end_y = min(end_y, screen_end_y)
 
         for y in range(start_y, end_y + 1):
-            self.stdscr.chgat(  y - screen_start_y, 
-                                self.content_position[0],
-                                len(self.get_line(y)) - 1, 
-                                curses.A_REVERSE)
+            self._screen_style( 0,
+                                y - screen_start_y, 
+                                len(self.get_line(y)) - 1,
+                                {'reverse': None})
 
     def visualize(self):
         if not self.buffer.visual_mode: return
@@ -212,7 +214,7 @@ class Window():
         style = {}
         style['background'] = g_settings['theme']['colors']['editor.background']
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
-        attr = self.style_to_attr(style)
+        # attr = self.style_to_attr(style)
 
         buf_start_y = self.buffer_cursor[1] - self.window_cursor[1]
 
@@ -224,15 +226,22 @@ class Window():
                     lineno = str(abs(self.window_cursor[1] - y)).rjust(self.lines_margin - 1)
                 lineno = lineno.ljust(self.lines_margin)
 
-                self.stdscr.addstr( y,
-                                    0,
-                                    lineno,
-                                    attr)
+                self._screen_write_raw( 0,
+                                        y,
+                                        lineno,
+                                        style)
             except Exception as e: elog(f"Exception: 1 {e}")
 
+    def clear(self):
+        # self.stdscr.clear()
+        for y in range(self.height):
+            self._screen_clear_line_raw(y)
+            # self.stdscr.move(   self.position[1] + y, 
+                                # self.position[0] + 0)
+            # self.stdscr.clrtoeol() # TODO end of range
+
     def draw(self):
-        # - Draw with defaut colors of theme
-        self.stdscr.clear()
+        self.clear()
 
         before = self.window_cursor[1]
         first_line = self.buffer_cursor[1] - before
@@ -254,18 +263,18 @@ class Window():
             x_range = min(self.content_width, max(0, len(line) - 1))
             for buffer_x in range(x_range):
                 try:
-                    self.stdscr.addstr( y, 
-                                        self.content_position[0] + buffer_x, 
+                    self._screen_write( buffer_x,
+                                        y,
                                         line[buffer_x],
-                                        attr)
+                                        style)
                 except Exception as e: elog(f"Exception: 1 {e}")
 
             for x in range(self.content_width - x_range):
                 try:
-                    self.stdscr.addstr( y, 
-                                        self.content_position[0] + x_range + x,
+                    self._screen_write( x_range + x,
+                                        y,
                                         ' ',
-                                        attr)
+                                        style)
                 except Exception as e: elog(f"Exception: {x} {x_range} {e}")
 
         # - on top of thaat draw highlights
@@ -758,3 +767,42 @@ class Window():
     def move_left(self):
         self._move_left()
         self.draw_cursor()
+
+    def _screen_move(self, x, y): 
+        # TODO: boundry checks
+        self.stdscr.move(   self.content_position[1] + y, 
+                            self.content_position[0] + x)
+
+    def _screen_clear_line_raw(self, y): 
+        self.stdscr.move(y, 0)
+        self.stdscr.clrtoeol()
+        self.stdscr.refresh() # IMPORTANT
+
+    def _screen_clear_line(self, y): 
+        self.stdscr.move(   self.content_position[1] + y,
+                            self.content_position[0])
+        self.stdscr.clrtoeol() 
+
+    def _screen_style(self, x, y, size, style): 
+        # TODO: boundry checks
+        attr = self.style_to_attr(style)
+        self.stdscr.chgat(  self.content_position[1] + y, 
+                            self.content_position[0] + x, 
+                            size, attr)
+
+    def _screen_write_raw(self, x, y, string, style): 
+        # TODO: boundry checks
+        attr = self.style_to_attr(style)
+        self.stdscr.addstr( self.position[1] + y, 
+                            self.position[0] + x,
+                            string,
+                            attr)
+
+    def _screen_write(self, x, y, string, style): 
+        # TODO: boundry checks
+        attr = self.style_to_attr(style)
+        self.stdscr.addstr( self.content_position[1] + y, 
+                            self.content_position[0] + x,
+                            string,
+                            attr)
+

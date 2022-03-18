@@ -37,21 +37,11 @@ class Tab():
         window = Window(self.stdscr,
                         self.width, 
                         self.height, 
-                        # position=(5,0),
+                        position=(0,0),
                         buffer=buffer)
-
-        # handlers = {}
-        # handlers[ON_WINDOW_MOVE_UP_AFTER] = self.on_window_move_up_after_callback
-        # handlers[ON_WINDOW_MOVE_DOWN_AFTER] = self.on_window_move_down_after_callback
-        # handlers[ON_WINDOW_MOVE_RIGHT_AFTER] = self.on_window_move_right_after_callback
-        # handlers[ON_WINDOW_MOVE_LEFT_AFTER] = self.on_window_move_left_after_callback 
-
-        # window.register_events(handlers)
+        self.add_window(window)
 
         self.events = {}
-        self.windows.append(window)
-        self.curr_window = 0
-
         Hooks.register(ON_RESIZE, self.on_resize_callbak)
 
     def register_events(self, handlers):
@@ -60,16 +50,41 @@ class Tab():
                 self.events[event] = []
             self.events[event].append(handlers[event])
 
+    def add_window(self, window):
+        index = len(self.windows)
+
+        self.windows.append(window)
+        self.curr_window = index
+
     def split(self):
         elog('tab.split()')
-        pass
+        curr_window = self.get_curr_window()
+        curr_buffer = curr_window.buffer
+
+        height = int(curr_window.height / 2)
+        width = curr_window.width
+
+        curr_window.resize( width,
+                            height)
+
+        new_window = Window(    self.stdscr,
+                                width, 
+                                height, 
+                                position=(  curr_window.position[0],
+                                            curr_window.position[1] + height),
+                                buffer=curr_buffer)
+        self.add_window(new_window)
+
+        curr_window.draw()
+        new_window.draw()
 
     def vsplit(self):
         elog('tab.vsplit()')
         pass
 
     def draw(self):
-        self.get_curr_window().draw()
+        for window in self.windows:
+            window.draw()
 
     def get_curr_window(self):
         return self.windows[self.curr_window]
