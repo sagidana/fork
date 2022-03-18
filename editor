@@ -629,6 +629,8 @@ class Editor():
         self.height, self.width = stdscr.getmaxyx()
         signal(SIGWINCH, self.screen_resize_handler)
 
+        self.esc_toggle_status = False
+        self.esc_toggle_counter = 0
         self.registers = {}
         self.initialize_registers()
 
@@ -762,14 +764,31 @@ class Editor():
         self.get_curr_tab().draw()
         return ret
 
+    def esc_toggle_reset(self):
+        self.esc_toggle_counter = 0
+
+    def esc_toggle(self):
+        if not self.esc_toggle_status:
+            if self.esc_toggle_counter < 1: 
+                self.esc_toggle_counter += 1
+                return
+        self.esc_toggle_reset()
+        self.esc_toggle_status = not self.esc_toggle_status
+        self.get_curr_window().esc_toggle(self.esc_toggle_status)
+
     def on_key(self, key):
         try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
         except Exception as e: pass
 
         if key == 27: # esc
-            self.change_mode(NORMAL)
+            if self.mode == NORMAL:
+                self.esc_toggle()
+            else:
+                self.esc_toggle_reset()
+                self.change_mode(NORMAL)
             return False
 
+        self.esc_toggle_reset()
         if key in self.maps[self.mode]:
             curr = self.maps[self.mode]
             if callable(curr[key]): return curr[key](self)

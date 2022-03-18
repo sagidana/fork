@@ -49,9 +49,10 @@ class Window():
         self.content_width = self.width
         self.content_height = self.height
 
-        # slice window for line numbers.
-        self.content_position[0] += self.lines_margin
-        self.content_width -= self.lines_margin
+        # # slice window for line numbers.
+        self.line_numbers = False # default
+        # self.content_position[0] += self.lines_margin
+        # self.content_width -= self.lines_margin
 
         self.window_cursor = [0,0]
         self.buffer_cursor = [0,0]
@@ -60,6 +61,16 @@ class Window():
         self.events = {}
 
         self.draw()
+
+    def enable_lines_numbers(self):
+        self.content_position[0] += self.lines_margin
+        self.content_width -= self.lines_margin
+        self.line_numbers = True
+
+    def disable_lines_numbers(self):
+        self.content_position[0] -= self.lines_margin
+        self.content_width += self.lines_margin
+        self.line_numbers = False
 
     def register_events(self, handlers):
         for event in handlers:
@@ -73,7 +84,7 @@ class Window():
         cursor[0] = self.content_position[0] + self.window_cursor[0]
         cursor[1] = self.content_position[1] + self.window_cursor[1]
 
-        self.draw_lines()
+        if self.line_numbers: self.draw_lines()
         self.visualize()
 
         self.stdscr.move(cursor[1], cursor[0])
@@ -190,6 +201,10 @@ class Window():
             self._visualize_block()
 
     def draw_lines(self):
+        # # slice window for line numbers.
+        # self.content_position[0] += self.lines_margin
+        # self.content_width -= self.lines_margin
+
         style = {}
         style['background'] = g_settings['theme']['colors']['editor.background']
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
@@ -199,16 +214,21 @@ class Window():
 
         for y in range(self.content_height):
             try:
-                # lineno = str(self.buffer_cursor[1]).ljust(self.lines_margin)
-                lineno = str(buf_start_y + y).ljust(self.lines_margin)
+                if y == self.window_cursor[1]:
+                    lineno = str(buf_start_y + y).ljust(self.lines_margin)
+                else: # relative numbers
+                    lineno = str(abs(self.window_cursor[1] - y)).ljust(self.lines_margin)
+
                 self.stdscr.addstr( y,
                                     0,
                                     lineno,
                                     attr)
             except Exception as e: elog(f"Exception: 1 {e}")
 
-        # for y in range(self.content_height):
-            # buffer_y = first_line + y
+    def esc_toggle(self, status):
+        if status: self.enable_lines_numbers()
+        else: self.disable_lines_numbers()
+        self.draw()
 
     def draw(self):
         # - Draw with defaut colors of theme
@@ -251,7 +271,6 @@ class Window():
         # - on top of thaat draw highlights
         self.highlight()
         self.visualize()
-        self.draw_lines()
         self.draw_cursor()
     
     def _scroll_up(self):
