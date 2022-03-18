@@ -1,6 +1,6 @@
 from log import elog
 
-from colors import get_curses_color_pair
+# from colors import get_curses_color_pair
 from settings import g_settings
 from buffer import *
 from hooks import *
@@ -28,14 +28,14 @@ class Window():
         return event_wrapper
 
     def __init__(   self, 
-                    stdscr, 
+                    screen, 
                     width, 
                     height, 
                     position=(0,0), 
                     buffer=None):
         if not buffer: raise Exception("Not implemented.")
 
-        self.stdscr = stdscr
+        self.screen = screen
 
         self.buffer = buffer
         self.set_lines_margin()
@@ -96,18 +96,18 @@ class Window():
     def set_lines_margin(self):
         self.lines_margin = len(str(len(self.buffer.lines))) + 1
 
-    def color_pair_to_curses(self, fg, bg):
-        return get_curses_color_pair(fg, bg)
+    # def color_pair_to_curses(self, fg, bg):
+        # return get_curses_color_pair(fg, bg)
 
-    def style_to_attr(self, style):
-        if 'reverse' in style: return curses.A_REVERSE
+    # def style_to_attr(self, style):
+        # if 'reverse' in style: return curses.A_REVERSE
 
-        fg = style['foreground'] if 'foreground' in style else g_settings['theme']['colors']['editor.foreground']
-        bg = style['background'] if 'background' in style else g_settings['theme']['colors']['editor.background']
+        # fg = style['foreground'] if 'foreground' in style else g_settings['theme']['colors']['editor.foreground']
+        # bg = style['background'] if 'background' in style else g_settings['theme']['colors']['editor.background']
 
-        pair = self.color_pair_to_curses(fg, bg)
-        attr = curses.color_pair(pair)
-        return attr
+        # pair = self.color_pair_to_curses(fg, bg)
+        # attr = curses.color_pair(pair)
+        # return attr
 
     def highlight(self):
         buffer_height = len(self.buffer.lines) - 1
@@ -125,9 +125,10 @@ class Window():
             x = node.start_point[1]
             length = node.end_point[1] - x
 
-            self._screen_style( x,
+            # elog(f"style: {style}")
+            self._screen_write( x,
                                 y - start_y,
-                                length,
+                                node.text.decode(),
                                 style)
 
     def _visualize_block(self): pass
@@ -250,7 +251,7 @@ class Window():
         style = {}
         style['background'] = g_settings['theme']['colors']['editor.background']
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
-        attr = self.style_to_attr(style)
+        # attr = self.style_to_attr(style)
 
         for y in range(self.content_height):
             buffer_y = first_line + y
@@ -279,7 +280,7 @@ class Window():
 
         # - on top of thaat draw highlights
         self.highlight()
-        self.visualize()
+        # self.visualize()
         self.draw_cursor()
     
     def _scroll_up(self):
@@ -556,7 +557,7 @@ class Window():
 
     @timeout_decorator.timeout(2)
     def get_key(self):
-        return self.stdscr.getch()
+        return self.screen.get_key()
 
     def find(self): 
         try: key = self.get_key()
@@ -770,39 +771,35 @@ class Window():
 
     def _screen_move(self, x, y): 
         # TODO: boundry checks
-        self.stdscr.move(   self.content_position[1] + y, 
-                            self.content_position[0] + x)
+        self.screen.move_cursor(    self.content_position[1] + y, 
+                                    self.content_position[0] + x)
 
     def _screen_clear_line_raw(self, y): 
-        self.stdscr.move(y, 0)
-        self.stdscr.clrtoeol()
-        self.stdscr.refresh() # IMPORTANT
+        self.screen.clear_line(y)
 
     def _screen_clear_line(self, y): 
-        self.stdscr.move(   self.content_position[1] + y,
-                            self.content_position[0])
-        self.stdscr.clrtoeol() 
+        self.screen.clear_line(self.content_position[1] + y)
 
     def _screen_style(self, x, y, size, style): 
+        pass
         # TODO: boundry checks
-        attr = self.style_to_attr(style)
-        self.stdscr.chgat(  self.content_position[1] + y, 
+        self.screen.style(  self.content_position[1] + y, 
                             self.content_position[0] + x, 
-                            size, attr)
+                            size, style)
 
     def _screen_write_raw(self, x, y, string, style): 
         # TODO: boundry checks
-        attr = self.style_to_attr(style)
-        self.stdscr.addstr( self.position[1] + y, 
+        # attr = self.style_to_attr(style)
+        self.screen.write(  self.position[1] + y, 
                             self.position[0] + x,
                             string,
-                            attr)
+                            style)
 
     def _screen_write(self, x, y, string, style): 
         # TODO: boundry checks
-        attr = self.style_to_attr(style)
-        self.stdscr.addstr( self.content_position[1] + y, 
+        # attr = self.style_to_attr(style)
+        self.screen.write(  self.content_position[1] + y, 
                             self.content_position[0] + x,
                             string,
-                            attr)
+                            style)
 

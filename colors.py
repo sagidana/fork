@@ -361,46 +361,46 @@ curses_color_pairs = {}
 # Might need to add support of colors!
 # TERM='xterm-256color' 
 
-def _color_to_curses(r, g, b):
-    factor = 1000 / 255
-    return int(r * factor), int(g * factor), int(b * factor)
+# def _color_to_curses(r, g, b):
+    # factor = 1000 / 255
+    # return int(r * factor), int(g * factor), int(b * factor)
 
-def get_curses_color(color):
-    # color system: 256_colors
-    # elog(f"color: {color}")
-    # return int(color)
+# def get_curses_color(color):
+    # # color system: 256_colors
+    # # elog(f"color: {color}")
+    # # return int(color)
 
-    # color system: true_colors
-    if color in curses_colors: return curses_colors[color]
+    # # color system: true_colors
+    # if color in curses_colors: return curses_colors[color]
 
-    n = len(curses_colors) + 1
+    # n = len(curses_colors) + 1
 
-    # curses.init_color(n, rgb2short(color)[0])
-    # curses.init_color(n, color)
+    # # curses.init_color(n, rgb2short(color)[0])
+    # # curses.init_color(n, color)
 
-    rgb = _strip_hash(color)
-    parts = [ int(h, 16) for h in re.split(r'(..)(..)(..)', rgb)[1:4] ]
-    r, g, b = parts[0], parts[1], parts[2]
-    r, g, b = _color_to_curses(r, g, b)
-    elog(f"n {n}, r {r}, g {g}, b {b}")
-    curses.init_color(n, r, g, b)
+    # rgb = _strip_hash(color)
+    # parts = [ int(h, 16) for h in re.split(r'(..)(..)(..)', rgb)[1:4] ]
+    # r, g, b = parts[0], parts[1], parts[2]
+    # r, g, b = _color_to_curses(r, g, b)
+    # elog(f"n {n}, r {r}, g {g}, b {b}")
+    # curses.init_color(n, r, g, b)
 
-    curses_colors[color] = n
+    # curses_colors[color] = n
 
-    return n
+    # return n
 
-def get_curses_color_pair(fg, bg):
-    fg = get_curses_color(fg)
-    bg = get_curses_color(bg)
-    pair = (fg, bg)
+# def get_curses_color_pair(fg, bg):
+    # fg = get_curses_color(fg)
+    # bg = get_curses_color(bg)
+    # pair = (fg, bg)
 
-    if pair in curses_color_pairs: return curses_color_pairs[pair]
+    # if pair in curses_color_pairs: return curses_color_pairs[pair]
 
-    n = len(curses_color_pairs) + 1
+    # n = len(curses_color_pairs) + 1
 
-    elog(f"n {n}, fg {fg}, bg {bg}")
+    # elog(f"n {n}, fg {fg}, bg {bg}")
 
-    curses.init_pair(n, fg, bg)
-    curses_color_pairs[pair] = n
+    # curses.init_pair(n, fg, bg)
+    # curses_color_pairs[pair] = n
 
-    return n
+    # return n
