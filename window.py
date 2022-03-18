@@ -240,25 +240,24 @@ class Window():
                 line = self.buffer.lines[first_line + y]
 
             x_range = min(self.content_width, max(0, len(line) - 1))
-            for buffer_x in range(x_range):
-                try:
-                    self._screen_write( buffer_x,
-                                        y,
-                                        line[buffer_x],
-                                        style)
-                except Exception as e: elog(f"Exception: 1 {e}")
+            try:
+                self._screen_write( 0,
+                                    y,
+                                    line[:x_range],
+                                    style)
+            except Exception as e: elog(f"Exception: 1 {e}")
 
-            for x in range(self.content_width - x_range):
-                try:
-                    self._screen_write( x_range + x,
-                                        y,
-                                        ' ',
-                                        style)
-                except Exception as e: elog(f"Exception: {x} {x_range} {e}")
+            x_rest = self.content_width - x_range
+            try:
+                self._screen_write( x_range,
+                                    y,
+                                    ' '* x_rest,
+                                    style)
+            except Exception as e: elog(f"Exception: {x} {x_range} {e}")
 
         # - on top of thaat draw highlights
         self.highlight()
-        # self.visualize()
+        self.visualize()
         self.draw_cursor()
     
     def _scroll_up(self):

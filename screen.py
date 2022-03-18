@@ -76,11 +76,15 @@ def get_terminal_size():
 
 class Screen():
     def screen_resize_handler(self, signum, frame):
-        self.width, self.height = get_terminal_size()
-        Hooks.execute(ON_RESIZE, (self.width, self.height))
+        size = get_terminal_size()
+        elog(f"{size}")
+        self.width, self.height = size
+        Hooks.execute(ON_RESIZE, size)
 
     def __init__(self):
-        self.width, self.height = get_terminal_size()
+        size = get_terminal_size()
+        elog(f"{size}")
+        self.width, self.height = size
 
         signal(SIGWINCH, self.screen_resize_handler)
         self._disable_echo()

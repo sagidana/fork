@@ -19,6 +19,8 @@ class Tab():
     def on_resize_callbak(self, size):
         self.width = size[0]
         self.height = size[1]
+
+        elog(f"{size}")
         
         self.get_curr_window().resize(  self.width,
                                         self.height)

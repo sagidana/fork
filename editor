@@ -823,6 +823,8 @@ def main():
 
         k = screen.get_key()
 
+    screen.clear()
+
 
 if __name__ == "__main__":
     main()
