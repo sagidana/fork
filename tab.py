@@ -1,3 +1,4 @@
+from log import elog
 from window import *
 from hooks import *
 from events import *
@@ -58,6 +59,14 @@ class Tab():
             if event not in self.events:
                 self.events[event] = []
             self.events[event].append(handlers[event])
+
+    def split(self):
+        elog('tab.split()')
+        pass
+
+    def vsplit(self):
+        elog('tab.vsplit()')
+        pass
 
     def draw(self):
         self.get_curr_window().draw()

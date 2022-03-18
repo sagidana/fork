@@ -108,6 +108,17 @@ class Editor():
             return False
         self.maps[NORMAL][18] = ctrl_r_map
 
+        self.maps[NORMAL][23] = {}
+
+        def ctrl_w_s_map(self):
+            self.get_curr_tab().split()
+            return False
+        self.maps[NORMAL][23][ord('s')] = ctrl_w_s_map
+        def ctrl_w_v_map(self):
+            self.get_curr_tab().vsplit()
+            return False
+        self.maps[NORMAL][23][ord('v')] = ctrl_w_v_map
+
     def _initialize_normal_symbol_maps(self):
         def zero_map(self):
             self.get_curr_window().move_line_begin()
@@ -531,6 +542,16 @@ class Editor():
             return self.on_command()
         self.maps[NORMAL][ord(':')] = colon_map
 
+        def enter_map(self):
+            enter_map.toggle = not enter_map.toggle
+            if enter_map.toggle:
+                self.get_curr_window().enable_lines_numbers()
+            else:
+                self.get_curr_window().disable_lines_numbers()
+            return False
+        enter_map.toggle = False
+        self.maps[NORMAL][10] = enter_map
+
         self._initialize_legends_maps(NORMAL)
         self._initialize_normal_mainstream_maps()
 
@@ -629,8 +650,6 @@ class Editor():
         self.height, self.width = stdscr.getmaxyx()
         signal(SIGWINCH, self.screen_resize_handler)
 
-        self.esc_toggle_status = False
-        self.esc_toggle_counter = 0
         self.registers = {}
         self.initialize_registers()
 
@@ -764,31 +783,14 @@ class Editor():
         self.get_curr_tab().draw()
         return ret
 
-    def esc_toggle_reset(self):
-        self.esc_toggle_counter = 0
-
-    def esc_toggle(self):
-        if not self.esc_toggle_status:
-            if self.esc_toggle_counter < 1: 
-                self.esc_toggle_counter += 1
-                return
-        self.esc_toggle_reset()
-        self.esc_toggle_status = not self.esc_toggle_status
-        self.get_curr_window().esc_toggle(self.esc_toggle_status)
-
     def on_key(self, key):
         try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
         except Exception as e: pass
 
         if key == 27: # esc
-            if self.mode == NORMAL:
-                self.esc_toggle()
-            else:
-                self.esc_toggle_reset()
-                self.change_mode(NORMAL)
+            self.change_mode(NORMAL)
             return False
 
-        self.esc_toggle_reset()
         if key in self.maps[self.mode]:
             curr = self.maps[self.mode]
             if callable(curr[key]): return curr[key](self)

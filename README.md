@@ -38,7 +38,7 @@ The theme files should come as a json format. currently using vs code theme:
 
 ### The Grammar
 
-Treesitter enable us to parse th code file and get its Abstraxt Syntax Tree
+Treesitter enable us to parse th code file and get its Abstract Syntax Tree
 (AST) in a fast, flexible, and efficiant way. But this is not enough, the
 themes uses a seperate terminology to map a style to an element inside a file.
 Something need to map between Treesitter's AST and the Theme's terminology.
@@ -54,18 +54,16 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 
-## Features
-- Modal Editing
-- Syntax Highlight
-- Folding
-
 ## TODOs
 - search & replace
 - \<num\>\<action\>
-- line numbers
+- macros
+- auto completion
+- splits
+    - quickfix lists/location lists
+    - fzf
 - statusline?
 - folds
-- splits
 - ctags
 - cscope
 - tabs

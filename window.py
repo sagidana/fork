@@ -63,14 +63,18 @@ class Window():
         self.draw()
 
     def enable_lines_numbers(self):
+        if self.line_numbers: return
         self.content_position[0] += self.lines_margin
         self.content_width -= self.lines_margin
         self.line_numbers = True
+        self.draw()
 
     def disable_lines_numbers(self):
+        if not self.line_numbers: return
         self.content_position[0] -= self.lines_margin
         self.content_width += self.lines_margin
         self.line_numbers = False
+        self.draw()
 
     def register_events(self, handlers):
         for event in handlers:
@@ -215,20 +219,16 @@ class Window():
         for y in range(self.content_height):
             try:
                 if y == self.window_cursor[1]:
-                    lineno = str(buf_start_y + y).ljust(self.lines_margin)
+                    lineno = str(buf_start_y + y).ljust(self.lines_margin - 1)
                 else: # relative numbers
-                    lineno = str(abs(self.window_cursor[1] - y)).ljust(self.lines_margin)
+                    lineno = str(abs(self.window_cursor[1] - y)).rjust(self.lines_margin - 1)
+                lineno = lineno.ljust(self.lines_margin)
 
                 self.stdscr.addstr( y,
                                     0,
                                     lineno,
                                     attr)
             except Exception as e: elog(f"Exception: 1 {e}")
-
-    def esc_toggle(self, status):
-        if status: self.enable_lines_numbers()
-        else: self.disable_lines_numbers()
-        self.draw()
 
     def draw(self):
         # - Draw with defaut colors of theme
