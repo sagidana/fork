@@ -220,7 +220,7 @@ class Window():
             self._screen_clear_line(y)
 
     def draw(self):
-        self.clear()
+        # self.clear()
 
         before = self.window_cursor[1]
         first_line = self.buffer_cursor[1] - before

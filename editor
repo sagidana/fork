@@ -90,6 +90,34 @@ class Editor():
             return False
         self.maps[mode][ord('h')] = h_map
 
+    def _initialize_normal_window_maps(self):
+        self.maps[NORMAL][CTRL_W_KEY] = {}
+        def ctrl_w_s_map(self):
+            self.get_curr_tab().split()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('s')] = ctrl_w_s_map
+        def ctrl_w_v_map(self):
+            self.get_curr_tab().vsplit()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('v')] = ctrl_w_v_map
+
+        def ctrl_w_h_map(self):
+            self.get_curr_tab().move_left_window()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('h')] = ctrl_w_h_map
+        def ctrl_w_j_map(self):
+            self.get_curr_tab().move_down_window()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('j')] = ctrl_w_j_map
+        def ctrl_w_k_map(self):
+            self.get_curr_tab().move_up_window()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('k')] = ctrl_w_k_map
+        def ctrl_w_l_map(self):
+            self.get_curr_tab().move_right_window()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('l')] = ctrl_w_l_map
+
     def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):
             self.get_curr_window().scroll_up_half_page()
@@ -108,17 +136,6 @@ class Editor():
             self.get_curr_window().redo()
             return False
         self.maps[NORMAL][18] = ctrl_r_map
-
-        self.maps[NORMAL][23] = {}
-
-        def ctrl_w_s_map(self):
-            self.get_curr_tab().split()
-            return False
-        self.maps[NORMAL][23][ord('s')] = ctrl_w_s_map
-        def ctrl_w_v_map(self):
-            self.get_curr_tab().vsplit()
-            return False
-        self.maps[NORMAL][23][ord('v')] = ctrl_w_v_map
 
     def _initialize_normal_symbol_maps(self):
         def zero_map(self):
@@ -555,6 +572,7 @@ class Editor():
 
         self._initialize_legends_maps(NORMAL)
         self._initialize_normal_mainstream_maps()
+        self._initialize_normal_window_maps()
 
     def _initialize_insert_maps(self): pass
 
@@ -824,6 +842,7 @@ def main():
         k = screen.get_key()
 
     screen.clear()
+    screen.move_cursor(0,0)
 
 
 if __name__ == "__main__":

@@ -26,17 +26,17 @@ class Tab():
                                         self.height)
 
     def __init__(   self, 
-                    stdscr, 
+                    screen, 
                     width, 
                     height, 
                     buffer=None):
 
-        self.stdscr = stdscr
+        self.screen = screen
         self.width = width
         self.height = height
 
         self.windows = []
-        window = Window(self.stdscr,
+        window = Window(self.screen,
                         self.width, 
                         self.height, 
                         position=(0,0),
@@ -58,22 +58,86 @@ class Tab():
         self.windows.append(window)
         self.curr_window = index
 
+    def move_left_window(self): 
+        x = self.get_curr_window().position[0]
+        y = self.get_curr_window().position[1]
+
+        nearest = self.curr_window
+        for index, window in enumerate(self.windows):
+            if index == self.curr_window: continue
+            curr_x = window.position[0]
+            curr_y = window.position[1]
+
+            if curr_x >= x: continue
+            nearest = index
+
+        self.set_curr_window(nearest)
+
+    def move_right_window(self): 
+        x = self.get_curr_window().position[0]
+        y = self.get_curr_window().position[1]
+
+        nearest = self.curr_window
+        for index, window in enumerate(self.windows):
+            if index == self.curr_window: continue
+            curr_x = window.position[0]
+            curr_y = window.position[1]
+
+            if curr_x <= x: continue
+            nearest = index
+
+        self.set_curr_window(nearest)
+
+    def move_up_window(self): 
+        x = self.get_curr_window().position[0]
+        y = self.get_curr_window().position[1]
+
+        nearest = self.curr_window
+        for index, window in enumerate(self.windows):
+            if index == self.curr_window: continue
+            curr_x = window.position[0]
+            curr_y = window.position[1]
+
+            if curr_y >= y: continue
+            nearest = index
+
+        self.set_curr_window(nearest)
+
+    def move_down_window(self): 
+        x = self.get_curr_window().position[0]
+        y = self.get_curr_window().position[1]
+
+        nearest = self.curr_window
+        for index, window in enumerate(self.windows):
+            if index == self.curr_window: continue
+            curr_x = window.position[0]
+            curr_y = window.position[1]
+
+            if curr_y <= y: continue
+            nearest = index
+
+        self.set_curr_window(nearest)
+
     def split(self):
-        elog('tab.split()')
         curr_window = self.get_curr_window()
         curr_buffer = curr_window.buffer
 
         height = int(curr_window.height / 2)
         width = curr_window.width
 
-        curr_window.resize( width,
-                            height)
+        seperator_y = curr_window.position[1] + height
 
-        new_window = Window(    self.stdscr,
+        self.draw_horizontal_seperator( seperator_y, 
+                                        curr_window.position[0],
+                                        width)
+
+        curr_window.resize(width, height)
+
+        new_window = Window(    self.screen,
                                 width, 
                                 height, 
                                 position=(  curr_window.position[0],
-                                            curr_window.position[1] + height),
+                                            curr_window.position[1] + height + 1),
                                 buffer=curr_buffer)
         self.add_window(new_window)
 
@@ -81,12 +145,52 @@ class Tab():
         new_window.draw()
 
     def vsplit(self):
-        elog('tab.vsplit()')
-        pass
+        curr_window = self.get_curr_window()
+        curr_buffer = curr_window.buffer
 
+        height = curr_window.height
+        width = int(curr_window.width / 2)
+
+        seperator_x = curr_window.position[0] + width
+
+        self.draw_vertical_seperator(   curr_window.position[1], 
+                                        seperator_x,
+                                        height)
+
+        curr_window.resize(width, height)
+
+        new_window = Window(    self.screen,
+                                width, 
+                                height, 
+                                position=(  curr_window.position[0] + width + 1,
+                                            curr_window.position[1]),
+                                buffer=curr_buffer)
+        self.add_window(new_window)
+
+        curr_window.draw()
+        new_window.draw()
+
+    def draw_vertical_seperator(self, y, x, size):
+        for i in range(size):
+            self.screen.write(  y + i,
+                                x,
+                                " ",
+                                {'background': '#000000'})
+
+    def draw_horizontal_seperator(self, y, x, size):
+        self.screen.write(  y, 
+                            x,
+                            " "*size,
+                            {'background': '#000000'})
+    
     def draw(self):
         for window in self.windows:
             window.draw()
+        self.get_curr_window().draw_cursor()
+
+    def set_curr_window(self, index):
+        self.curr_window = index
+        self.draw()
 
     def get_curr_window(self):
         return self.windows[self.curr_window]
