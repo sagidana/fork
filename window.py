@@ -79,7 +79,7 @@ class Window():
         self.stdscr.move(cursor[1], cursor[0])
 
     def set_lines_margin(self):
-        self.lines_margin = len(str(len(self.buffer.lines)))
+        self.lines_margin = len(str(len(self.buffer.lines))) + 1
 
     def color_pair_to_curses(self, fg, bg):
         return get_curses_color_pair(fg, bg)

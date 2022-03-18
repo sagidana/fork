@@ -61,7 +61,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - search & replace
-- <num><action>
+- \<num\>\<action\>
 - line numbers
 - statusline?
 - folds
