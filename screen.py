@@ -155,7 +155,6 @@ class Screen():
             # self._write_to_stdout(escape)
 
     def write(self, y, x, string, style=None): 
-        # y += 1; x += 1
         self._save_cursor()
 
         self.move_cursor(y, x)

@@ -101,7 +101,7 @@ class Editor():
         self.maps[NORMAL][4] = ctrl_d_map
         def ctrl_l_map(self):
             self.get_curr_buffer().resync_treesitter()
-            self.get_curr_window().draw()
+            self.get_curr_tab().draw()
             return False
         self.maps[NORMAL][12] = ctrl_l_map
         def ctrl_r_map(self):
@@ -760,7 +760,6 @@ class Editor():
         command = ""
         self.draw_command(command)
         while True:
-            # self.stdscr.refresh() # refresh the screen
             key = self.screen.get_key()
 
             if key == ESC_KEY: break
@@ -775,15 +774,11 @@ class Editor():
             except: pass
             self.draw_command(command)
 
-        # self.stdscr.refresh() # refresh the screen
         self.screen.clear()
         self.get_curr_tab().draw()
         return ret
 
     def on_key(self, key):
-        # try: elog(f"KEY: '{chr(key)}' -> ord({key}) -> {curses.keyname(key).decode()}")
-        # except Exception as e: pass
-
         if key == ESC_KEY:
             self.change_mode(NORMAL)
             return False

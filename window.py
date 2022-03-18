@@ -88,26 +88,13 @@ class Window():
         cursor[0] = self.window_cursor[0]
         cursor[1] = self.window_cursor[1]
 
-        if self.line_numbers: self.draw_lines()
+        if self.line_numbers: self.draw_line_numbers()
         self.visualize()
 
         self._screen_move(cursor[0], cursor[1])
 
     def set_lines_margin(self):
         self.lines_margin = len(str(len(self.buffer.lines))) + 1
-
-    # def color_pair_to_curses(self, fg, bg):
-        # return get_curses_color_pair(fg, bg)
-
-    # def style_to_attr(self, style):
-        # if 'reverse' in style: return curses.A_REVERSE
-
-        # fg = style['foreground'] if 'foreground' in style else g_settings['theme']['colors']['editor.foreground']
-        # bg = style['background'] if 'background' in style else g_settings['theme']['colors']['editor.background']
-
-        # pair = self.color_pair_to_curses(fg, bg)
-        # attr = curses.color_pair(pair)
-        # return attr
 
     def highlight(self):
         buffer_height = len(self.buffer.lines) - 1
@@ -207,15 +194,10 @@ class Window():
         if self.buffer.visual_mode == 'visual_block':
             self._visualize_block()
 
-    def draw_lines(self):
-        # # slice window for line numbers.
-        # self.content_position[0] += self.lines_margin
-        # self.content_width -= self.lines_margin
-
+    def draw_line_numbers(self):
         style = {}
         style['background'] = g_settings['theme']['colors']['editor.background']
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
-        # attr = self.style_to_attr(style)
 
         buf_start_y = self.buffer_cursor[1] - self.window_cursor[1]
 
@@ -234,12 +216,8 @@ class Window():
             except Exception as e: elog(f"Exception: 1 {e}")
 
     def clear(self):
-        # self.stdscr.clear()
         for y in range(self.height):
-            self._screen_clear_line_raw(y)
-            # self.stdscr.move(   self.position[1] + y, 
-                                # self.position[0] + 0)
-            # self.stdscr.clrtoeol() # TODO end of range
+            self._screen_clear_line(y)
 
     def draw(self):
         self.clear()
