@@ -313,13 +313,14 @@ class Window():
         self.draw()
 
     def _move_up(self):
+        scrolled = False
         # We are at the bottom
         if self.buffer_cursor[1] == 0: return False
 
         # We need to scroll up
         if self.window_cursor[1] == 0:
             self._scroll_up()
-            self.draw()
+            scrolled = True
         else: # Simple up action
             if self.buffer_cursor[1] == 0: raise Exception('Should never happen.')
 
@@ -336,16 +337,17 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
-        return True
+        return True,  scrolled
 
     def _move_down(self):
+        scrolled = False
         # We are at the bottom
         if self.buffer_cursor[1] == len(self.buffer.lines) - 1: return False
 
         # We need to scroll down
         if self.window_cursor[1] == self.height - 1:
             self._scroll_down()
-            self.draw()
+            scrolled = True
         else: # Simple down action
             self.window_cursor[1] += 1
             self.buffer_cursor[1] += 1
@@ -360,7 +362,7 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
-        return True
+        return True, scrolled
 
     def _move_right(self):
         if self.buffer_cursor[0] == len(self.buffer.lines[self.buffer_cursor[1]]) - 1:
@@ -427,13 +429,18 @@ class Window():
 
     def move_cursor_to_buf_location(self, buf_x, buf_y):
         if self.is_visible(buf_x, buf_y):
+            scrolled = False
             elog(f"{buf_x}, {buf_y}")
             if self.buffer_cursor[1] > buf_y:
                 y_diff = self.buffer_cursor[1] - buf_y
-                for i in range(y_diff): self._move_up()
+                for i in range(y_diff): 
+                    ret = self._move_up()
+                    if ret and ret[1]: scrolled = True
             else:
                 y_diff = buf_y - self.buffer_cursor[1]
-                for i in range(y_diff): self._move_down()
+                for i in range(y_diff): 
+                    ret = self._move_down()
+                    if ret and ret[1]: scrolled = True
 
             if self.buffer_cursor[0] > buf_x:
                 x_diff = self.buffer_cursor[0] - buf_x
@@ -442,7 +449,10 @@ class Window():
                 x_diff = buf_x - self.buffer_cursor[0]
                 for i in range(x_diff): self._move_right()
 
-            self.draw_cursor()
+            if scrolled:
+                self.draw()
+            else:
+                self.draw_cursor()
             # self.window_cursor[0] = buf_x
             # self.window_cursor[1] = buf_y
 
@@ -484,7 +494,6 @@ class Window():
         return x, y
 
     def scroll_up_half_page(self):
-        self._align_center()
         half = int(self.height / 2)
         for i in range(half): self._move_up()
         self._align_center()
@@ -492,7 +501,6 @@ class Window():
         self.draw()
 
     def scroll_down_half_page(self):
-        self._align_center()
         half = int(self.height / 2)
         for i in range(half): self._move_down()
         self._align_center()
@@ -745,7 +753,8 @@ class Window():
                                     self.buffer_cursor[1],
                                     char)
         if char == '\n' or char == '\r':
-            self._move_down()
+            ret = self._move_down()
+            if ret and ret[1]: self.draw() # scrolled
             self._move_line_begin()
         else:
             self._move_right()
@@ -810,13 +819,21 @@ class Window():
 
     @raise_event
     def move_up(self):
-        self._move_up()
-        self.draw_cursor()
+        ret = self._move_up()
+        if not ret: return
+        if ret[1]:
+            self.draw()
+        else:
+            self.draw_cursor()
 
     @raise_event
     def move_down(self):
-        self._move_down()
-        self.draw_cursor()
+        ret = self._move_down()
+        if not ret: return
+        if ret[1]:
+            self.draw()
+        else:
+            self.draw_cursor()
 
     @raise_event
     def move_right(self):
