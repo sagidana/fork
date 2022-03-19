@@ -118,6 +118,23 @@ class Tab():
 
         self.set_curr_window(nearest)
 
+    def _get_index_by_window(self, window):
+        for index, win in enumerate(self.windows):
+            if win == window: return index
+        return None
+
+    def close_window(self, window):
+        index = self._get_index_by_window(window)
+
+        self.windows.pop(index)
+
+        # TODO: if this is the last window close the tab.
+        if len(self.windows) == 0: raise Exception('close tab')
+
+        if index == self.curr_window: self.set_curr_window(0)
+
+        # TODO fix sizes
+
     def split(self):
         curr_window = self.get_curr_window()
         curr_buffer = curr_window.buffer
