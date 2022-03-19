@@ -402,6 +402,30 @@ class Window():
         else:
             self.window_cursor[1] = center
 
+    def _align_top(self):
+        top = 0
+        self.window_cursor[1] = top
+
+    def _align_bottom(self):
+        bottom = self.height - 1
+
+        if self.buffer_cursor[1] < bottom:
+            self.window_cursor[1] = self.buffer_cursor[1]
+        else:
+            self.window_cursor[1] = bottom
+
+    def align_center(self):
+        self._align_center()
+        self.draw()
+
+    def align_top(self):
+        self._align_top()
+        self.draw()
+
+    def align_bottom(self):
+        self._align_bottom()
+        self.draw()
+
     def is_visible(self, buf_x, buf_y):
         return True # TODO:
 
@@ -443,6 +467,25 @@ class Window():
         except Exception as e:
             elog(f"{e}")
             return None
+
+    def half_page_down(self):
+        half = int(self.height / 2)
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+        max_y = len(self.buffer.lines) - 1
+
+        y = min(max_y, y + half)
+        x = min(x, len(self.get_line(y)) - 1)
+        return x, y
+
+    def half_page_up(self):
+        half = int(self.height / 2)
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+
+        y = max(y - half, 0)
+        x = min(x, len(self.get_line(y)) - 1)
+        return x, y
 
     def scroll_up_half_page(self):
         half = int(self.height / 2)

@@ -159,86 +159,103 @@ class Editor():
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
             scope = (x, y, x, y + 1)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('j')] = move_j
         def move_k(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
             scope = (x, y, x, y - 1)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('k')] = move_k
         def move_h(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
             scope = (x, y, x - 1, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('h')] = move_h
         def move_l(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
             scope = (x, y, x + 1, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('l')] = move_l
 
         def move_w(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_next_word(start_x, start_y)
-            if not ret: return
+            if not ret: return False
             end_x, end_y = ret
             # scope = (start_x, start_y, end_x - 1, end_y)
             scope = (start_x, start_y, end_x, end_y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('w')] = move_w
         def move_W(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_next_WORD(start_x, start_y)
-            if not ret: return
+            if not ret: return False
             end_x, end_y = ret
             # scope = (start_x, start_y, end_x - 1, end_y)
             scope = (start_x, start_y, end_x, end_y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('W')] = move_W
         def move_b(self):
             end_x = self.get_curr_window().buffer_cursor[0] - 1
             end_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_prev_word(end_x, end_y)
-            if not ret: return
+            if not ret: return False
             start_x, start_y = ret
             scope = (start_x, start_y, end_x, end_y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('b')] = move_b
         def move_B(self):
             end_x = self.get_curr_window().buffer_cursor[0] - 1
             end_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_prev_WORD(end_x, end_y)
-            if not ret: return
+            if not ret: return False
             start_x, start_y = ret
             scope = (start_x, start_y, end_x, end_y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('B')] = move_B
         def move_e(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_word_end(start_x, start_y)
-            if not ret: return
+            if not ret: return False
             end_x, end_y = ret
             scope = (start_x, start_y, end_x, end_y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('e')] = move_e
         def move_E(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_WORD_end(start_x, start_y)
-            if not ret: return
+            if not ret: return False
             end_x, end_y = ret
             scope = (start_x, start_y, end_x, end_y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('E')] = move_E
+
+        def ctrl_u_map(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+            end_x, end_y = self.get_curr_window().half_page_up()
+            scope = (start_x, start_y, end_x, end_y)
+            if scope: return cb(scope)
+            return False
+        maps[CTRL_U_KEY] = ctrl_u_map
+        def ctrl_d_map(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+            end_x, end_y = self.get_curr_window().half_page_down()
+            scope = (start_x, start_y, end_x, end_y)
+            if scope: return cb(scope)
+            return False
+        maps[CTRL_D_KEY] = ctrl_d_map
 
         # def move_f(self):
             # start_x = self.get_curr_window().buffer_cursor[0]
@@ -269,59 +286,59 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_parentheses(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][ord('(')] = inner_parentheses
         maps[ord('i')][ord(')')] = inner_parentheses
         def inner_square_brackets(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_square_brackets(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][ord('[')] = inner_square_brackets
         maps[ord('i')][ord(']')] = inner_square_brackets
         def inner_curly_brackets(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_curly_brackets(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][ord('{')] = inner_curly_brackets
         maps[ord('i')][ord('}')] = inner_curly_brackets
         def inner_greater_than(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_greater_than(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][('<')] = inner_greater_than
         maps[ord('i')][('>')] = inner_greater_than
         def inner_quotation(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_quotation(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][ord('"')] = inner_quotation
         def inner_apostrophe(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_apostrophe(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][ord("'")] = inner_apostrophe
         def inner_backtick(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_backtick(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][ord("`")] = inner_backtick
         def inner_word(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_word(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][ord("w")] = inner_word
         def inner_WORD(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_WORD(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('i')][ord("W")] = inner_WORD
 
         maps[ord('a')] = {}
@@ -329,59 +346,59 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_parentheses(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord('(')] = arround_parentheses
         maps[ord('a')][ord(')')] = arround_parentheses
         def arround_square_brackets(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_square_brackets(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord('[')] = arround_square_brackets
         maps[ord('a')][ord(']')] = arround_square_brackets
         def arround_curly_brackets(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_curly_brackets(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord('{')] = arround_curly_brackets
         maps[ord('a')][ord('}')] = arround_curly_brackets
         def arround_greater_than(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_greater_than(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord('<')] = arround_greater_than
         maps[ord('a')][ord('>')] = arround_greater_than
         def arround_quotation(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_quotation(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord('"')] = arround_quotation
         def arround_apostrophe(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_apostrophe(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord("'")] = arround_apostrophe
         def arround_backtick(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_backtick(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord("`")] = arround_backtick
         def arround_word(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_word(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord("w")] = arround_word
         def arround_WORD(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_WORD(x, y)
-            if scope: cb(scope)
+            if scope: return cb(scope)
         maps[ord('a')][ord("W")] = arround_WORD
 
     def _initialize_normal_mainstream_maps(self):
@@ -554,6 +571,20 @@ class Editor():
             self.change_mode(VISUAL)
             return False
         self.maps[NORMAL][ord('v')] = v_map
+
+        self.maps[NORMAL][ord('z')] = {}
+        def zz_map(self):
+            self.get_curr_window().align_center()
+            return False
+        self.maps[NORMAL][ord('z')][ord('z')] = zz_map
+        def zb_map(self):
+            self.get_curr_window().align_bottom()
+            return False
+        self.maps[NORMAL][ord('z')][ord('b')] = zb_map
+        def zt_map(self):
+            self.get_curr_window().align_top()
+            return False
+        self.maps[NORMAL][ord('z')][ord('t')] = zt_map
 
         self._initialize_normal_ctrl_maps()
         self._initialize_normal_symbol_maps()
