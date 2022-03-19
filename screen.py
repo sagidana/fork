@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+# VT100 escape codes:
+# https://www.csie.ntu.edu.tw/~r92094/c++/VT100.html
+
 from settings import g_settings
 from log import elog
 from events import *
@@ -18,6 +21,9 @@ TAB_KEY = 9
 ESC_KEY = 27
 CTRL_W_KEY = 23
 CTRL_L_KEY = 12
+CTRL_H_KEY = 8
+CTRL_J_KEY = 10
+CTRL_K_KEY = 11
 BACKSPACE_KEY = 127
 
 def _find_getch():
@@ -78,24 +84,20 @@ def get_terminal_size():
 class Screen():
     def screen_resize_handler(self, signum, frame):
         size = get_terminal_size()
-        elog(f"{size}")
+        # TODO: elog(f"{size}") == (0,0)???
         self.width, self.height = size
         Hooks.execute(ON_RESIZE, size)
 
     def __init__(self):
         size = get_terminal_size()
-        elog(f"{size}")
         self.width, self.height = size
 
         signal(SIGWINCH, self.screen_resize_handler)
         self._disable_echo()
+        self._disable_wrap()
 
         getch = _find_getch()
-        def get_key():
-            ch = getch()
-            return ord(ch)
-    
-
+        def get_key(): return ord(getch())
         self.get_key = get_key
 
     def _write_to_stdout(self, to_write):
@@ -107,6 +109,14 @@ class Screen():
 
     def get_width(self):
         return self.width
+
+    def _enable_wrap(self):
+        escape = "\x1b[?7h"
+        self._write_to_stdout(escape)
+
+    def _disable_wrap(self):
+        escape = "\x1b[?7l"
+        self._write_to_stdout(escape)
 
     def _enable_echo(self):
         escape = "\x1b[28m"

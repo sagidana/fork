@@ -220,7 +220,7 @@ class Buffer():
     # CORE: change
     def insert_char(self, x, y, char):
         start_byte = self.get_file_pos(x, y)
-        if char == '\n':
+        if char == '\n' or char == '\r':
             self._split_line(x, y)
             change = {
                     'start_byte': start_byte,

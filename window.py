@@ -49,10 +49,7 @@ class Window():
         self.content_width = self.width
         self.content_height = self.height
 
-        # # slice window for line numbers.
         self.line_numbers = False # default
-        # self.content_position[0] += self.lines_margin
-        # self.content_width -= self.lines_margin
 
         self.window_cursor = [0,0]
         self.buffer_cursor = [0,0]
@@ -669,7 +666,7 @@ class Window():
         self.buffer.insert_char(    self.buffer_cursor[0],
                                     self.buffer_cursor[1],
                                     char)
-        if char == '\n':
+        if char == '\n' or char == '\r':
             self.move_down()
             self.move_line_begin()
             self.draw()
@@ -747,34 +744,40 @@ class Window():
         self.draw_cursor()
 
     def _screen_move(self, x, y): 
-        # TODO: boundry checks
+        x_margin = self.content_position[0] - self.position[0]
+        y_margin = self.content_position[1] - self.position[1]
+        if x >= self.width - x_margin: return
+        if y >= self.height - y_margin: return
+
         self.screen.move_cursor(    self.content_position[1] + y, 
                                     self.content_position[0] + x)
 
     def _screen_clear_line_raw(self, y): 
+        if y >= self.height: return
+
         self.screen.clear_line(y)
 
     def _screen_clear_line(self, y): 
+        y_margin = self.content_position[1] - self.position[1]
+        if y >= self.height - y_margin: return
+
         self.screen.clear_line(self.content_position[1] + y)
 
-    def _screen_style(self, x, y, size, style): 
-        pass
-        # TODO: boundry checks
-        self.screen.style(  self.content_position[1] + y, 
-                            self.content_position[0] + x, 
-                            size, style)
-
     def _screen_write_raw(self, x, y, string, style): 
-        # TODO: boundry checks
-        # attr = self.style_to_attr(style)
+        if x + len(string) - 1 >= self.width: return
+        if y >= self.height: return
+
         self.screen.write(  self.position[1] + y, 
                             self.position[0] + x,
                             string,
                             style)
 
     def _screen_write(self, x, y, string, style): 
-        # TODO: boundry checks
-        # attr = self.style_to_attr(style)
+        x_margin = self.content_position[0] - self.position[0]
+        y_margin = self.content_position[1] - self.position[1]
+        if x + len(string) - 1 >= self.width - x_margin: return
+        if y >= self.height - y_margin: return
+
         self.screen.write(  self.content_position[1] + y, 
                             self.content_position[0] + x,
                             string,
