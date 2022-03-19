@@ -2,6 +2,7 @@ from log import elog
 from window import *
 from hooks import *
 from events import *
+from idr import *
 
 class Tab():
     def raise_event(func):
@@ -20,17 +21,14 @@ class Tab():
         self.width = size[0]
         self.height = size[1]
 
-        elog(f"{size}")
-        
-        self.get_curr_window().resize(  self.width,
-                                        self.height)
+        self.adjust_sizes()
 
     def __init__(   self, 
                     screen, 
                     width, 
                     height, 
                     buffer=None):
-
+        self.id = get_id(TAB_ID)
         self.screen = screen
         self.width = width
         self.height = height
@@ -52,19 +50,56 @@ class Tab():
                 self.events[event] = []
             self.events[event].append(handlers[event])
 
+    def _get_index_by_window(self, window):
+        for index, win in enumerate(self.windows):
+            if win == window: return index
+        return None
+
+    def _find_left_window(self, window): pass
+    def _find_right_window(self, window): pass
+    def _find_up_window(self, window): pass
+    def _find_down_window(self, window): pass
+
+    def set_curr_window(self, index):
+        self.curr_window_index = index
+
+    def get_curr_window(self):
+        return self.windows[self.curr_window_index]
+
+    def remove_window(self, window):
+        pass
+
     def add_window(self, window):
         index = len(self.windows)
 
         self.windows.append(window)
-        self.curr_window = index
+        self.curr_window_index = index
+
+    def focus_window(self, window):
+        index = self._get_index_by_window(window)
+        if not index: return 
+
+        self.set_curr_window(index)
+
+    def close_window(self, window):
+        index = self._get_index_by_window(window)
+
+        self.windows.pop(index)
+
+        # TODO: if this is the last window close the tab.
+        if len(self.windows) == 0: raise Exception('close tab')
+
+        if index == self.curr_window_index: self.set_curr_window(0)
+
+        # TODO fix sizes
 
     def move_left_window(self): 
         x = self.get_curr_window().position[0]
         y = self.get_curr_window().position[1]
 
-        nearest = self.curr_window
+        nearest = self.curr_window_index
         for index, window in enumerate(self.windows):
-            if index == self.curr_window: continue
+            if index == self.curr_window_index: continue
             curr_x = window.position[0]
             curr_y = window.position[1]
 
@@ -77,9 +112,9 @@ class Tab():
         x = self.get_curr_window().position[0]
         y = self.get_curr_window().position[1]
 
-        nearest = self.curr_window
+        nearest = self.curr_window_index
         for index, window in enumerate(self.windows):
-            if index == self.curr_window: continue
+            if index == self.curr_window_index: continue
             curr_x = window.position[0]
             curr_y = window.position[1]
 
@@ -92,9 +127,9 @@ class Tab():
         x = self.get_curr_window().position[0]
         y = self.get_curr_window().position[1]
 
-        nearest = self.curr_window
+        nearest = self.curr_window_index
         for index, window in enumerate(self.windows):
-            if index == self.curr_window: continue
+            if index == self.curr_window_index: continue
             curr_x = window.position[0]
             curr_y = window.position[1]
 
@@ -107,9 +142,9 @@ class Tab():
         x = self.get_curr_window().position[0]
         y = self.get_curr_window().position[1]
 
-        nearest = self.curr_window
+        nearest = self.curr_window_index
         for index, window in enumerate(self.windows):
-            if index == self.curr_window: continue
+            if index == self.curr_window_index: continue
             curr_x = window.position[0]
             curr_y = window.position[1]
 
@@ -117,23 +152,6 @@ class Tab():
             nearest = index
 
         self.set_curr_window(nearest)
-
-    def _get_index_by_window(self, window):
-        for index, win in enumerate(self.windows):
-            if win == window: return index
-        return None
-
-    def close_window(self, window):
-        index = self._get_index_by_window(window)
-
-        self.windows.pop(index)
-
-        # TODO: if this is the last window close the tab.
-        if len(self.windows) == 0: raise Exception('close tab')
-
-        if index == self.curr_window: self.set_curr_window(0)
-
-        # TODO fix sizes
 
     def split(self):
         curr_window = self.get_curr_window()
@@ -157,6 +175,7 @@ class Tab():
                                             curr_window.position[1] + height + 1),
                                 buffer=curr_buffer)
         self.add_window(new_window)
+        self.focus_window(new_window)
 
         curr_window.draw()
         new_window.draw()
@@ -183,6 +202,7 @@ class Tab():
                                             curr_window.position[1]),
                                 buffer=curr_buffer)
         self.add_window(new_window)
+        self.focus_window(new_window)
 
         curr_window.draw()
         new_window.draw()
@@ -205,9 +225,3 @@ class Tab():
             window.draw()
         self.get_curr_window().draw_cursor()
 
-    def set_curr_window(self, index):
-        self.curr_window = index
-        self.draw()
-
-    def get_curr_window(self):
-        return self.windows[self.curr_window]

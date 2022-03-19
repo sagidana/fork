@@ -668,7 +668,6 @@ class Editor():
         self.screen = screen
 
         self.height, self.width = screen.get_height(), screen.get_width()
-        signal(SIGWINCH, self.screen_resize_handler)
 
         self.registers = {}
         self.initialize_registers()

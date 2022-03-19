@@ -2,6 +2,7 @@ from log import elog
 
 # from colors import get_curses_color_pair
 from settings import g_settings
+from idr import *
 from buffer import *
 from hooks import *
 from highlight import get_highlights
@@ -35,6 +36,7 @@ class Window():
                     buffer=None):
         if not buffer: raise Exception("Not implemented.")
 
+        self.id = get_id(WINDOW_ID)
         self.screen = screen
 
         self.buffer = buffer

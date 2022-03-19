@@ -2,9 +2,9 @@ from log import elog
 
 from events import *
 from hooks import *
+from idr import *
 
 from treesitter import TreeSitter
-from syntax import Syntax
 
 from difflib import Differ
 import json
@@ -44,6 +44,7 @@ class Buffer():
         Hooks.execute(ON_BUFFER_CREATE_BEFORE, self)
 
         # When change is starting, this is where original is saved
+        self.id = get_id(BUFFER_ID)
         self.shadow = None
         self.change_start_position = None
         self.undo_stack = []
@@ -66,8 +67,6 @@ class Buffer():
             with open(file_path, 'r') as f:
                 self.lines = f.readlines()
         except:pass
-
-        # self.syntax = Syntax(self, file_path, self.lines)
 
         with open(file_path, "rb") as f: file_bytes = f.read()
         self.treesitter = TreeSitter(file_bytes)
