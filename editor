@@ -126,20 +126,20 @@ class Editor():
         def ctrl_u_map(self):
             self.get_curr_window().scroll_up_half_page()
             return False
-        self.maps[NORMAL][21] = ctrl_u_map
+        self.maps[NORMAL][CTRL_U_KEY] = ctrl_u_map
         def ctrl_d_map(self):
             self.get_curr_window().scroll_down_half_page()
             return False
-        self.maps[NORMAL][4] = ctrl_d_map
+        self.maps[NORMAL][CTRL_D_KEY] = ctrl_d_map
         def ctrl_l_map(self):
             self.get_curr_buffer().resync_treesitter()
             self.get_curr_tab().draw()
             return False
-        self.maps[NORMAL][12] = ctrl_l_map
+        self.maps[NORMAL][CTRL_L_KEY] = ctrl_l_map
         def ctrl_r_map(self):
             self.get_curr_window().redo()
             return False
-        self.maps[NORMAL][18] = ctrl_r_map
+        self.maps[NORMAL][CTRL_R_KEY] = ctrl_r_map
 
     def _initialize_normal_symbol_maps(self):
         def zero_map(self):
@@ -577,7 +577,22 @@ class Editor():
         self._initialize_normal_mainstream_maps()
         self._initialize_normal_window_maps()
 
-    def _initialize_insert_maps(self): pass
+    def _initialize_insert_ctrl_maps(self):
+        def ctrl_w_map(self):
+            window = self.get_curr_window()
+
+            start_x, start_y = window.buffer_cursor[0], window.buffer_cursor[1]
+
+            ret = window.buffer.find_prev_word(start_x, start_y)
+            if not ret: return
+            end_x, end_y = ret
+
+            window.remove_scope(start_x, start_y, end_x, end_y)
+            return False
+        self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
+
+    def _initialize_insert_maps(self):
+        self._initialize_insert_ctrl_maps()
 
     def _initialize_visual_line_maps(self): 
         def visual_line_object_map(scope): 
