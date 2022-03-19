@@ -480,13 +480,19 @@ class Window():
 
     def move_line(self, line): pass
 
-    def move_to_x(self, x): 
+    def _move_to_x(self, x): 
         while self.buffer_cursor[0] > x: self._move_left()
         while self.buffer_cursor[0] < x: self._move_right()
+
+    def move_to_x(self, x): 
+        self._move_to_x(x)
         self.draw_cursor()
 
-    def move_line_begin(self):
+    def _move_line_begin(self):
         while self.buffer_cursor[0] > 0: self._move_left()
+
+    def move_line_begin(self):
+        self._move_line_begin()
         self.draw_cursor()
 
     def move_line_end(self):
@@ -650,7 +656,7 @@ class Window():
                                     self.buffer_cursor[1])
         self.draw()
 
-    def remove_char(self): 
+    def _remove_char(self): 
         if self.buffer_cursor[0] == 0:
             if self.buffer_cursor[1] == 0: return
             # we are about to move line up because of our removal. this is our
@@ -660,26 +666,40 @@ class Window():
             self.buffer.remove_char(    self.buffer_cursor[0],
                                         self.buffer_cursor[1])
 
-            self.move_up()
-            self.move_to_x(new_x)
-            self.draw()
+            self._move_up()
+            self._move_to_x(new_x)
         else:
             self.buffer.remove_char(    self.buffer_cursor[0],
                                         self.buffer_cursor[1])
-            self.move_left()
-            self.draw()
+            self._move_left()
 
-    def insert_char(self, char):
+    def remove_chars(self, num): 
+        for i in range(num):
+            self._remove_char()
+        self.draw()
+
+    def remove_char(self): 
+        self._remove_char()
+        self.draw()
+
+    def _insert_char(self, char):
         self.buffer.insert_char(    self.buffer_cursor[0],
                                     self.buffer_cursor[1],
                                     char)
         if char == '\n' or char == '\r':
-            self.move_down()
-            self.move_line_begin()
-            self.draw()
+            self._move_down()
+            self._move_line_begin()
         else:
-            self.move_right()
-            self.draw()
+            self._move_right()
+
+    def insert_char(self, char):
+        self._insert_char(char)
+        self.draw()
+
+    def insert_string(self, string):
+        for c in string:
+            self._insert_char(c)
+        self.draw()
 
     def insert_line_before(self, line):
         self.buffer.insert_line(self.buffer_cursor[1],

@@ -770,12 +770,18 @@ class Editor():
         ret = False
 
         if key == BACKSPACE_KEY:
-            self.get_curr_window().remove_char()
+            line = self.get_curr_window().get_curr_line()
+            x = self.get_curr_window().buffer_cursor[0]
+            if line[x-4:x] == '    ':
+                self.get_curr_window().remove_chars(4)
+            else:
+                self.get_curr_window().remove_char()
+
             return ret
 
         if key == TAB_KEY:
             # expand tab to spaces
-            for i in range(4): self.get_curr_window().insert_char(' ')
+            self.get_curr_window().insert_string("    ")
             return ret
 
         try: 
