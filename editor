@@ -189,7 +189,8 @@ class Editor():
             ret = self.get_curr_buffer().find_next_word(start_x, start_y)
             if not ret: return
             end_x, end_y = ret
-            scope = (start_x, start_y, end_x - 1, end_y)
+            # scope = (start_x, start_y, end_x - 1, end_y)
+            scope = (start_x, start_y, end_x, end_y)
             if scope: cb(scope)
         maps[ord('w')] = move_w
         def move_W(self):
@@ -198,7 +199,8 @@ class Editor():
             ret = self.get_curr_buffer().find_next_WORD(start_x, start_y)
             if not ret: return
             end_x, end_y = ret
-            scope = (start_x, start_y, end_x - 1, end_y)
+            # scope = (start_x, start_y, end_x - 1, end_y)
+            scope = (start_x, start_y, end_x, end_y)
             if scope: cb(scope)
         maps[ord('W')] = move_W
         def move_b(self):
@@ -391,7 +393,6 @@ class Editor():
         def change_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
             self.get_curr_window().change_begin()
-            elog(f"EDITOR: change {scope}")
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.get_curr_window().change_end()
             self.change_mode(INSERT)
@@ -400,14 +401,12 @@ class Editor():
         def delete_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
             self.get_curr_window().change_begin()
-            elog(f"EDITOR: delete {scope}")
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.get_curr_window().change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
         def yank_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
-            elog(f"EDITOR: yank {scope}")
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_map)
 

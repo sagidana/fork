@@ -84,7 +84,6 @@ def get_terminal_size():
 class Screen():
     def screen_resize_handler(self, signum, frame):
         size = get_terminal_size()
-        # TODO: elog(f"{size}") == (0,0)???
         self.width, self.height = size
         Hooks.execute(ON_RESIZE, size)
 
@@ -162,12 +161,9 @@ class Screen():
         if fg: self._write_to_stdout(FOREGROUND_TRUE_COLOR.format(convert(fg)))
         if bg: self._write_to_stdout(BACKGROUND_TRUE_COLOR.format(convert(bg)))
 
-        # if 'reverse' in style: 
-            # escape = f"\x1b[7m"
-            # self._write_to_stdout(escape)
-        # else:
-            # escape = f"\x1b[7m"
-            # self._write_to_stdout(escape)
+        if 'reverse' in style: 
+            escape = f"\x1b[7m"
+            self._write_to_stdout(escape)
 
     def write(self, y, x, string, style=None): 
         self._save_cursor()

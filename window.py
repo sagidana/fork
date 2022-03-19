@@ -136,30 +136,34 @@ class Window():
         else: end_x = len(self.get_line(end_y)) - 1
 
         if start_y == end_y:
-            self._screen_style( start_x,
+            string = self.get_line(start_y)[start_x:end_x]
+            self._screen_write( start_x,
                                 start_y - screen_start_y, 
-                                end_x - start_x,
+                                string,
                                 {'reverse': None})
             return
         
 
         # first line
-        self._screen_style( start_x,
+        string = self.get_line(start_y)[start_x:]
+        self._screen_write( start_x,
                             start_y - screen_start_y, 
-                            (len(self.get_line(start_y)) - 1) - start_x,
+                            string,
                             {'reverse': None})
 
         # lines in between
         for y in range(start_y + 1, end_y):
-            self._screen_style( 0,
+            string = self.get_line(y)
+            self._screen_write( 0,
                                 y - screen_start_y,
-                                len(self.get_line(y)) - 1, 
+                                string,
                                 {'reverse': None})
                                 
         # last line
-        self._screen_style( 0,
+        string = self.get_line(end_y)[:end_x]
+        self._screen_write( 0,
                             end_y - screen_start_y, 
-                            end_x,
+                            string,
                             {'reverse': None})
 
     def _visualize_line(self): 
@@ -176,9 +180,10 @@ class Window():
         end_y = min(end_y, screen_end_y)
 
         for y in range(start_y, end_y + 1):
-            self._screen_style( 0,
+            string = self.get_line(y)
+            self._screen_write( 0,
                                 y - screen_start_y, 
-                                len(self.get_line(y)) - 1,
+                                string,
                                 {'reverse': None})
 
     def visualize(self):
@@ -764,8 +769,13 @@ class Window():
         self.screen.clear_line(self.content_position[1] + y)
 
     def _screen_write_raw(self, x, y, string, style): 
-        if x + len(string) - 1 >= self.width: return
+        if x >= self.width: return
         if y >= self.height: return
+
+        if x + len(string) - 1 >= self.width:
+            space_for = self.width - x
+            string  = string[:space_for]
+
 
         self.screen.write(  self.position[1] + y, 
                             self.position[0] + x,
@@ -775,8 +785,12 @@ class Window():
     def _screen_write(self, x, y, string, style): 
         x_margin = self.content_position[0] - self.position[0]
         y_margin = self.content_position[1] - self.position[1]
-        if x + len(string) - 1 >= self.width - x_margin: return
+        if x >= self.width - x_margin: return
         if y >= self.height - y_margin: return
+
+        if x + len(string) - 1 >= self.width - x_margin:
+            space_for = self.width - x_margin - x
+            string  = string[:space_for]
 
         self.screen.write(  self.content_position[1] + y, 
                             self.content_position[0] + x,
