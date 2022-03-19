@@ -494,6 +494,18 @@ class Editor():
             self.get_curr_window().till_back()
             return False
         self.maps[NORMAL][ord('T')] = T_map
+        def H_map(self):
+            self.get_curr_window().move_begin_visible()
+            return False
+        self.maps[NORMAL][ord('H')] = H_map
+        def M_map(self):
+            self.get_curr_window().move_middle_visible()
+            return False
+        self.maps[NORMAL][ord('M')] = M_map
+        def L_map(self):
+            self.get_curr_window().move_end_visible()
+            return False
+        self.maps[NORMAL][ord('L')] = L_map
         def o_map(self):
             self.change_mode(INSERT)
             self.get_curr_window().new_line_after()

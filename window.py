@@ -336,14 +336,11 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
-
-        # self.buffer.visual_set_current( self.buffer_cursor[0],
-                                        # self.buffer_cursor[1])
         return True
 
     def _move_down(self):
         # We are at the bottom
-        if self.buffer_cursor[1] == len(self.buffer.lines) - 1: return
+        if self.buffer_cursor[1] == len(self.buffer.lines) - 1: return False
 
         # We need to scroll down
         if self.window_cursor[1] == self.height - 1:
@@ -363,8 +360,7 @@ class Window():
                 self.remember = self.window_cursor[0]
                 self.window_cursor[0] = line_len
                 self.buffer_cursor[0] = line_len
-        # self.buffer.visual_set_current( self.buffer_cursor[0],
-                                        # self.buffer_cursor[1])
+        return True
 
     def _move_right(self):
         if self.buffer_cursor[0] == len(self.buffer.lines[self.buffer_cursor[1]]) - 1:
@@ -488,6 +484,7 @@ class Window():
         return x, y
 
     def scroll_up_half_page(self):
+        self._align_center()
         half = int(self.height / 2)
         for i in range(half): self._move_up()
         self._align_center()
@@ -495,6 +492,7 @@ class Window():
         self.draw()
 
     def scroll_down_half_page(self):
+        self._align_center()
         half = int(self.height / 2)
         for i in range(half): self._move_down()
         self._align_center()
@@ -520,6 +518,23 @@ class Window():
         else:
             self.window_cursor[1] = buffer_len
         self.draw()
+
+    def move_begin_visible(self):
+        while self.window_cursor[1] > 0: self._move_up()
+        self.draw_cursor()
+
+    def move_middle_visible(self): 
+        middle =  int(self.height / 2)
+        while self.window_cursor[1] < middle:
+            if not self._move_down(): break
+        while self.window_cursor[1] > middle:
+            if not self._move_up(): break
+        self.draw_cursor()
+
+    def move_end_visible(self):
+        while self.window_cursor[1] < self.height - 1:
+            if not self._move_down(): break
+        self.draw_cursor()
 
     def move_line(self, line): pass
 
