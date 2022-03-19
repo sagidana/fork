@@ -21,7 +21,7 @@ class Tab():
         self.width = size[0]
         self.height = size[1]
 
-        self.adjust_sizes()
+        self._adjust_sizes()
 
     def __init__(   self, 
                     screen, 
@@ -55,7 +55,27 @@ class Tab():
             if win == window: return index
         return None
 
-    def _find_left_window(self, window): pass
+    def _adjust_sizes(self):
+        for index, curr in enumerate(self.windows):
+            pass
+
+    def _find_left_window(self, window):
+        index = self._get_index_by_window(window)
+        x = window.position[0]
+        y = window.position[1]
+
+        found = None
+        for curr_index, curr in enumerate(self.windows):
+            if curr_index == index: continue
+            curr_x = curr.position[0]
+            curr_y = curr.position[1]
+
+            if curr_x >= x: continue
+            if curr_y >= x: continue
+            nearest = index
+
+        return found
+
     def _find_right_window(self, window): pass
     def _find_up_window(self, window): pass
     def _find_down_window(self, window): pass
@@ -67,13 +87,23 @@ class Tab():
         return self.windows[self.curr_window_index]
 
     def remove_window(self, window):
-        pass
+        index = self._get_index_by_window(window)
+        if not index: return 
+
+        self.windows.pop(index)
+
+        if len(self.windows) == 0: raise Exception('close tab')
+        if index == self.curr_window_index: self.set_curr_window(0)
+
+        self._adjust_sizes()
 
     def add_window(self, window):
         index = len(self.windows)
 
         self.windows.append(window)
-        self.curr_window_index = index
+        self.set_curr_window(index)
+
+        self._adjust_sizes()
 
     def focus_window(self, window):
         index = self._get_index_by_window(window)
@@ -82,14 +112,7 @@ class Tab():
         self.set_curr_window(index)
 
     def close_window(self, window):
-        index = self._get_index_by_window(window)
-
-        self.windows.pop(index)
-
-        # TODO: if this is the last window close the tab.
-        if len(self.windows) == 0: raise Exception('close tab')
-
-        if index == self.curr_window_index: self.set_curr_window(0)
+        self.remove_window(window)
 
         # TODO fix sizes
 
