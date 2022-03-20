@@ -59,26 +59,120 @@ class Tab():
         for index, curr in enumerate(self.windows):
             pass
 
+    def _windows_distance(self, win_1, win_2):
+        x_1 = win_1.position[0]
+        y_1 = win_1.position[1]
+        x_2 = win_2.position[0]
+        y_2 = win_2.position[1]
+        return ((((x_2 - x_1)**2) + ((y_2 - y_1)**2))**0.5)
+
     def _find_left_window(self, window):
         index = self._get_index_by_window(window)
-        x = window.position[0]
-        y = window.position[1]
+        left_top_x = window.position[0]
+        left_top_y = window.position[1]
+        left_bot_x = left_top_x
+        left_bot_y = left_top_y + window.height - 1
 
         found = None
         for curr_index, curr in enumerate(self.windows):
             if curr_index == index: continue
-            curr_x = curr.position[0]
-            curr_y = curr.position[1]
+            curr_right_top_x = curr.position[0] + curr.width - 1
+            curr_right_top_y = curr.position[1]
+            curr_right_bot_x = curr_right_top_x
+            curr_right_bot_y = curr_right_top_y + curr.height - 1
 
-            if curr_x >= x: continue
-            if curr_y >= x: continue
-            nearest = index
+            if curr_right_top_x >= left_top_x: continue
+            if curr_right_top_y >= left_bot_y: continue
+            if curr_right_bot_y < left_top_y: continue
 
+            if not found:
+                found = curr
+                continue
+
+            if self._windows_distance(curr, window) < self._windows_distance(found, window):
+                found = curr
         return found
 
-    def _find_right_window(self, window): pass
-    def _find_up_window(self, window): pass
-    def _find_down_window(self, window): pass
+    def _find_right_window(self, window): 
+        index = self._get_index_by_window(window)
+        right_top_x = window.position[0] + window.width - 1
+        right_top_y = window.position[1]
+        right_bot_x = right_top_x
+        right_bot_y = right_top_y + window.height - 1
+
+        found = None
+        for curr_index, curr in enumerate(self.windows):
+            if curr_index == index: continue
+            curr_left_top_x = curr.position[0]
+            curr_left_top_y = curr.position[1]
+            curr_left_bot_x = curr_left_top_x
+            curr_left_bot_y = curr_left_top_y + curr.height - 1
+
+            if curr_left_top_x <= right_top_x: continue
+            if curr_left_top_y >= right_bot_y: continue
+            if curr_left_bot_y < right_top_y: continue
+
+            if not found:
+                found = curr
+                continue
+
+            if self._windows_distance(curr, window) < self._windows_distance(found, window):
+                found = curr
+        return found
+
+    def _find_up_window(self, window):
+        index = self._get_index_by_window(window)
+        top_left_x = window.position[0]
+        top_left_y = window.position[1]
+        top_right_x = top_left_x + window.width - 1
+        top_right_y = top_left_y
+
+        found = None
+        for curr_index, curr in enumerate(self.windows):
+            if curr_index == index: continue
+            curr_bot_left_x = curr.position[0]
+            curr_bot_left_y = curr.position[1] + curr.height - 1
+            curr_bot_right_x = curr_bot_left_x + curr.width - 1
+            curr_bot_right_y = curr_bot_left_y
+
+            if curr_bot_left_y >= top_left_y: continue
+            if curr_bot_left_x >= top_right_x: continue
+            if curr_bot_right_x <= top_left_x: continue
+
+            if not found:
+                found = curr
+                continue
+
+            if self._windows_distance(curr, window) < self._windows_distance(found, window):
+                found = curr
+        return found
+
+    def _find_down_window(self, window): 
+        index = self._get_index_by_window(window)
+        bot_left_x = window.position[0]
+        bot_left_y = window.position[1] + window.height - 1
+        bot_right_x = bot_left_x + window.width - 1
+        bot_right_y = bot_left_y
+
+        found = None
+        for curr_index, curr in enumerate(self.windows):
+            if curr_index == index: continue
+            curr_top_left_x = curr.position[0]
+            curr_top_left_y = curr.position[1]
+            curr_top_right_x = curr_top_left_x + curr.width - 1
+            curr_top_right_y = curr_top_left_y
+
+            if curr_top_left_y <= bot_left_y: continue
+            if curr_top_left_x >= bot_right_x: continue
+            if curr_top_right_x <= bot_left_x: continue
+
+            if not found:
+                found = curr
+                continue
+
+            if self._windows_distance(curr, window) < self._windows_distance(found, window):
+                found = curr
+        return found
 
     def set_curr_window(self, index):
         self.curr_window_index = index
@@ -107,7 +201,7 @@ class Tab():
 
     def focus_window(self, window):
         index = self._get_index_by_window(window)
-        if not index: return 
+        if index is False: return # distinguish False from 0
 
         self.set_curr_window(index)
 
@@ -117,64 +211,32 @@ class Tab():
         # TODO fix sizes
 
     def move_left_window(self): 
-        x = self.get_curr_window().position[0]
-        y = self.get_curr_window().position[1]
+        found = self._find_left_window(self.get_curr_window())
+        if not found: return False 
 
-        nearest = self.curr_window_index
-        for index, window in enumerate(self.windows):
-            if index == self.curr_window_index: continue
-            curr_x = window.position[0]
-            curr_y = window.position[1]
-
-            if curr_x >= x: continue
-            nearest = index
-
-        self.set_curr_window(nearest)
+        self.focus_window(found)
+        return True
 
     def move_right_window(self): 
-        x = self.get_curr_window().position[0]
-        y = self.get_curr_window().position[1]
+        found = self._find_right_window(self.get_curr_window())
+        if not found: return False 
 
-        nearest = self.curr_window_index
-        for index, window in enumerate(self.windows):
-            if index == self.curr_window_index: continue
-            curr_x = window.position[0]
-            curr_y = window.position[1]
-
-            if curr_x <= x: continue
-            nearest = index
-
-        self.set_curr_window(nearest)
+        self.focus_window(found)
+        return True
 
     def move_up_window(self): 
-        x = self.get_curr_window().position[0]
-        y = self.get_curr_window().position[1]
+        found = self._find_up_window(self.get_curr_window())
+        if not found: return False 
 
-        nearest = self.curr_window_index
-        for index, window in enumerate(self.windows):
-            if index == self.curr_window_index: continue
-            curr_x = window.position[0]
-            curr_y = window.position[1]
-
-            if curr_y >= y: continue
-            nearest = index
-
-        self.set_curr_window(nearest)
+        self.focus_window(found)
+        return True
 
     def move_down_window(self): 
-        x = self.get_curr_window().position[0]
-        y = self.get_curr_window().position[1]
+        found = self._find_down_window(self.get_curr_window())
+        if not found: return False 
 
-        nearest = self.curr_window_index
-        for index, window in enumerate(self.windows):
-            if index == self.curr_window_index: continue
-            curr_x = window.position[0]
-            curr_y = window.position[1]
-
-            if curr_y <= y: continue
-            nearest = index
-
-        self.set_curr_window(nearest)
+        self.focus_window(found)
+        return True
 
     def split(self):
         curr_window = self.get_curr_window()

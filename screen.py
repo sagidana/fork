@@ -103,7 +103,7 @@ class Screen():
         self.width, self.height = size
 
         signal(SIGWINCH, self.screen_resize_handler)
-        self._disable_echo()
+        # self._disable_echo()
         self._disable_wrap()
 
         getch = _find_getch()
@@ -191,10 +191,10 @@ if __name__ == '__main__':
 
     screen.clear()
 
-    # screen.write(0,0,
-                # "Hello World",
-                # # {"foreground": "#A6E22E"})
-                # {"foreground": "#F9262E"})
+    screen.write(0,0,
+                "Hello World",
+                # {"foreground": "#A6E22E"})
+                {"foreground": "#F9262E"})
 
     for i in range(1000):
         c = screen.get_key()
