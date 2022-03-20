@@ -293,6 +293,8 @@ class Window():
             self.buffer_cursor[0] = line_len
 
     def resize(self, width, height):
+        self.clear()
+
         self.width = width
         self.height = height
         self.content_width = width
@@ -310,6 +312,14 @@ class Window():
             for i in range(diff): self._move_up()
         else: pass
 
+        self.draw()
+
+    def set_position(self, x, y):
+        self.clear()
+        self.position[0] = x
+        self.content_position[0] = x
+        self.position[1] = y
+        self.content_position[1] = y
         self.draw()
 
     def _move_up(self):

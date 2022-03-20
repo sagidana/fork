@@ -56,33 +56,52 @@ class Tab():
         return None
 
     def _adjust_sizes(self):
+        todo = []
         for index, curr in enumerate(self.windows):
-            num_of_vertical_windows = 0
-            num_of_horizontal_windows = 0
+            num_of_left_windows = 0
+            num_of_right_windows = 0
+            num_of_up_windows = 0
+            num_of_down_windows = 0
 
             inner = curr
             while self._find_left_window(inner):
-                num_of_horizontal_windows += 1
+                num_of_left_windows += 1
                 inner = self._find_left_window(inner)
             inner = curr
             while self._find_right_window(inner):
-                num_of_horizontal_windows += 1
+                num_of_right_windows += 1
                 inner = self._find_right_window(inner)
 
             inner = curr
             while self._find_up_window(inner):
-                num_of_vertical_windows += 1
+                num_of_up_windows += 1
                 inner = self._find_up_window(inner)
             inner = curr
             while self._find_down_window(inner):
-                num_of_vertical_windows += 1
+                num_of_down_windows += 1
                 inner = self._find_down_window(inner)
             
-            num_of_horizontal_windows = max(num_of_horizontal_windows, 1)
-            num_of_vertical_windows = max(num_of_vertical_windows, 1)
+            num_of_horizontal_windows = num_of_left_windows + num_of_right_windows + 1
+            num_of_vertical_windows = num_of_up_windows + num_of_down_windows + 1
 
-            curr.resize(int(self.width / num_of_horizontal_windows),
-                        int(self.height / num_of_vertical_windows))
+            width = self.width - num_of_horizontal_windows
+            height = self.height - num_of_vertical_windows
+
+            width = int(width / num_of_horizontal_windows)
+            height = int(height / num_of_vertical_windows)
+
+            x = (width + 1) * num_of_left_windows
+            y = (height + 1) * num_of_up_windows
+
+            item = (curr, x, y, width, height)
+
+            elog(f"{item}")
+
+            todo.append(item)
+
+        for curr, x, y, width, height in todo:
+            curr.set_position(x, y)
+            curr.resize(width, height)
 
     def _windows_distance(self, win_1, win_2):
         x_1 = win_1.position[0]
