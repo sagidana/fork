@@ -57,7 +57,32 @@ class Tab():
 
     def _adjust_sizes(self):
         for index, curr in enumerate(self.windows):
-            pass
+            num_of_vertical_windows = 0
+            num_of_horizontal_windows = 0
+
+            inner = curr
+            while self._find_left_window(inner):
+                num_of_horizontal_windows += 1
+                inner = self._find_left_window(inner)
+            inner = curr
+            while self._find_right_window(inner):
+                num_of_horizontal_windows += 1
+                inner = self._find_right_window(inner)
+
+            inner = curr
+            while self._find_up_window(inner):
+                num_of_vertical_windows += 1
+                inner = self._find_up_window(inner)
+            inner = curr
+            while self._find_down_window(inner):
+                num_of_vertical_windows += 1
+                inner = self._find_down_window(inner)
+            
+            num_of_horizontal_windows = max(num_of_horizontal_windows, 1)
+            num_of_vertical_windows = max(num_of_vertical_windows, 1)
+
+            curr.resize(int(self.width / num_of_horizontal_windows),
+                        int(self.height / num_of_vertical_windows))
 
     def _windows_distance(self, win_1, win_2):
         x_1 = win_1.position[0]
