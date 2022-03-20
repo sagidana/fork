@@ -9,7 +9,11 @@ from events import *
 from hooks import *
 
 from signal import signal, SIGWINCH
+
+from termios import tcgetattr, tcsetattr, TCSADRAIN
 from sys import stdout, stdin
+from tty import setraw
+
 
 BACKGROUND_TRUE_COLOR = "\x1b[48;2;{}m"
 FOREGROUND_TRUE_COLOR = "\x1b[38;2;{}m"
@@ -29,27 +33,6 @@ CTRL_K_KEY = 11
 CTRL_R_KEY = 18
 BACKSPACE_KEY = 127
 
-def _find_getch():
-    try:
-        import termios
-    except ImportError:
-        # Non-POSIX. Return msvcrt's (Windows') getch.
-        import msvcrt
-        return msvcrt.getch
-
-    # POSIX system. Create and return a getch that manipulates the tty.
-    import sys, tty
-    def _getch():
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        try:
-            tty.setraw(fd)
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return ch
-
-    return _getch
 
 def convert(a):
     r, g, b = int(a[1:3], 16), int(a[3:5], 16), int(a[5:7], 16)
@@ -103,16 +86,25 @@ class Screen():
         self.width, self.height = size
 
         signal(SIGWINCH, self.screen_resize_handler)
-        # self._disable_echo()
         self._disable_wrap()
 
-        getch = _find_getch()
-        def get_key(): return ord(getch())
-        self.get_key = get_key
+        self.fd = stdin.fileno()
+        self.old_stdin_settings = tcgetattr(self.fd)
+        setraw(self.fd)
+
+    def __del__(self):
+        tcsetattr(  self.fd, 
+                    TCSADRAIN, 
+                    self.old_stdin_settings)
+        self._enable_wrap()
 
     def _write_to_stdout(self, to_write):
         stdout.write(to_write)
         stdout.flush()
+
+    def get_key(self):
+        try: return ord(stdin.read(1))
+        except: return None
 
     def get_height(self):
         return self.height
