@@ -4,7 +4,6 @@ from signal import signal, SIGWINCH
 from string import printable
 import timeout_decorator
 import argparse
-# import curses
 import time
 import json
 import re
@@ -624,7 +623,7 @@ class Editor():
         def ctrl_w_map(self):
             window = self.get_curr_window()
 
-            start_x, start_y = window.buffer_cursor[0], window.buffer_cursor[1]
+            start_x, start_y = window.buffer_cursor[0] - 1, window.buffer_cursor[1]
 
             ret = window.buffer.find_prev_word(start_x, start_y)
             if not ret: return
