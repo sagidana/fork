@@ -255,6 +255,7 @@ class Tab():
         if not found: return False 
 
         self.focus_window(found)
+        self.get_curr_window().draw_cursor()
         return True
 
     def move_right_window(self): 
@@ -262,6 +263,7 @@ class Tab():
         if not found: return False 
 
         self.focus_window(found)
+        self.get_curr_window().draw_cursor()
         return True
 
     def move_up_window(self): 
@@ -269,6 +271,7 @@ class Tab():
         if not found: return False 
 
         self.focus_window(found)
+        self.get_curr_window().draw_cursor()
         return True
 
     def move_down_window(self): 
@@ -276,6 +279,7 @@ class Tab():
         if not found: return False 
 
         self.focus_window(found)
+        self.get_curr_window().draw_cursor()
         return True
 
     def split(self):
