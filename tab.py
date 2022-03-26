@@ -94,9 +94,6 @@ class Tab():
             y = (height + 1) * num_of_up_windows
 
             item = (curr, x, y, width, height)
-
-            elog(f"{item}")
-
             todo.append(item)
 
         for curr, x, y, width, height in todo:
@@ -226,7 +223,7 @@ class Tab():
 
     def remove_window(self, window):
         index = self._get_index_by_window(window)
-        if not index: return 
+        if index is False: return # distinguish False from 0
 
         self.windows.pop(index)
 
@@ -251,8 +248,7 @@ class Tab():
 
     def close_window(self, window):
         self.remove_window(window)
-
-        # TODO fix sizes
+        self.draw()
 
     def move_left_window(self): 
         found = self._find_left_window(self.get_curr_window())
@@ -306,8 +302,9 @@ class Tab():
         self.add_window(new_window)
         self.focus_window(new_window)
 
-        curr_window.draw()
-        new_window.draw()
+        self.draw()
+        # curr_window.draw()
+        # new_window.draw()
 
     def vsplit(self):
         curr_window = self.get_curr_window()
@@ -318,8 +315,8 @@ class Tab():
 
         seperator_x = curr_window.position[0] + width
 
-        self.draw_vertical_seperator(   curr_window.position[1], 
-                                        seperator_x,
+        self.draw_vertical_seperator(   seperator_x,
+                                        curr_window.position[1],
                                         height)
 
         curr_window.resize(width, height)
@@ -333,10 +330,11 @@ class Tab():
         self.add_window(new_window)
         self.focus_window(new_window)
 
-        curr_window.draw()
-        new_window.draw()
+        self.draw()
+        # curr_window.draw()
+        # new_window.draw()
 
-    def draw_vertical_seperator(self, y, x, size):
+    def draw_vertical_seperator(self, x, y, size):
         for i in range(size):
             self.screen.write(  y + i,
                                 x,
@@ -348,9 +346,40 @@ class Tab():
                             x,
                             " "*size,
                             {'background': '#000000'})
-    
+
+    def draw_seperators(self):
+        for index, curr in enumerate(self.windows):
+            inner = curr
+            while self._find_left_window(inner):
+                self.draw_vertical_seperator(   inner.position[0] - 1,
+                                                inner.position[1],
+                                                inner.height)
+                inner = self._find_left_window(inner)
+
+            inner = curr
+            while self._find_right_window(inner):
+                self.draw_vertical_seperator(   inner.position[0] + inner.width,
+                                                inner.position[1],
+                                                inner.height)
+                inner = self._find_right_window(inner)
+
+            inner = curr
+            while self._find_up_window(inner):
+                self.draw_horizontal_seperator( inner.position[1] - 1,
+                                                inner.position[0],
+                                                inner.width)
+                inner = self._find_up_window(inner)
+
+            inner = curr
+            while self._find_down_window(inner):
+                self.draw_horizontal_seperator( inner.position[1] + inner.height,
+                                                inner.position[0],
+                                                inner.width)
+                inner = self._find_down_window(inner)
+
     def draw(self):
         for window in self.windows:
             window.draw()
+        self.draw_seperators()
         self.get_curr_window().draw_cursor()
 
