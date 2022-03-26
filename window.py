@@ -124,7 +124,7 @@ class Window():
         orig_end_x += 1
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
-        screen_end_y = min(orig_start_y + self.height, buffer_height)
+        screen_end_y = min(screen_start_y + self.height, buffer_height)
 
         if orig_start_y > screen_end_y: return
         if orig_end_y < screen_start_y: return
@@ -173,7 +173,7 @@ class Window():
 
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
-        screen_end_y = min(start_y + self.height, buffer_height)
+        screen_end_y = min(screen_start_y + self.height, buffer_height)
 
         if start_y > screen_end_y: return
         if end_y < screen_start_y: return

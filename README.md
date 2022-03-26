@@ -55,6 +55,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 
 ## TODOs
+- add all languages and filetype detections.
 - search & replace
 - \<num\>\<action\>
 - macros
@@ -67,3 +68,4 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - ctags
 - cscope
 - tabs
+- existing plugins
