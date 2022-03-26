@@ -7,6 +7,7 @@ from buffer import *
 from hooks import *
 from highlight import get_highlights
 
+from string import printable
 import timeout_decorator
 import curses
 import time
@@ -566,11 +567,17 @@ class Window():
         self._move_to_x(x)
         self.draw_cursor()
 
-    def _move_line_begin(self):
+    def _move_line_begin(self, ignore_spaces=False):
         while self.buffer_cursor[0] > 0: self._move_left()
 
-    def move_line_begin(self):
-        self._move_line_begin()
+        if ignore_spaces: 
+            line = self.get_line(self.buffer_cursor[1])
+            while self.buffer_cursor[0] < self.width - 1: 
+                if not re.match("\s", line[self.buffer_cursor[0]]): break
+                self._move_right()
+
+    def move_line_begin(self, ignore_spaces=False):
+        self._move_line_begin(ignore_spaces)
         self.draw_cursor()
 
     def move_line_end(self):

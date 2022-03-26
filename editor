@@ -527,7 +527,7 @@ class Editor():
         self.maps[NORMAL][ord('a')] = a_map
         def I_map(self):
             self.change_mode(INSERT)
-            self.get_curr_window().move_line_begin()
+            self.get_curr_window().move_line_begin(ignore_spaces=True)
             return False
         self.maps[NORMAL][ord('I')] = I_map
         def i_map(self):
