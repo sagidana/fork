@@ -28,7 +28,14 @@
 "#ifdef" @keyword
 "#ifndef" @keyword
 "#include" @keyword
+
 (preproc_directive) @keyword
+
+(primitive_type) @constant.language
+
+(null) @constant.language
+
+(number_literal) @constant.numeric
 
 "--" @operator
 "-" @operator
