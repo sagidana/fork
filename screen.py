@@ -145,6 +145,10 @@ class Screen():
 
         self._restore_cursor()
 
+    def clear_line_partial(self, y, start_x, end_x):
+        empty = " " * (end_x - start_x)
+        self.write(y, start_x, empty)
+
     def clear(self):
         escape = f"\x1b[2J"
         self._write_to_stdout(escape)

@@ -221,7 +221,9 @@ class Window():
 
     def clear(self):
         for y in range(self.height):
-            self._screen_clear_line(y)
+            start_x = 0
+            end_x = self.width - 1
+            self._screen_clear_line_partial(y, start_x, end_x)
 
     def draw(self):
         # self.clear()
@@ -874,6 +876,19 @@ class Window():
         if y >= self.height - y_margin: return
 
         self.screen.clear_line(self.content_position[1] + y)
+
+    def _screen_clear_line_partial(self, y, start_x, end_x): 
+        x_margin = self.content_position[0] - self.position[0]
+        y_margin = self.content_position[1] - self.position[1]
+
+        if y >= self.height - y_margin: return
+        if start_x >= self.width - x_margin: return
+        if end_x >= self.width - x_margin: 
+            end_x = self.width - x_margin - x
+
+        self.screen.clear_line_partial( self.content_position[1] + y,
+                                        self.content_position[0] + start_x,
+                                        self.content_position[0] + end_x)
 
     def _screen_write_raw(self, x, y, string, style): 
         if x >= self.width: return
