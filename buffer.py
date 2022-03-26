@@ -12,8 +12,8 @@ import re
 
 class Buffer():
     def on_buffer_change_callback(self, change):
-        self.treesitter.edit(change, self.get_file_bytes())
-        pass
+        if self.treesitter:
+            self.treesitter.edit(change, self.get_file_bytes())
 
     def raise_event(func):
         def event_wrapper(self):
@@ -68,8 +68,11 @@ class Buffer():
                 self.lines = f.readlines()
         except:pass
 
-        with open(file_path, "rb") as f: file_bytes = f.read()
-        self.treesitter = TreeSitter(file_bytes)
+        language = self.detect_language()
+        self.treesitter = None
+        if language:
+            with open(file_path, "rb") as f: file_bytes = f.read()
+            self.treesitter = TreeSitter(file_bytes, language)
 
         handlers = {}
         handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
@@ -77,8 +80,65 @@ class Buffer():
 
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
+    def detect_language(self):
+        if      self.file_path.endswith('.py'):
+            return "python"
+        elif    self.file_path.endswith('.c') or \
+                self.file_path.endswith('.h'):
+            return "c"
+        elif    self.file_path.endswith('.md'):
+            return "markdown"
+        elif    self.file_path.endswith('.php'):
+            return "php"
+        elif    self.file_path.endswith('.go'):
+            return "go"
+        elif    self.file_path.endswith('.html'):
+            return "html"
+        elif    self.file_path.endswith('.css'):
+            return "css"
+        elif    self.file_path.endswith('.java'):
+            return "java"
+        elif    self.file_path.endswith('.js'):
+            return "javascript"
+        elif    self.file_path.endswith('.rb'):
+            return "ruby"
+        elif    self.file_path.endswith('.rs'):
+            return "rust"
+        elif    self.file_path.endswith('.sh'):
+            return "sh"
+        elif    self.file_path.endswith('.cpp') or \
+                self.file_path.endswith('.hpp'):
+            return "cpp"
+        elif    self.file_path.endswith('.json'):
+            return "json"
+        elif    self.file_path.endswith('.xml'):
+            # return "xml"  # treesitter not supporting
+            return None
+        elif    self.file_path.endswith('.vim'):
+            # return "vimscript"  # treesitter not supporting
+            return None
+        else: 
+            if len(self.lines) == 0: return None
+
+            first_line = self.lines[0]
+            if not first_line.startswith("#!/"): return None
+
+            m = re.match("#!(?P<program>[a-zA-Z0-9/]+)\s*$", first_line)
+            if not m: 
+                elog("1")
+                return None
+            program = m.groups('program')[0]
+            elog(f"{program}")
+            if  program == "/usr/bin/python3" or \
+                program == "/usr/bin/python2" or \
+                program == "/usr/bin/python":
+                return "python"
+            return None
+
     def resync_treesitter(self):
-        self.treesitter.resync(self.get_file_bytes())
+        if self.treesitter:
+            self.treesitter.resync(self.get_file_bytes())
+
     def get_file_bytes(self):
         return ''.join(self.lines).encode()
 

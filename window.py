@@ -97,6 +97,8 @@ class Window():
         self.lines_margin = len(str(len(self.buffer.lines))) + 1
 
     def highlight(self):
+        if not self.buffer.treesitter: return # no syntax tree..
+
         buffer_height = len(self.buffer.lines) - 1
 
         start_y = self.buffer_cursor[1] - self.window_cursor[1]
