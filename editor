@@ -188,7 +188,6 @@ class Editor():
             ret = self.get_curr_buffer().find_next_word(start_x, start_y)
             if not ret: return False
             end_x, end_y = ret
-            # scope = (start_x, start_y, end_x - 1, end_y)
             scope = (start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[ord('w')] = move_w
@@ -198,12 +197,11 @@ class Editor():
             ret = self.get_curr_buffer().find_next_WORD(start_x, start_y)
             if not ret: return False
             end_x, end_y = ret
-            # scope = (start_x, start_y, end_x - 1, end_y)
             scope = (start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[ord('W')] = move_W
         def move_b(self):
-            end_x = self.get_curr_window().buffer_cursor[0] - 1
+            end_x = self.get_curr_window().buffer_cursor[0]
             end_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_prev_word(end_x, end_y)
             if not ret: return False
@@ -212,7 +210,7 @@ class Editor():
             if scope: return cb(scope)
         maps[ord('b')] = move_b
         def move_B(self):
-            end_x = self.get_curr_window().buffer_cursor[0] - 1
+            end_x = self.get_curr_window().buffer_cursor[0]
             end_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_prev_WORD(end_x, end_y)
             if not ret: return False
@@ -409,7 +407,7 @@ class Editor():
         def change_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
             self.get_curr_window().change_begin()
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(start_x, start_y, end_x - 1, end_y)
             self.get_curr_window().change_end()
             self.change_mode(INSERT)
             return False
@@ -417,7 +415,7 @@ class Editor():
         def delete_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
             self.get_curr_window().change_begin()
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(start_x, start_y, end_x - 1, end_y)
             self.get_curr_window().change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
@@ -674,13 +672,18 @@ class Editor():
             start_x, start_y, end_x, end_y = scope
             # scope was just a movement
             if  start_x == self.get_curr_window().buffer_cursor[0] and \
-                start_y == self.get_curr_window().buffer_cursor[1]:
+                    start_y == self.get_curr_window().buffer_cursor[1]:
                 self.get_curr_buffer().visual_set_current(end_x, end_y)
+                self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
+            elif end_x == self.get_curr_window().buffer_cursor[0] and \
+                    end_y == self.get_curr_window().buffer_cursor[1]:
+                self.get_curr_buffer().visual_set_current(start_x, start_y)
+                self.get_curr_window().move_cursor_to_buf_location(start_x, start_y)
             # scope was an object
             else:
                 self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
+                self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
 
-            self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
             self.draw()
             return False
         self._initialize_objects_maps(self.maps[VISUAL], visual_object_map)

@@ -143,7 +143,6 @@ class Window():
                                 string,
                                 style)
 
-
     def _visualize_block(self): pass
         
     def _visualize(self): 
