@@ -387,7 +387,11 @@ class Buffer():
                 self.remove_line(end_y - i)
 
             new_line = start_line + end_line
-            self.replace_line(start_y, new_line)
+
+            if len(new_line) > 1:
+                self.replace_line(start_y, new_line)
+            else:
+                self.remove_line(start_y)
 
         return start_x, start_y
 
@@ -554,7 +558,7 @@ class Buffer():
     # CORE: movement
     def find_next_word(self, x, y, skip_current=True):
         word_regex = '[a-zA-Z0-9_-]'
-        single_regex = '[\)\(\}\{\]\[\,\.\/\'\;]'
+        single_regex = '[\)\(\}\{\]\[\,\.\/\'\;\:]'
 
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
