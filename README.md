@@ -55,6 +55,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 
 ## TODOs
+- highlights
 - search & replace
 - folds
 

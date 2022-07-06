@@ -90,36 +90,37 @@ class Editor():
         self.maps[mode][ord('h')] = h_map
 
     def _initialize_normal_window_maps(self):
-        self.maps[NORMAL][CTRL_W_KEY] = {}
-        def ctrl_w_s_map(self):
-            self.get_curr_tab().split()
-            return False
-        self.maps[NORMAL][CTRL_W_KEY][ord('s')] = ctrl_w_s_map
-        def ctrl_w_v_map(self):
-            self.get_curr_tab().vsplit()
-            return False
-        self.maps[NORMAL][CTRL_W_KEY][ord('v')] = ctrl_w_v_map
+        pass
+        # self.maps[NORMAL][CTRL_W_KEY] = {}
+        # def ctrl_w_s_map(self):
+            # self.get_curr_tab().split()
+            # return False
+        # self.maps[NORMAL][CTRL_W_KEY][ord('s')] = ctrl_w_s_map
+        # def ctrl_w_v_map(self):
+            # self.get_curr_tab().vsplit()
+            # return False
+        # self.maps[NORMAL][CTRL_W_KEY][ord('v')] = ctrl_w_v_map
 
-        def ctrl_w_h_map(self):
-            self.get_curr_tab().move_left_window()
-            return False
-        self.maps[NORMAL][CTRL_W_KEY][ord('h')] = ctrl_w_h_map
-        self.maps[NORMAL][CTRL_W_KEY][CTRL_H_KEY] = ctrl_w_h_map
-        def ctrl_w_j_map(self):
-            self.get_curr_tab().move_down_window()
-            return False
-        self.maps[NORMAL][CTRL_W_KEY][ord('j')] = ctrl_w_j_map
-        self.maps[NORMAL][CTRL_W_KEY][CTRL_J_KEY] = ctrl_w_j_map
-        def ctrl_w_k_map(self):
-            self.get_curr_tab().move_up_window()
-            return False
-        self.maps[NORMAL][CTRL_W_KEY][ord('k')] = ctrl_w_k_map
-        self.maps[NORMAL][CTRL_W_KEY][CTRL_K_KEY] = ctrl_w_k_map
-        def ctrl_w_l_map(self):
-            self.get_curr_tab().move_right_window()
-            return False
-        self.maps[NORMAL][CTRL_W_KEY][ord('l')] = ctrl_w_l_map
-        self.maps[NORMAL][CTRL_W_KEY][CTRL_L_KEY] = ctrl_w_l_map
+        # def ctrl_w_h_map(self):
+            # self.get_curr_tab().move_left_window()
+            # return False
+        # self.maps[NORMAL][CTRL_W_KEY][ord('h')] = ctrl_w_h_map
+        # self.maps[NORMAL][CTRL_W_KEY][CTRL_H_KEY] = ctrl_w_h_map
+        # def ctrl_w_j_map(self):
+            # self.get_curr_tab().move_down_window()
+            # return False
+        # self.maps[NORMAL][CTRL_W_KEY][ord('j')] = ctrl_w_j_map
+        # self.maps[NORMAL][CTRL_W_KEY][CTRL_J_KEY] = ctrl_w_j_map
+        # def ctrl_w_k_map(self):
+            # self.get_curr_tab().move_up_window()
+            # return False
+        # self.maps[NORMAL][CTRL_W_KEY][ord('k')] = ctrl_w_k_map
+        # self.maps[NORMAL][CTRL_W_KEY][CTRL_K_KEY] = ctrl_w_k_map
+        # def ctrl_w_l_map(self):
+            # self.get_curr_tab().move_right_window()
+            # return False
+        # self.maps[NORMAL][CTRL_W_KEY][ord('l')] = ctrl_w_l_map
+        # self.maps[NORMAL][CTRL_W_KEY][CTRL_L_KEY] = ctrl_w_l_map
 
     def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):
@@ -150,7 +151,7 @@ class Editor():
             return False
         self.maps[NORMAL][ord('$')] = dollar_map
         def slash_map(self):
-            # TODO
+            self.on_search()
             return False
         self.maps[NORMAL][ord('/')] = slash_map
 
@@ -650,6 +651,7 @@ class Editor():
         self._initialize_insert_ctrl_maps()
 
     def _initialize_visual_line_maps(self): 
+        # TODO
         pass
 
     def _initialize_visual_maps(self): 
@@ -825,6 +827,66 @@ class Editor():
                 elog(f"INSERT: ({key}) not printable.")
         except Exception as e: elog(f"Exception: {e}")
         return ret
+
+    def _find_closest_match(self, matches, forward=True):
+        origin_x = self.get_curr_window().buffer_cursor[0]
+        origin_y = self.get_curr_window().buffer_cursor[1]
+
+        if forward:
+            for start_x, start_y, end_x, end_y in matches:
+                if start_y < origin_y: continue
+                if start_y == origin_y and start_x < origin_x: continue
+                return (start_x, start_y)
+            return None
+        else:
+            for start_x, start_y, end_x, end_y in reversed(matches):
+                if start_y > origin_y: continue
+                if start_y == origin_y and start_x >= origin_x: continue
+                return (start_x, start_y)
+            return None
+
+    def on_search(self):
+        origin_x = self.get_curr_window().buffer_cursor[0]
+        origin_y = self.get_curr_window().buffer_cursor[1]
+
+        pattern = ""
+        success = False
+        while True:
+            key = self.screen.get_key()
+
+            elog(f"EDITOR: {key}")
+            if key == ENTER_KEY: 
+                if len(pattern) > 0: success = True
+                break
+            if key == ESC_KEY: break
+            if key == BACKSPACE_KEY: 
+                if len(pattern) > 0: pattern = pattern[:-1] 
+                break
+
+            try: 
+                char = chr(key)
+                # if re.match("[a-zA-Z 7-9-_()]", char): 
+                if char in printable:
+                    pattern += char
+
+                    results = self.get_curr_buffer().search_pattern(pattern)
+                    if len(results) == 0: continue
+
+                    pos = self._find_closest_match(results)
+                    if not pos: continue
+
+                    self.get_curr_window().move_cursor_to_buf_location( pos[0], 
+                                                                        pos[1])
+
+                    # TODO: highlight all matches
+            except: pass
+
+        if success:
+            self.registers['/'] = pattern
+        else:
+            self.get_curr_window().move_cursor_to_buf_location( origin_x, 
+                                                                origin_y)
+            # TODO: clear highlights
 
     def on_command(self):
         ret = False

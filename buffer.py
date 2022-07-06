@@ -857,3 +857,13 @@ class Buffer():
         end_x -= 1
 
         return start_x, start_y, end_x, end_y
+
+    def search_pattern(self, pattern):
+        results = []
+        for y, line in enumerate(self.lines):
+            for m in re.finditer(pattern, line):
+                start_x = m.start()
+                end_x = m.end()
+
+                results.append((start_x, y, end_x, y))
+        return results

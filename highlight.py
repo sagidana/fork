@@ -51,8 +51,3 @@ if __name__ == '__main__':
 
     for hl in get_highlights(treesitter, theme):
         print(hl)
-
-
-
-
-
