@@ -5,7 +5,7 @@ from settings import g_settings
 from idr import *
 from buffer import *
 from hooks import *
-from highlight import get_highlights
+from syntax import get_syntax_highlights
 
 from string import printable
 import timeout_decorator
@@ -97,6 +97,47 @@ class Window():
         self.lines_margin = len(str(len(self.buffer.lines))) + 1
 
     def highlight(self):
+        buffer_height = len(self.buffer.lines) - 1
+
+        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+        screen_end_y = min(screen_start_y + self.height, buffer_height)
+
+        for start_x, start_y, end_x, end_y, style in self.buffer.highlights:
+            if start_y >= screen_end_y: return
+            if end_y < screen_start_y: continue
+            
+            if start_y == end_y:
+                string = self.get_line(start_y)[start_x:end_x]
+
+                self._screen_write( start_x,
+                                    start_y - screen_start_y,
+                                    string,
+                                    style)
+                continue
+
+            # first line
+            string = self.get_line(start_y)[start_x:]
+            self._screen_write( start_x,
+                                start_y - screen_start_y, 
+                                string,
+                                style)
+
+            # lines in between
+            for y in range(start_y + 1, end_y):
+                string = self.get_line(y)
+                self._screen_write( 0,
+                                    y - screen_start_y,
+                                    string,
+                                    style)
+                                    
+            # last line
+            string = self.get_line(end_y)[:end_x]
+            self._screen_write( 0,
+                                end_y - screen_start_y, 
+                                string,
+                                style)
+
+    def syntax_highlight(self):
         if not self.buffer.treesitter: return # no syntax tree..
 
         buffer_height = len(self.buffer.lines) - 1
@@ -104,8 +145,8 @@ class Window():
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.height, buffer_height)
 
-        for node, style in get_highlights(  self.buffer.treesitter, 
-                                            g_settings['theme_opt']):
+        for node, style in get_syntax_highlights(   self.buffer.treesitter, 
+                                                    g_settings['theme_opt']):
             start_y = node.start_point[0]
             start_x = node.start_point[1]
             end_y = node.end_point[0]
@@ -288,6 +329,7 @@ class Window():
             except Exception as e: elog(f"Exception: {x} {x_range} {e}")
 
         # - on top of thaat draw highlights
+        self.syntax_highlight()
         self.highlight()
         self.visualize()
         self.draw_cursor()

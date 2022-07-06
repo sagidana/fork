@@ -50,6 +50,8 @@ class Buffer():
         self.undo_stack = []
         self.redo_stack = []
 
+        self.highlights = []
+
         self.visual_mode = None
         self.visual_start_point = None
         self.visual_current_point = None
@@ -177,6 +179,14 @@ class Buffer():
 
         with open(self.file_path, 'w+') as f:
             f.writelines(self.lines)
+
+    def set_highlights(self, highlights):
+        self.highlights = highlights
+
+    def clear_highlights(self):
+        self.highlights = []
+
+    def add_highlights(self, highlights): pass
 
     def visual_begin(self, mode, x, y):
         self.visual_mode = mode

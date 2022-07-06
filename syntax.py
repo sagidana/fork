@@ -36,7 +36,7 @@ def get_scope_style(theme, scope):
 
     return None
 
-def get_highlights(treesitter, theme):
+def get_syntax_highlights(treesitter, theme):
     for c in treesitter.get_captures():
         node, scope = c[0], c[1]
 
@@ -49,5 +49,5 @@ if __name__ == '__main__':
     with open('themes/monokai-color-theme.json', 'r') as f: theme = json.loads(f.read())
     with open('editor', 'rb') as f: treesitter = TreeSitter(f.read())
 
-    for hl in get_highlights(treesitter, theme):
+    for hl in get_syntax_highlights(treesitter, theme):
         print(hl)

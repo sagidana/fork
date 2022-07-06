@@ -151,9 +151,13 @@ class Editor():
             return False
         self.maps[NORMAL][ord('$')] = dollar_map
         def slash_map(self):
-            self.on_search()
+            self.on_search(True)
             return False
         self.maps[NORMAL][ord('/')] = slash_map
+        def question_mark_map(self):
+            self.on_search(False)
+            return False
+        self.maps[NORMAL][ord('?')] = question_mark_map
 
     def __initialize_movement_objects_maps(self, maps, cb):
         def move_(self): pass
@@ -845,7 +849,7 @@ class Editor():
                 return (start_x, start_y)
             return None
 
-    def on_search(self):
+    def on_search(self, forward):
         origin_x = self.get_curr_window().buffer_cursor[0]
         origin_y = self.get_curr_window().buffer_cursor[1]
 
@@ -872,13 +876,20 @@ class Editor():
                     results = self.get_curr_buffer().search_pattern(pattern)
                     if len(results) == 0: continue
 
-                    pos = self._find_closest_match(results)
+                    pos = self._find_closest_match(results, forward)
                     if not pos: continue
 
                     self.get_curr_window().move_cursor_to_buf_location( pos[0], 
                                                                         pos[1])
 
-                    # TODO: highlight all matches
+                    # reverse the colors for highlights
+                    style = {}
+                    style['background'] = g_settings['theme']['colors']['editor.foreground']
+                    style['foreground'] = g_settings['theme']['colors']['editor.background']
+
+                    highlights = [(start_x, start_y, end_x, end_y, style) for start_x, start_y, end_x, end_y in results]
+                    self.get_curr_buffer().set_highlights(highlights)
+                    self.get_curr_window().draw()
             except: pass
 
         if success:
@@ -886,7 +897,8 @@ class Editor():
         else:
             self.get_curr_window().move_cursor_to_buf_location( origin_x, 
                                                                 origin_y)
-            # TODO: clear highlights
+            self.get_curr_buffer().clear_highlights()
+            self.get_curr_window().draw()
 
     def on_command(self):
         ret = False
