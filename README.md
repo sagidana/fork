@@ -55,10 +55,8 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 
 ## TODOs
-- highlights
-- search & replace
+- windowing
 - folds
-
 - ctags
 - cscope
 
@@ -69,6 +67,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 - statusline?
 
+- replace
 - \<num\>\<action\>
 
 - existing plugins

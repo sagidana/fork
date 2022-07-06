@@ -767,6 +767,16 @@ class Window():
         self.move_cursor_to_buf_location(x, y)
         self.draw()
 
+    def empty_line(self):
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+
+        # replace with empty line (including the newline char)
+        self.buffer.replace_line(y, "\n")
+
+        self.move_cursor_to_buf_location(0, y)
+        self.draw()
+
     def remove_line(self):
         self.buffer.remove_line(self.buffer_cursor[1])
 
@@ -865,6 +875,19 @@ class Window():
                                 line)
         self.move_down()
         self.move_line_begin()
+        self.draw()
+
+    def join_line(self):
+        curr_line = self.buffer_cursor[1]
+        if curr_line + 1 > len(self.buffer.lines) - 1: return
+
+        self.move_line_end()
+
+        self._insert_char(' ')
+        self._move_left()
+
+        self.buffer.remove_char(0, curr_line + 1) # to trigger join
+
         self.draw()
 
     def undo(self): 

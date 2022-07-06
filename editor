@@ -463,6 +463,19 @@ class Editor():
             self.get_curr_window().change_end()
             return False
         self.maps[NORMAL][ord('d')][ord('d')] = dd_map
+        def cc_map(self):
+            self.get_curr_window().change_begin()
+
+            data = {}
+            data["data"] = self.get_curr_window().get_curr_line()
+            data["meta"] = "line" # to let the paste know the data is entire line.
+            self.registers['"'] = data
+
+            self.get_curr_window().empty_line()
+            self.get_curr_window().change_end()
+            self.change_mode(INSERT)
+            return False
+        self.maps[NORMAL][ord('c')][ord('c')] = cc_map
         def gg_map(self):
             self.get_curr_window().move_begin()
             return False
@@ -610,7 +623,14 @@ class Editor():
             self._on_search(last_pattern, False)
             return False
         self.maps[NORMAL][ord('N')] = N_map
+        def J_map(self):
+            self.get_curr_window().change_begin()
 
+            self.get_curr_window().join_line()
+
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('J')] = J_map
 
         self.maps[NORMAL][ord('z')] = {}
         def zz_map(self):
@@ -899,7 +919,6 @@ class Editor():
 
             try: 
                 char = chr(key)
-                # if re.match("[a-zA-Z 7-9-_()]", char): 
                 if char in printable:
                     pattern += char
                     self._on_search(pattern, forward)
