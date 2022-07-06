@@ -600,6 +600,17 @@ class Editor():
             self.change_mode(VISUAL)
             return False
         self.maps[NORMAL][ord('v')] = v_map
+        def n_map(self):
+            last_pattern = self.registers['/']
+            self._on_search(last_pattern, True)
+            return False
+        self.maps[NORMAL][ord('n')] = n_map
+        def N_map(self):
+            last_pattern = self.registers['/']
+            self._on_search(last_pattern, False)
+            return False
+        self.maps[NORMAL][ord('N')] = N_map
+
 
         self.maps[NORMAL][ord('z')] = {}
         def zz_map(self):
@@ -839,7 +850,7 @@ class Editor():
         if forward:
             for start_x, start_y, end_x, end_y in matches:
                 if start_y < origin_y: continue
-                if start_y == origin_y and start_x < origin_x: continue
+                if start_y == origin_y and start_x <= origin_x: continue
                 return (start_x, start_y)
             return None
         else:
@@ -848,6 +859,25 @@ class Editor():
                 if start_y == origin_y and start_x >= origin_x: continue
                 return (start_x, start_y)
             return None
+
+    def _on_search(self, pattern, forward):
+        results = self.get_curr_buffer().search_pattern(pattern)
+        if len(results) == 0: return
+
+        pos = self._find_closest_match(results, forward)
+        if not pos: return
+
+        self.get_curr_window().move_cursor_to_buf_location( pos[0], 
+                                                            pos[1])
+
+        # reverse the colors for highlights
+        style = {}
+        style['background'] = g_settings['theme']['colors']['editor.foreground']
+        style['foreground'] = g_settings['theme']['colors']['editor.background']
+
+        highlights = [(start_x, start_y, end_x, end_y, style) for start_x, start_y, end_x, end_y in results]
+        self.get_curr_buffer().set_highlights(highlights)
+        self.get_curr_window().draw()
 
     def on_search(self, forward):
         origin_x = self.get_curr_window().buffer_cursor[0]
@@ -872,24 +902,7 @@ class Editor():
                 # if re.match("[a-zA-Z 7-9-_()]", char): 
                 if char in printable:
                     pattern += char
-
-                    results = self.get_curr_buffer().search_pattern(pattern)
-                    if len(results) == 0: continue
-
-                    pos = self._find_closest_match(results, forward)
-                    if not pos: continue
-
-                    self.get_curr_window().move_cursor_to_buf_location( pos[0], 
-                                                                        pos[1])
-
-                    # reverse the colors for highlights
-                    style = {}
-                    style['background'] = g_settings['theme']['colors']['editor.foreground']
-                    style['foreground'] = g_settings['theme']['colors']['editor.background']
-
-                    highlights = [(start_x, start_y, end_x, end_y, style) for start_x, start_y, end_x, end_y in results]
-                    self.get_curr_buffer().set_highlights(highlights)
-                    self.get_curr_window().draw()
+                    self._on_search(pattern, forward)
             except: pass
 
         if success:
