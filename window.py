@@ -881,10 +881,13 @@ class Window():
         curr_line = self.buffer_cursor[1]
         if curr_line + 1 > len(self.buffer.lines) - 1: return
 
-        self.move_line_end()
+        next_line = self.get_line(curr_line + 1)
 
-        self._insert_char(' ')
-        self._move_left()
+        next_line = " " + next_line.lstrip() # make only one space at the begining 
+
+        self.buffer.replace_line(curr_line + 1, next_line)
+
+        self.move_line_end()
 
         self.buffer.remove_char(0, curr_line + 1) # to trigger join
 
