@@ -55,17 +55,20 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 
 ## TODOs
-- add all languages and filetype detections.
 - search & replace
-- \<num\>\<action\>
-- macros
-- auto completion
-- splits
-    - quickfix lists/location lists
-    - fzf
-- statusline?
 - folds
+
 - ctags
 - cscope
-- tabs
+
+- auto completion
+
+- quickfix lists/location lists
+- fzf
+
+- statusline?
+
+- \<num\>\<action\>
+
 - existing plugins
+- macros
