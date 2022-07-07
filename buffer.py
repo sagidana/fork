@@ -182,11 +182,9 @@ class Buffer():
 
     def set_highlights(self, highlights):
         self.highlights = highlights
-        self._raise_event(ON_BUFFER_CHANGE, change)
 
     def clear_highlights(self):
         self.highlights = []
-        self._raise_event(ON_BUFFER_CHANGE, change)
 
     def add_highlights(self, highlights): pass
 
