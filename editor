@@ -615,12 +615,16 @@ class Editor():
         self.maps[NORMAL][ord('v')] = v_map
         def n_map(self):
             last_pattern = self.registers['/']
-            self._on_search(last_pattern, True)
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self._on_search(x, y, last_pattern, True)
             return False
         self.maps[NORMAL][ord('n')] = n_map
         def N_map(self):
             last_pattern = self.registers['/']
-            self._on_search(last_pattern, False)
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self._on_search(x, y, last_pattern, False)
             return False
         self.maps[NORMAL][ord('N')] = N_map
         def J_map(self):
@@ -863,28 +867,25 @@ class Editor():
         except Exception as e: elog(f"Exception: {e}")
         return ret
 
-    def _find_closest_match(self, matches, forward=True):
-        origin_x = self.get_curr_window().buffer_cursor[0]
-        origin_y = self.get_curr_window().buffer_cursor[1]
-
+    def _find_closest_match(self, x, y, matches, forward=True):
         if forward:
             for start_x, start_y, end_x, end_y in matches:
-                if start_y < origin_y: continue
-                if start_y == origin_y and start_x <= origin_x: continue
+                if start_y < y: continue
+                if start_y == y and start_x <= x: continue
                 return (start_x, start_y)
             return None
         else:
             for start_x, start_y, end_x, end_y in reversed(matches):
-                if start_y > origin_y: continue
-                if start_y == origin_y and start_x >= origin_x: continue
+                if start_y > y: continue
+                if start_y == y and start_x >= x: continue
                 return (start_x, start_y)
             return None
 
-    def _on_search(self, pattern, forward):
+    def _on_search(self, x, y, pattern, forward):
         results = self.get_curr_buffer().search_pattern(pattern)
         if len(results) == 0: return
 
-        pos = self._find_closest_match(results, forward)
+        pos = self._find_closest_match(x, y, results, forward)
         if not pos: return
 
         self.get_curr_window().move_cursor_to_buf_location( pos[0], 
@@ -892,8 +893,8 @@ class Editor():
 
         # reverse the colors for highlights
         style = {}
-        style['background'] = g_settings['theme']['colors']['editor.foreground']
-        style['foreground'] = g_settings['theme']['colors']['editor.background']
+        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+        style['background'] = g_settings['theme']['colors']['selection.background']
 
         highlights = [(start_x, start_y, end_x, end_y, style) for start_x, start_y, end_x, end_y in results]
         self.get_curr_buffer().set_highlights(highlights)
@@ -908,10 +909,6 @@ class Editor():
         while True:
             key = self.screen.get_key()
 
-            self.get_curr_window().move_cursor_to_buf_location( origin_x, 
-                                                                origin_y)
-            self.get_curr_buffer().clear_highlights()
-            self.get_curr_window().draw()
 
             elog(f"EDITOR: {key}")
             if key == ENTER_KEY: 
@@ -919,7 +916,12 @@ class Editor():
                 break
             if key == ESC_KEY: break
             if key == BACKSPACE_KEY: 
-                if len(pattern) > 0: pattern = pattern[:-1] 
+                if len(pattern) > 0: 
+                    pattern = pattern[:-1] 
+                    self.get_curr_window().move_cursor_to_buf_location( origin_x, 
+                                                                        origin_y)
+                    self.get_curr_buffer().clear_highlights()
+                    self.get_curr_window().draw()
             else:
                 try: 
                     char = chr(key)
@@ -928,7 +930,7 @@ class Editor():
                     else: break
                 except: pass
 
-            self._on_search(pattern, forward)
+            self._on_search(origin_x, origin_y, pattern, forward)
 
         if success:
             self.registers['/'] = pattern
