@@ -870,10 +870,12 @@ class Buffer():
 
     def search_pattern(self, pattern):
         results = []
-        for y, line in enumerate(self.lines):
-            for m in re.finditer(pattern, line):
-                start_x = m.start()
-                end_x = m.end()
+        try:
+            for y, line in enumerate(self.lines):
+                for m in re.finditer(pattern, line):
+                    start_x = m.start()
+                    end_x = m.end()
 
-                results.append((start_x, y, end_x, y))
+                    results.append((start_x, y, end_x, y))
+        except: pass
         return results

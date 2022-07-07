@@ -928,7 +928,7 @@ class Editor():
                     if char in printable:
                         pattern += char
                     else: break
-                except: pass
+                except: continue
 
             self._on_search(origin_x, origin_y, pattern, forward)
 
