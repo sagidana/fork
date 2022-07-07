@@ -908,6 +908,11 @@ class Editor():
         while True:
             key = self.screen.get_key()
 
+            self.get_curr_window().move_cursor_to_buf_location( origin_x, 
+                                                                origin_y)
+            self.get_curr_buffer().clear_highlights()
+            self.get_curr_window().draw()
+
             elog(f"EDITOR: {key}")
             if key == ENTER_KEY: 
                 if len(pattern) > 0: success = True
@@ -915,14 +920,15 @@ class Editor():
             if key == ESC_KEY: break
             if key == BACKSPACE_KEY: 
                 if len(pattern) > 0: pattern = pattern[:-1] 
-                break
+            else:
+                try: 
+                    char = chr(key)
+                    if char in printable:
+                        pattern += char
+                    else: break
+                except: pass
 
-            try: 
-                char = chr(key)
-                if char in printable:
-                    pattern += char
-                    self._on_search(pattern, forward)
-            except: pass
+            self._on_search(pattern, forward)
 
         if success:
             self.registers['/'] = pattern
