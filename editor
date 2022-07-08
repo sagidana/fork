@@ -44,14 +44,20 @@ class Editor():
     def get_key_timeout(self):
         return self.screen.get_key()
 
+    def change_begin(self):
+        self.get_curr_window().change_begin()
+
+    def change_end(self):
+        self.get_curr_window().change_end()
+
     def change_mode(self, target):
         if self.mode == INSERT and target == NORMAL:
-            self.get_curr_window().change_end()
+            self.change_end()
             self.get_curr_window().move_left()
         if self.mode == NORMAL and target == INSERT:
             # in vim the transition from insert mode to normal mode causes the
             # cursor to move one index to the left. should I mimic this?
-            self.get_curr_window().change_begin()
+            self.change_begin()
         if self.mode == NORMAL and target == VISUAL_LINE:
             self.get_curr_window().visual_begin(VISUAL_LINE)
         if self.mode == NORMAL and target == VISUAL:
@@ -160,9 +166,9 @@ class Editor():
             return False
         self.maps[NORMAL][ord('?')] = question_mark_map
         def tilda_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().upper()
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('~')] = tilda_map
 
@@ -436,17 +442,17 @@ class Editor():
 
         def change_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
-            self.get_curr_window().change_end()
+            self.change_end()
             self.change_mode(INSERT)
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
         def delete_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
         def yank_object_map(scope): 
@@ -455,16 +461,16 @@ class Editor():
         self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_map)
         def indent_right_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().indent_lines(start_y, end_y, True)
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('>')], indent_right_object_map)
         def indent_left_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().indent_lines(start_y, end_y, False)
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('<')], indent_left_object_map)
 
@@ -476,7 +482,7 @@ class Editor():
             return False
         self.maps[NORMAL][ord('y')][ord('y')] = yy_map
         def dd_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
 
             data = {}
             data["data"] = self.get_curr_window().get_curr_line()
@@ -484,11 +490,11 @@ class Editor():
             self.registers['"'] = data
 
             self.get_curr_window().remove_line()
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('d')][ord('d')] = dd_map
         def cc_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
 
             data = {}
             data["data"] = self.get_curr_window().get_curr_line()
@@ -496,22 +502,22 @@ class Editor():
             self.registers['"'] = data
 
             self.get_curr_window().empty_line()
-            self.get_curr_window().change_end()
+            self.change_end()
             self.change_mode(INSERT)
             return False
         self.maps[NORMAL][ord('c')][ord('c')] = cc_map
         def gt_gt_map(self):
             y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().indent_lines(y, y, True)
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('>')][ord('>')] = gt_gt_map
         def lt_lt_map(self):
             y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().indent_lines(y, y, False)
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('<')][ord('<')] = lt_lt_map
         def gg_map(self):
@@ -604,21 +610,21 @@ class Editor():
             return False
         self.maps[NORMAL][ord('i')] = i_map
         def X_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().remove_char_special(self.get_curr_window().buffer_cursor[0])
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('X')] = X_map
         def x_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().remove_char_special(self.get_curr_window().buffer_cursor[0] + 1)
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('x')] = x_map
         def r_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().replace()
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('r')] = r_map
         def R_map(self):
@@ -626,7 +632,7 @@ class Editor():
             return False
         self.maps[NORMAL][ord('R')] = R_map
         def P_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
             data = self.registers['"']
             if data:
                 if data['meta'] == 'line':
@@ -634,11 +640,11 @@ class Editor():
                     self.get_curr_window().insert_line_before(line)
                 elif data['meta'] == 'char': pass
                 elif data['meta'] == 'block': pass
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('P')] = P_map
         def p_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
             data = self.registers['"']
             if data:
                 if data['meta'] == 'line':
@@ -646,7 +652,7 @@ class Editor():
                     self.get_curr_window().insert_line_after(line)
                 elif data['meta'] == 'char': pass
                 elif data['meta'] == 'block': pass
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('p')] = p_map
         def u_map(self):
@@ -676,11 +682,11 @@ class Editor():
             return False
         self.maps[NORMAL][ord('N')] = N_map
         def J_map(self):
-            self.get_curr_window().change_begin()
+            self.change_begin()
 
             self.get_curr_window().join_line()
 
-            self.get_curr_window().change_end()
+            self.change_end()
             return False
         self.maps[NORMAL][ord('J')] = J_map
         def C_map(self):
@@ -693,9 +699,9 @@ class Editor():
             end_x = size - 2
             end_y = y
 
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
-            self.get_curr_window().change_end()
+            self.change_end()
             self.change_mode(INSERT)
             return False
         self.maps[NORMAL][ord('C')] = C_map
@@ -709,9 +715,9 @@ class Editor():
             end_x = size - 2
             end_y = y
 
-            self.get_curr_window().change_begin()
+            self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
-            self.get_curr_window().change_end()
+            self.change_end()
 
             return False
         self.maps[NORMAL][ord('D')] = D_map
@@ -786,12 +792,12 @@ class Editor():
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            self.get_curr_window().change_begin()
+            self.change_begin()
 
             start_x, start_y, end_x, end_y = scope
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
 
-            self.get_curr_window().change_end()
+            self.change_end()
 
             self.change_mode(NORMAL)
             return False
