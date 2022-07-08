@@ -708,6 +708,18 @@ class Window():
     def get_key(self):
         return self.screen.get_key()
 
+    def upper(self):
+        line = self.get_curr_line()
+        char = line[self.buffer_cursor[0]]
+        if char.isupper():
+            char = char.lower()
+        else:
+            char = char.upper()
+        self.buffer.replace_char(   self.buffer_cursor[0],
+                                    self.buffer_cursor[1],
+                                    char)
+        self.draw()
+
     def replace(self): 
         try: 
             key = self.get_key()

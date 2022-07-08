@@ -159,6 +159,12 @@ class Editor():
             self.on_search(False)
             return False
         self.maps[NORMAL][ord('?')] = question_mark_map
+        def tilda_map(self):
+            self.get_curr_window().change_begin()
+            self.get_curr_window().upper()
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('~')] = tilda_map
 
     def __initialize_movement_objects_maps(self, maps, cb):
         def move_(self): pass
