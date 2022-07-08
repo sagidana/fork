@@ -823,6 +823,32 @@ class Window():
         self.move_cursor_to_buf_location(x, y)
         self.draw()
 
+    def indent_lines(   self,
+                        start_y,
+                        end_y, 
+                        is_right):
+        indent_content = "    "
+        if is_right:
+            for y in range(start_y, end_y + 1):
+                line = self.get_line(y)
+                line = indent_content + line
+                self.buffer.replace_line(y, line)
+            curr_y = self.buffer_cursor[1]
+            if start_y <= self.buffer_cursor[1] < end_y + 1:
+                for i in range(len(indent_content)):
+                    self.move_right()
+        else:
+            for y in range(start_y, end_y + 1):
+                line = self.get_line(y)
+                num_of_spaces = re.search('\S', line).start()
+                num_to_remove = min(len(indent_content), num_of_spaces)
+                self.buffer.replace_line(y, line[num_to_remove:])
+                if self.buffer_cursor[1] == y:
+                    for i in range(num_to_remove):
+                        self.move_left()
+
+        self.draw()
+
     def remove_scope(   self,
                         start_x,
                         start_y,

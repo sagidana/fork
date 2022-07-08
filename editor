@@ -426,10 +426,13 @@ class Editor():
         self.__initialize_inner_around_objects_maps(maps, cb)
 
     def _initialize_normal_mainstream_maps(self):
+        # operations
         self.maps[NORMAL][ord('c')] = {}    # change
         self.maps[NORMAL][ord('d')] = {}    # delete
         self.maps[NORMAL][ord('y')] = {}    # yank
         self.maps[NORMAL][ord('g')] = {}    # go
+        self.maps[NORMAL][ord('>')] = {}    # indent right
+        self.maps[NORMAL][ord('<')] = {}    # indent left
 
         def change_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
@@ -450,6 +453,20 @@ class Editor():
             start_x, start_y, end_x, end_y = scope
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_map)
+        def indent_right_object_map(scope): 
+            start_x, start_y, end_x, end_y = scope
+            self.get_curr_window().change_begin()
+            self.get_curr_window().indent_lines(start_y, end_y, True)
+            self.get_curr_window().change_end()
+            return False
+        self._initialize_objects_maps(self.maps[NORMAL][ord('>')], indent_right_object_map)
+        def indent_left_object_map(scope): 
+            start_x, start_y, end_x, end_y = scope
+            self.get_curr_window().change_begin()
+            self.get_curr_window().indent_lines(start_y, end_y, False)
+            self.get_curr_window().change_end()
+            return False
+        self._initialize_objects_maps(self.maps[NORMAL][ord('<')], indent_left_object_map)
 
         def yy_map(self):
             data = {}
@@ -483,6 +500,20 @@ class Editor():
             self.change_mode(INSERT)
             return False
         self.maps[NORMAL][ord('c')][ord('c')] = cc_map
+        def gt_gt_map(self):
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_window().change_begin()
+            self.get_curr_window().indent_lines(y, y, True)
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('>')][ord('>')] = gt_gt_map
+        def lt_lt_map(self):
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_window().change_begin()
+            self.get_curr_window().indent_lines(y, y, False)
+            self.get_curr_window().change_end()
+            return False
+        self.maps[NORMAL][ord('<')][ord('<')] = lt_lt_map
         def gg_map(self):
             self.get_curr_window().move_begin()
             return False
