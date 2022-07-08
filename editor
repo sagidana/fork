@@ -50,6 +50,10 @@ class Editor():
     def change_end(self):
         self.get_curr_window().change_end()
 
+        # set last change in '.' register for the repeat operation.
+        self.registers["."] = self.internal_registers["."].copy()
+        self.internal_registers["."] = []
+
     def change_mode(self, target, effect_change=True):
         if self.mode == INSERT and target == NORMAL:
             if effect_change: self.change_end()
@@ -66,6 +70,7 @@ class Editor():
             self.get_curr_window().visual_end()
 
         self.mode = target
+        self.curr_maps = self.maps[self.mode]
 
     def get_inner_key(self):
         try: return self.get_key_timeout()
@@ -718,6 +723,11 @@ class Editor():
 
             return False
         self.maps[NORMAL][ord('D')] = D_map
+        def dot_map(self):
+            elog(f"EDITOR: registers: {self.registers['.']}")
+            for k in self.registers['.']: self.on_key(k)
+            return False
+        self.maps[NORMAL][ord('.')] = dot_map
 
         self.maps[NORMAL][ord('z')] = {}
         def zz_map(self):
@@ -809,6 +819,8 @@ class Editor():
 
     def initialize_registers(self):
         # we dont add all of vim's registers for now..
+        self.registers = {}
+        self.internal_registers = {}
 
         # named registers
         for char in "abcdefghijklmnopqrstuvwxyz": self.registers[char] = None
@@ -819,13 +831,15 @@ class Editor():
         self.registers['"'] = None
         # last search pattern register
         self.registers['/'] = None
+        # last change register
+        self.registers['.'] = []
+        self.internal_registers['.'] = []
 
     def __init__(self, screen):
         self.screen = screen
 
         self.height, self.width = screen.get_height(), screen.get_width()
 
-        self.registers = {}
         self.initialize_registers()
 
         self.maps = {}
@@ -836,9 +850,11 @@ class Editor():
         self.maps[VISUAL_BLOCK] = {}
         self.maps[REPLACE] = {}
 
-        self.mode = NORMAL # start in normal mode
-
         self.initialize_maps()
+
+        # start in normal mode
+        self.mode = NORMAL
+        self.curr_maps = self.maps[self.mode]
 
         self.tabs = []
         self.windows = []
@@ -1047,29 +1063,46 @@ class Editor():
         return ret
 
     def on_key(self, key):
+        if self.mode == NORMAL: 
+            # If we on top level, start recording from top.
+            if self.curr_maps == self.maps[self.mode]:
+                self.internal_registers["."] = [key]
+            # If we nested somewhere just append the key to the already
+            # existing keys
+            else:
+                self.internal_registers["."].append(key)
+        if self.mode == INSERT: 
+            self.internal_registers["."].append(key)
+
         if key == ESC_KEY:
             self.change_mode(NORMAL)
             return False
 
-        if key in self.maps[self.mode]:
-            curr = self.maps[self.mode]
-            if callable(curr[key]): return curr[key](self)
+        if key in self.curr_maps:
+            if callable(self.curr_maps[key]):
+                func = self.curr_maps[key]
+                # if we reached the level where we have a callable, that means
+                # we return to top level of the mappings
+                self.curr_maps = self.maps[self.mode]
+                return func(self)
 
-            while key in curr and isinstance(curr[key], dict): 
-                curr = curr[key]
-                key = self.get_inner_key()
+            if isinstance(self.curr_maps[key], dict):
+                # this means we need to keep nesting
+                self.curr_maps = self.curr_maps[key]
+                return False
 
-                if not key: break
-                if key not in curr: break
-
-            if key in curr: curr[key](self)
+            # We reached a dead-end. start from the top again in normal
+            # mode.
+            self.change_mode(NORMAL)
+            return False
+        # If we have no mappings matches, it is only find under insert-mode
+        # where we free to input free text.
         elif self.mode == INSERT:
             return self.on_insert(key)
-        elif self.mode == NORMAL and \
-            ord('1') <= key <= ord('9'):
-            elog(f"EDITOR: key: {chr(key)}")
-            return False
 
+        # We reached a dead-end. start from the top again in normal
+        # mode.
+        self.change_mode(NORMAL)
         return False
 
 
