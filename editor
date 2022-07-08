@@ -590,6 +590,10 @@ class Editor():
             self.get_curr_window().change_end()
             return False
         self.maps[NORMAL][ord('r')] = r_map
+        def R_map(self):
+            # TODO
+            return False
+        self.maps[NORMAL][ord('R')] = R_map
         def P_map(self):
             self.get_curr_window().change_begin()
             data = self.registers['"']
@@ -648,6 +652,38 @@ class Editor():
             self.get_curr_window().change_end()
             return False
         self.maps[NORMAL][ord('J')] = J_map
+        def C_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+
+            size = self.get_curr_window().get_curr_line_len()
+            start_x = x
+            start_y = y
+            end_x = size - 2
+            end_y = y
+
+            self.get_curr_window().change_begin()
+            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().change_end()
+            self.change_mode(INSERT)
+            return False
+        self.maps[NORMAL][ord('C')] = C_map
+        def D_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+
+            size = self.get_curr_window().get_curr_line_len()
+            start_x = x
+            start_y = y
+            end_x = size - 2
+            end_y = y
+
+            self.get_curr_window().change_begin()
+            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().change_end()
+
+            return False
+        self.maps[NORMAL][ord('D')] = D_map
 
         self.maps[NORMAL][ord('z')] = {}
         def zz_map(self):
