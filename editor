@@ -50,14 +50,12 @@ class Editor():
     def change_end(self):
         self.get_curr_window().change_end()
 
-    def change_mode(self, target):
+    def change_mode(self, target, effect_change=True):
         if self.mode == INSERT and target == NORMAL:
-            self.change_end()
+            if effect_change: self.change_end()
             self.get_curr_window().move_left()
         if self.mode == NORMAL and target == INSERT:
-            # in vim the transition from insert mode to normal mode causes the
-            # cursor to move one index to the left. should I mimic this?
-            self.change_begin()
+            if effect_change: self.change_begin()
         if self.mode == NORMAL and target == VISUAL_LINE:
             self.get_curr_window().visual_begin(VISUAL_LINE)
         if self.mode == NORMAL and target == VISUAL:
@@ -444,8 +442,7 @@ class Editor():
             start_x, start_y, end_x, end_y = scope
             self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
-            self.change_end()
-            self.change_mode(INSERT)
+            self.change_mode(INSERT, effect_change=False)
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
         def delete_object_map(scope): 
