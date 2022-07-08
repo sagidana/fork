@@ -437,7 +437,7 @@ class Editor():
         def change_object_map(scope): 
             start_x, start_y, end_x, end_y = scope
             self.get_curr_window().change_begin()
-            self.get_curr_window().remove_scope(start_x, start_y, end_x - 1, end_y)
+            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.get_curr_window().change_end()
             self.change_mode(INSERT)
             return False
