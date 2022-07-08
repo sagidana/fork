@@ -47,6 +47,7 @@ class Editor():
     def change_mode(self, target):
         if self.mode == INSERT and target == NORMAL:
             self.get_curr_window().change_end()
+            self.get_curr_window().move_left()
         if self.mode == NORMAL and target == INSERT:
             # in vim the transition from insert mode to normal mode causes the
             # cursor to move one index to the left. should I mimic this?
