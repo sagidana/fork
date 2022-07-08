@@ -8,7 +8,6 @@ from hooks import *
 from syntax import get_syntax_highlights
 
 from string import printable
-import timeout_decorator
 import curses
 import time
 import re
@@ -704,7 +703,6 @@ class Window():
         x, y = ret
         self.move_cursor_to_buf_location(x, y)
 
-    @timeout_decorator.timeout(2)
     def get_key(self):
         return self.screen.get_key()
 

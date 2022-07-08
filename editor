@@ -2,7 +2,6 @@
 
 from signal import signal, SIGWINCH
 from string import printable
-import timeout_decorator
 import argparse
 import time
 import json
@@ -40,10 +39,6 @@ class Editor():
         self.get_curr_tab().draw()
         pass
 
-    @timeout_decorator.timeout(MAP_TIMEOOUT)
-    def get_key_timeout(self):
-        return self.screen.get_key()
-
     def change_begin(self):
         self.get_curr_window().change_begin()
 
@@ -71,10 +66,6 @@ class Editor():
 
         self.mode = target
         self.curr_maps = self.maps[self.mode]
-
-    def get_inner_key(self):
-        try: return self.get_key_timeout()
-        except: return None
 
     def initialize_theme(self):
         with open(self.config['theme_path'], 'r') as f: 
