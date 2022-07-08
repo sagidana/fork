@@ -29,6 +29,14 @@ class Window():
 
         return event_wrapper
 
+    def on_buffer_reload_callback(self, priv):
+        orig_x = self.buffer_cursor[0]
+        orig_y = self.buffer_cursor[1]
+        self.window_cursor = [0,0]
+        self.buffer_cursor = [0,0]
+        self.move_cursor_to_buf_location(orig_x, orig_y)
+        self.draw()
+
     def __init__(   self, 
                     screen, 
                     width, 
@@ -41,6 +49,10 @@ class Window():
         self.screen = screen
 
         self.buffer = buffer
+        handlers = {}
+        handlers[ON_BUFFER_RELOAD] = self.on_buffer_reload_callback
+        self.buffer.register_events(handlers)
+
         self.set_lines_margin()
 
         self.position = list(position)

@@ -7,12 +7,13 @@ from idr import *
 from treesitter import TreeSitter
 
 from difflib import Differ
+import hashlib
 import json
 import re
 
 class Buffer():
     def on_buffer_change_callback(self, change):
-        if self.treesitter:
+        if self.treesitter and change:
             self.treesitter.edit(change, self.get_file_bytes())
 
     def raise_event(func):
@@ -65,10 +66,15 @@ class Buffer():
             Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
             return
         
-        try:
-            with open(file_path, 'r') as f:
-                self.lines = f.readlines()
-        except:pass
+        with open(file_path, 'r') as f:
+            self.lines = f.readlines()
+
+        self.hash = self._hash_file()
+        if not self.hash:
+            elog("here2")
+            raise Exception('Not implemented!')
+            Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
+            return
 
         language = self.detect_language()
         self.treesitter = None
@@ -81,6 +87,23 @@ class Buffer():
         self.register_events(handlers)
 
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
+
+    def _hash_file(self):
+        try:
+            with open(self.file_path, 'rb') as h_file:
+                return hashlib.md5(h_file.read()).hexdigest()
+        except: return None
+
+    def _match_hash(self):
+        try:
+            with open(self.file_path, 'rb') as h_file:
+                curr_hash = hashlib.md5(h_file.read()).hexdigest()
+                return self.hash == curr_hash
+        except:
+            return False
+
+    def file_changed_on_disk(self):
+        return not self._match_hash()
 
     def detect_language(self):
         if      self.file_path.endswith('.py'):
@@ -173,12 +196,28 @@ class Buffer():
         with open(file_path, 'w+') as f:
             f.writelines(self.lines)
 
+    def reload(self):
+        with open(self.file_path, 'r') as f:
+            self.lines = f.readlines()
+
+        self.hash = self._hash_file()
+        if not self.hash:
+            raise Exception('Not implemented!')
+            Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
+            return
+
+        self.resync_treesitter()
+        self._raise_event(ON_BUFFER_RELOAD, None)
+
     def write(self):
+        elog("BUFFER: writing to file!")
         if not self.file_path: 
             raise Exception("No file attached to buffer.")
 
         with open(self.file_path, 'w+') as f:
             f.writelines(self.lines)
+
+        self.hash = self._hash_file()
 
     def set_highlights(self, highlights):
         self.highlights = highlights
@@ -467,6 +506,9 @@ class Buffer():
         return change_wrapper['end_position']
 
     def change_begin(self, x, y):
+        if self.file_changed_on_disk(): 
+            elog("BUFFER: change begin: file changed!")
+            self.reload()
         if self.shadow: elog("BUFFER: WTF, already in a change?")
         if self.change_start_position: elog("BUFFER: WTF, already in a change?")
         self.shadow = self.lines.copy()
@@ -516,9 +558,18 @@ class Buffer():
         return change
             
     def change_end(self, x, y):
+        if self.file_changed_on_disk(): 
+            elog("BUFFER: file_changed_on_disk")
+            elog("BUFFER: change end: file changed!")
+            self.reload()
+            # discard changes if file changed underneath us
+            change = None 
+            self.shadow = None
+            self.change_start_position = None
+            return
+
         change = self._analyze_change()
         change_wrapper = {}
-
         if change: 
             change_wrapper['change'] = change
             change_wrapper['start_position'] = self.change_start_position
@@ -527,6 +578,7 @@ class Buffer():
 
         self.shadow = None
         self.change_start_position = None
+        self.write()
     
     # CORE: movement
     def find_next_char_regex(self, x, y, char_regex): pass

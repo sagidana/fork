@@ -819,8 +819,8 @@ class Editor():
     def exec_command(self, command):
         if command == 'q': 
             return self._quit_command()
-        if command == 'w': 
-            self.get_curr_window().buffer.write()
+        # if command == 'w': 
+            # self.get_curr_window().buffer.write()
         if command == 'qa': 
             return True
         return False

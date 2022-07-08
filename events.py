@@ -13,6 +13,7 @@ ON_DRAW_TAB = "on_draw_tab"
 
 # Per Buffer
 ON_BUFFER_CHANGE = "on_buffer_change"
+ON_BUFFER_RELOAD = "on_buffer_reload"
 
 # Per Window
 ON_WINDOW_MOVE_UP_BEFORE = "on_window_move_up_before"
