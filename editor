@@ -611,6 +611,12 @@ class Editor():
             self.change_mode(INSERT)
             return False
         self.maps[NORMAL][ord('i')] = i_map
+        def s_map(self):
+            self.change_begin()
+            self.get_curr_window().remove_char_special(self.get_curr_window().buffer_cursor[0] + 1)
+            self.change_mode(INSERT, effect_change=False)
+            return False
+        self.maps[NORMAL][ord('s')] = s_map
         def X_map(self):
             self.change_begin()
             self.get_curr_window().remove_char_special(self.get_curr_window().buffer_cursor[0])
