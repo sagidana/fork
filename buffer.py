@@ -189,13 +189,6 @@ class Buffer():
         Hooks.execute(ON_BUFFER_DESTROY_BEFORE, self)
         Hooks.execute(ON_BUFFER_DESTROY_AFTER, self)
 
-    def write_to_file(self, file_path):
-        if not self.file_path: 
-            self.file_path = file_path
-
-        with open(file_path, 'w+') as f:
-            f.writelines(self.lines)
-
     def reload(self):
         with open(self.file_path, 'r') as f:
             self.lines = f.readlines()
@@ -390,6 +383,10 @@ class Buffer():
         self._raise_event(ON_BUFFER_CHANGE, change)
         return y
 
+    def replace_char(self, x, y, char):
+        self.remove_char(x+1, y)
+        self.insert_char(x, y, char)
+
     def replace_line(self, y, new_line):
         self.remove_line(y)
         self.insert_line(y, new_line)
@@ -486,21 +483,41 @@ class Buffer():
             self.replace_line(line, lines_for_replacement[line])
 
     def undo(self): 
+        if self.file_changed_on_disk():
+            self.reload()
+            # if file was changed under us,
+            # all our stack are irrelevant as the entire file's content might
+            # be compromised
+            self.undo_stack = []
+            self.redo_stack = []
+            return
+
         if len(self.undo_stack) == 0: return
         change_wrapper = self.undo_stack.pop()
         change = change_wrapper['change']
 
         self._change(change)
+        self.write()
 
         self.redo_stack.append(change_wrapper)
         return change_wrapper['start_position']
 
     def redo(self): 
+        if self.file_changed_on_disk():
+            self.reload()
+            # if file was changed under us,
+            # all our stack are irrelevant as the entire file's content might
+            # be compromised
+            self.undo_stack = []
+            self.redo_stack = []
+            return
+
         if len(self.redo_stack) == 0: return
         change_wrapper = self.redo_stack.pop()
         change = change_wrapper['change']
 
         self._change(change, undo=False)
+        self.write()
 
         self.undo_stack.append(change_wrapper)
         return change_wrapper['end_position']

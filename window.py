@@ -305,8 +305,6 @@ class Window():
             self._screen_clear_line_partial(y, start_x, end_x)
 
     def draw(self):
-        # self.clear()
-
         before = self.window_cursor[1]
         first_line = self.buffer_cursor[1] - before
         buffer_height = len(self.buffer.lines) - 1
@@ -709,6 +707,18 @@ class Window():
     @timeout_decorator.timeout(2)
     def get_key(self):
         return self.screen.get_key()
+
+    def replace(self): 
+        try: 
+            key = self.get_key()
+            char = chr(key)
+            self.buffer.replace_char(   self.buffer_cursor[0],
+                                        self.buffer_cursor[1],
+                                        char)
+            self.draw()
+
+        except Exception as e: 
+            elog(f"WINDOW: {e}")
 
     def find(self): 
         try: key = self.get_key()
