@@ -20,6 +20,31 @@ FOREGROUND_TRUE_COLOR = "\x1b[38;2;{}m"
 BACKGROUND_256_COLOR = "\x1b[48;5;{}m"
 FOREGROUND_256_COLOR = "\x1b[38;5;{}m"
 
+REVERSE = "\x1b[7m"
+MOVE = "\x1b[{};{}H"
+
+ECHO = "\x1b[28m"
+NO_ECHO = "\x1b[8m"
+
+WRAP = "\x1b[?7h"
+NO_WRAP = "\x1b[?7l"
+
+BLINK = ""
+NO_BLINK = ""
+
+UNDERLINE = "\x1b[4m"
+NO_UNDERLINE = "\x1b[24m"
+
+DIM = "\x1b[2m"
+NO_DIM = "\x1b[22m"
+
+SAVE_CURSOR = "\x1b[s"
+RESTORE_CURSOR = "\x1b[u"
+
+CLEAR_LINE = "\x1b[2K"
+CLEAR = "\x1b[2J"
+
+
 ENTER_KEY = 13
 TAB_KEY = 9
 ESC_KEY = 27
@@ -113,35 +138,28 @@ class Screen():
         return self.width
 
     def _enable_wrap(self):
-        escape = "\x1b[?7h"
-        self._write_to_stdout(escape)
+        self._write_to_stdout(WRAP)
 
     def _disable_wrap(self):
-        escape = "\x1b[?7l"
-        self._write_to_stdout(escape)
+        self._write_to_stdout(NO_WRAP)
 
     def _enable_echo(self):
-        escape = "\x1b[28m"
-        self._write_to_stdout(escape)
+        self._write_to_stdout(ECHO)
 
     def _disable_echo(self):
-        escape = "\x1b[8m"
-        self._write_to_stdout(escape)
+        self._write_to_stdout(NO_ECHO)
 
     def _save_cursor(self):
-        escape = f"\x1b[s"
-        self._write_to_stdout(escape)
+        self._write_to_stdout(SAVE_CURSOR)
 
     def _restore_cursor(self):
-        escape = f"\x1b[u"
-        self._write_to_stdout(escape)
+        self._write_to_stdout(RESTORE_CURSOR)
 
     def clear_line(self, y):
         self._save_cursor()
 
         self.move_cursor(y, 0)
-        escape = f"\x1b[2K"
-        self._write_to_stdout(escape)
+        self._write_to_stdout(CLEAR_LINE)
 
         self._restore_cursor()
 
@@ -150,12 +168,16 @@ class Screen():
         self.write(y, start_x, empty)
 
     def clear(self):
-        escape = f"\x1b[2J"
-        self._write_to_stdout(escape)
+        self._write_to_stdout(CLEAR)
+
+    def set_cursor_blink(self):
+        self._write_to_stdout(BLINK)
+    def unset_cursor_blink(self):
+        self._write_to_stdout(NO_BLINK)
 
     def move_cursor(self, y, x):
         y += 1; x += 1
-        escape = f"\x1b[{y};{x}H"
+        escape = MOVE.format(y, x)
         self._write_to_stdout(escape)
 
     def _set_style(self, style):
@@ -169,8 +191,7 @@ class Screen():
         if bg: self._write_to_stdout(BACKGROUND_TRUE_COLOR.format(convert(bg)))
 
         if 'reverse' in style: 
-            escape = f"\x1b[7m"
-            self._write_to_stdout(escape)
+            self._write_to_stdout(REVERSE)
 
     def write(self, y, x, string, style=None): 
         self._save_cursor()
@@ -192,6 +213,15 @@ if __name__ == '__main__':
                 # {"foreground": "#A6E22E"})
                 {"foreground": "#F9262E"})
 
-    for i in range(1000):
+    screen.move_cursor(0,0)
+
+    # screen._write_to_stdout("\x1b[5m") # set blink
+    
+    screen._write_to_stdout("\x1b[?17;14;224c")
+    # screen._write_to_stdout("\x1b[?16;1000]")
+    # screen._write_to_stdout("\x1b[4h")
+    # screen._write_to_stdout("\x1b[?16;20]")
+
+    for i in range(1):
         c = screen.get_key()
         print(f"{c}")

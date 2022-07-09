@@ -37,7 +37,6 @@ class Editor():
 
     def draw(self):
         self.get_curr_tab().draw()
-        pass
 
     def change_begin(self):
         self.get_curr_window().change_begin()
@@ -53,8 +52,10 @@ class Editor():
         if self.mode == INSERT and target == NORMAL:
             if effect_change: self.change_end()
             self.get_curr_window().move_left()
+            # TODO: reset cursor shape of normal mode
         if self.mode == NORMAL and target == INSERT:
             if effect_change: self.change_begin()
+            # TODO: set cursor shape of insert mode
         if self.mode == NORMAL and target == VISUAL_LINE:
             self.get_curr_window().visual_begin(VISUAL_LINE)
         if self.mode == NORMAL and target == VISUAL:
