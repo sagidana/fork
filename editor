@@ -53,11 +53,11 @@ class Editor():
             if effect_change: self.change_end()
             self.get_curr_window().move_left()
             # TODO: reset cursor shape of normal mode
-            # self.screen.set_cursor_block_blink()
+            self.screen.set_cursor_block_blink()
         if self.mode == NORMAL and target == INSERT:
             if effect_change: self.change_begin()
             # TODO: set cursor shape of insert mode
-            # self.screen.set_cursor_i_beam()
+            self.screen.set_cursor_i_beam()
         if self.mode == NORMAL and target == VISUAL_LINE:
             self.get_curr_window().visual_begin(VISUAL_LINE)
         if self.mode == NORMAL and target == VISUAL:
@@ -837,7 +837,7 @@ class Editor():
 
     def __init__(self, screen):
         self.screen = screen
-        # self.screen.set_cursor_block_blink() # default for normal mode
+        self.screen.set_cursor_block_blink() # default for normal mode
 
         self.height, self.width = screen.get_height(), screen.get_width()
 
