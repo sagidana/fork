@@ -29,11 +29,13 @@ NO_ECHO = "\x1b[8m"
 WRAP = "\x1b[?7h"
 NO_WRAP = "\x1b[?7l"
 
-BLINK = ""
-NO_BLINK = ""
-
-UNDERLINE = "\x1b[4m"
-NO_UNDERLINE = "\x1b[24m"
+CURSOR_I_BEAM = "\x1b[6 q"
+CURSOR_I_BEAM_BLINK = "\x1b[5 q"
+CURSOR_UNDERLINE = "\x1b[4 q"
+CURSOR_UNDERLINE_BLINK = "\x1b[3 q"
+CURSOR_BLOCK = "\x1b[2 q"
+CURSOR_BLOCK_BLINK = "\x1b[1 q"
+CURSOR_RESET = "\x1b[0 q"
 
 DIM = "\x1b[2m"
 NO_DIM = "\x1b[22m"
@@ -170,10 +172,11 @@ class Screen():
     def clear(self):
         self._write_to_stdout(CLEAR)
 
-    def set_cursor_blink(self):
-        self._write_to_stdout(BLINK)
-    def unset_cursor_blink(self):
-        self._write_to_stdout(NO_BLINK)
+    def set_cursor_i_beam(self):
+        self._write_to_stdout(CURSOR_I_BEAM)
+
+    def set_cursor_block_blink(self):
+        self._write_to_stdout(CURSOR_BLOCK_BLINK)
 
     def move_cursor(self, y, x):
         y += 1; x += 1
@@ -216,8 +219,19 @@ if __name__ == '__main__':
     screen.move_cursor(0,0)
 
     # screen._write_to_stdout("\x1b[5m") # set blink
+    # screen._write_to_stdout("\x1b[25m") # set blink
+    # screen._write_to_stdout("\x1b[4h") # set insert mod
+
+    # screen._write_to_stdout("\x1b[6 q") # set i-beam
+    # screen._write_to_stdout("\x1b[5 q") # set i-beam blnking
+    # screen._write_to_stdout("\x1b[4 q") # set underline
+    # screen._write_to_stdout("\x1b[3 q") # set underline blinking
+    # screen._write_to_stdout("\x1b[2 q") # set block
+    # screen._write_to_stdout("\x1b[1 q") # set block blinking
+    # screen._write_to_stdout("\x1b[0 q") # reset
     
-    screen._write_to_stdout("\x1b[?17;14;224c")
+    # screen._write_to_stdout("\x1b[?17;14;224c")
+    # screen._write_to_stdout("\x1b[?17;14;224c")
     # screen._write_to_stdout("\x1b[?16;1000]")
     # screen._write_to_stdout("\x1b[4h")
     # screen._write_to_stdout("\x1b[?16;20]")
