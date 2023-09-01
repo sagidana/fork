@@ -310,6 +310,7 @@ class Window():
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
         # attr = self.style_to_attr(style)
 
+        elog(f"window position: {self.position}, window height: {self.height}")
         for y in range(self.content_height):
             buffer_y = first_line + y
 

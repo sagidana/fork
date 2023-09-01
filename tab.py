@@ -299,7 +299,9 @@ class Tab():
         curr_window = self.get_curr_window()
         curr_buffer = curr_window.buffer
 
-        height = int(curr_window.height / 2)
+        total_height = curr_window.height
+
+        height = int(total_height / 2)
         width = curr_window.width
 
         seperator_y = curr_window.position[1] + height
@@ -431,4 +433,6 @@ class Tab():
                 window.draw()
             self.draw_seperators()
         self.get_curr_window().draw_cursor()
+
+        Hooks.execute(ON_DRAW_TAB, None)
 
