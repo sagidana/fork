@@ -90,8 +90,8 @@ class Tab():
             num_of_horizontal_windows = num_of_left_windows + num_of_right_windows + 1
             num_of_vertical_windows = num_of_up_windows + num_of_down_windows + 1
 
-            width = self.width - num_of_horizontal_windows
-            height = self.height - num_of_vertical_windows
+            width = self.width - num_of_horizontal_windows + 1
+            height = self.height - num_of_vertical_windows + 1
 
             width = int(width / num_of_horizontal_windows)
             height = int(height / num_of_vertical_windows)
