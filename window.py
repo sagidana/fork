@@ -342,7 +342,7 @@ class Window():
         self.highlight()
         self.visualize()
         self.draw_cursor()
-    
+
     def _scroll_up(self):
         self.buffer_cursor[1] -= 1
 

@@ -13,6 +13,7 @@ import re
 
 class Buffer():
     def on_buffer_change_callback(self, change):
+        elog(f"on_buffer_change_callback: {change}")
         if self.treesitter and change:
             self.treesitter.edit(change, self.get_file_bytes())
 
@@ -65,7 +66,7 @@ class Buffer():
             raise Exception('Not implemented!')
             Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
             return
-        
+
         with open(file_path, 'r') as f:
             self.lines = f.readlines()
 
@@ -204,7 +205,7 @@ class Buffer():
 
     def write(self):
         elog("BUFFER: writing to file!")
-        if not self.file_path: 
+        if not self.file_path:
             raise Exception("No file attached to buffer.")
 
         with open(self.file_path, 'w+') as f:
@@ -350,7 +351,7 @@ class Buffer():
         start_byte = self.get_file_pos(0, y)
         change['start_byte'] = start_byte
         change['old_end_byte'] = start_byte
-        change['new_end_byte'] = start_byte + len(new_line) - 1
+        change['new_end_byte'] = start_byte + len(new_line)
 
         change['start_point'] = (y, 0)
         change['old_end_point'] = (y, 0)
@@ -573,7 +574,7 @@ class Buffer():
                 old_line_num += 1
 
         return change
-            
+
     def change_end(self, x, y):
         if self.file_changed_on_disk(): 
             elog("BUFFER: file_changed_on_disk")
@@ -596,7 +597,7 @@ class Buffer():
         self.shadow = None
         self.change_start_position = None
         self.write()
-    
+
     # CORE: movement
     def find_next_char_regex(self, x, y, char_regex): pass
     # CORE: movement

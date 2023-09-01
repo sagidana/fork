@@ -1,10 +1,19 @@
+from os import path
 import json
+
 from log import elog
 
 g_settings = {}
+EDITOR_HOME_PATH = path.expanduser('~/.config/editor/')
 
-with open('config.json', 'r') as f: g_settings = json.loads(f.read())
-with open(g_settings['theme_path'], 'r') as f: g_settings['theme'] = json.loads(f.read())
+with open(  path.join(EDITOR_HOME_PATH, 'config.json'),
+            'r') as f:
+    g_settings = json.loads(f.read())
+
+with open(  path.join(EDITOR_HOME_PATH, g_settings['theme_path']),
+            'r') as f:
+    g_settings['theme'] = json.loads(f.read())
+
 g_settings['theme_opt'] = {}
 
 def add_to_theme(scope, style):
@@ -27,6 +36,5 @@ def optimize_theme():
             scopes = [x.strip() for x in token['scope'].split(',')]
             for s in scopes:
                 add_to_theme(s, token["settings"])
-
 
 optimize_theme()

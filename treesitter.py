@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 from tree_sitter import Language, Parser
-
+from settings import EDITOR_HOME_PATH
 from log import elog
+
+from os import path
+
 
 # Language.build_library(
     # # Store the library in the `build` directory
@@ -32,26 +35,30 @@ from log import elog
     # ]
 # )
 
-PYTHON_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',      'python')
-BASH_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'bash')
-C_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',           'c')
-CPP_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',         'cpp')
-CSS_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',         'css')
-GO_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',          'go')
-HTML_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'html')
-JAVA_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'java')
-JAVASCRIPT_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',  'javascript')
-MARKDOWN_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',    'markdown')
-PHP_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',         'php')
-RUBY_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'ruby')
-RUST_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'rust')
-MAKE_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'make')
-CSHARP_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',      'c_sharp')
-ELISP_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',       'elisp')
-LUA_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',         'lua')
-YAML_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'yaml')
-R_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',           'r')
-JSON_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'json')
+PYTHON_LANGUAGE = Language( path.join(EDITOR_HOME_PATH,
+                            'grammars/tree-sitter-lib/my-languages.so'),
+                            'python')
+C_LANGUAGE = Language(  path.join(EDITOR_HOME_PATH,
+                        'grammars/tree-sitter-lib/my-languages.so'),
+                        'c')
+# BASH_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'bash')
+# CPP_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',         'cpp')
+# CSS_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',         'css')
+# GO_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',          'go')
+# HTML_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'html')
+# JAVA_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'java')
+# JAVASCRIPT_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',  'javascript')
+# MARKDOWN_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',    'markdown')
+# PHP_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',         'php')
+# RUBY_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'ruby')
+# RUST_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'rust')
+# MAKE_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'make')
+# CSHARP_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',      'c_sharp')
+# ELISP_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',       'elisp')
+# LUA_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',         'lua')
+# YAML_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'yaml')
+# R_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',           'r')
+# JSON_LANGUAGE = Language('grammars/tree-sitter-lib/my-languages.so',        'json')
 
 def walk(node, cb, level=0, nth_child=0):
     if cb(node, level, nth_child): return True
@@ -61,7 +68,7 @@ def walk(node, cb, level=0, nth_child=0):
             return True
         curr_nth_child += 1
     return False
-    
+
 def traverse_tree(tree, cb):
     cursor = tree.walk()
     reached_root = False
@@ -104,7 +111,7 @@ class TreeSitter():
 
     def _initialize_language(self, language):
         self.parser = Parser()
-        query_path = "grammars/{}/highlights.scm"
+        query_path = path.join(EDITOR_HOME_PATH, "grammars/{}/highlights.scm")
 
         if language == 'python':
             with open(query_path.format("python"),"r") as f: query = f.read()

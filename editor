@@ -94,37 +94,36 @@ class Editor():
         self.maps[mode][ord('h')] = h_map
 
     def _initialize_normal_window_maps(self):
-        pass
-        # self.maps[NORMAL][CTRL_W_KEY] = {}
-        # def ctrl_w_s_map(self):
-            # self.get_curr_tab().split()
-            # return False
-        # self.maps[NORMAL][CTRL_W_KEY][ord('s')] = ctrl_w_s_map
-        # def ctrl_w_v_map(self):
-            # self.get_curr_tab().vsplit()
-            # return False
-        # self.maps[NORMAL][CTRL_W_KEY][ord('v')] = ctrl_w_v_map
+        self.maps[NORMAL][CTRL_W_KEY] = {}
+        def ctrl_w_s_map(self):
+            self.get_curr_tab().split()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('s')] = ctrl_w_s_map
+        def ctrl_w_v_map(self):
+            self.get_curr_tab().vsplit()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('v')] = ctrl_w_v_map
 
-        # def ctrl_w_h_map(self):
-            # self.get_curr_tab().move_left_window()
-            # return False
-        # self.maps[NORMAL][CTRL_W_KEY][ord('h')] = ctrl_w_h_map
-        # self.maps[NORMAL][CTRL_W_KEY][CTRL_H_KEY] = ctrl_w_h_map
-        # def ctrl_w_j_map(self):
-            # self.get_curr_tab().move_down_window()
-            # return False
-        # self.maps[NORMAL][CTRL_W_KEY][ord('j')] = ctrl_w_j_map
-        # self.maps[NORMAL][CTRL_W_KEY][CTRL_J_KEY] = ctrl_w_j_map
-        # def ctrl_w_k_map(self):
-            # self.get_curr_tab().move_up_window()
-            # return False
-        # self.maps[NORMAL][CTRL_W_KEY][ord('k')] = ctrl_w_k_map
-        # self.maps[NORMAL][CTRL_W_KEY][CTRL_K_KEY] = ctrl_w_k_map
-        # def ctrl_w_l_map(self):
-            # self.get_curr_tab().move_right_window()
-            # return False
-        # self.maps[NORMAL][CTRL_W_KEY][ord('l')] = ctrl_w_l_map
-        # self.maps[NORMAL][CTRL_W_KEY][CTRL_L_KEY] = ctrl_w_l_map
+        def ctrl_w_h_map(self):
+            self.get_curr_tab().move_left_window()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('h')] = ctrl_w_h_map
+        self.maps[NORMAL][CTRL_W_KEY][CTRL_H_KEY] = ctrl_w_h_map
+        def ctrl_w_j_map(self):
+            self.get_curr_tab().move_down_window()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('j')] = ctrl_w_j_map
+        self.maps[NORMAL][CTRL_W_KEY][CTRL_J_KEY] = ctrl_w_j_map
+        def ctrl_w_k_map(self):
+            self.get_curr_tab().move_up_window()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('k')] = ctrl_w_k_map
+        self.maps[NORMAL][CTRL_W_KEY][CTRL_K_KEY] = ctrl_w_k_map
+        def ctrl_w_l_map(self):
+            self.get_curr_tab().move_right_window()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('l')] = ctrl_w_l_map
+        self.maps[NORMAL][CTRL_W_KEY][CTRL_L_KEY] = ctrl_w_l_map
 
     def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):
