@@ -878,6 +878,8 @@ class Editor():
         # Tell movim to draw the newly created tab
         Hooks.execute(ON_DRAW_TAB, None)
 
+        self.get_curr_tab().draw()
+
         return self.tabs[-1]
 
     def get_curr_tab(self):

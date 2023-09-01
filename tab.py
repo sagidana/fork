@@ -397,15 +397,10 @@ class Tab():
 
     def zoom_toggle(self):
         if self.zoom_mode:
-            elog("disable zoom mode")
             curr = self.get_curr_window()
 
             curr.set_position(self.zoom_x, self.zoom_y)
             curr.resize(self.zoom_width, self.zoom_height)
-
-            elog(f"position: {curr.position}")
-            elog(f"width {curr.width}")
-            elog(f"height {curr.height}")
 
             self.zoom_x = -1
             self.zoom_y = -1
@@ -413,7 +408,6 @@ class Tab():
             self.zoom_width = -1
             self.zoom_mode = False
         else:
-            elog("enable zoom mode")
             curr = self.get_curr_window()
 
             self.zoom_x = curr.position[0]
@@ -424,9 +418,6 @@ class Tab():
             curr.set_position(0, 0)
             curr.resize(self.width, self.height)
 
-            elog(f"position: {curr.position}")
-            elog(f"width {curr.width}")
-            elog(f"height {curr.height}")
             self.zoom_mode = True
         self.draw()
 

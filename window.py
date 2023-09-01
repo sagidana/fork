@@ -71,8 +71,6 @@ class Window():
 
         self.events = {}
 
-        self.draw()
-
     def enable_lines_numbers(self):
         if self.line_numbers: return
         self.content_position[0] += self.lines_margin
@@ -390,15 +388,12 @@ class Window():
             for i in range(diff): self._move_up()
         else: pass
 
-        self.draw()
-
     def set_position(self, x, y):
         self.clear()
         self.position[0] = x
         self.content_position[0] = x
         self.position[1] = y
         self.content_position[1] = y
-        self.draw()
 
     def _move_up(self):
         scrolled = False
