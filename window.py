@@ -373,8 +373,12 @@ class Window():
 
         self.width = width
         self.height = height
-        self.content_width = width
         self.content_height = height
+
+        if not self.line_numbers:
+            self.content_width = width
+        else:
+            self.content_width = width - self.lines_margin
 
         elog(f"width:{self.width}, height:{self.height}")
 
@@ -391,7 +395,10 @@ class Window():
     def set_position(self, x, y):
         self.clear()
         self.position[0] = x
-        self.content_position[0] = x
+        if not self.line_numbers:
+            self.content_position[0] = x
+        else:
+            self.content_position[0] = x + self.lines_margin
         self.position[1] = y
         self.content_position[1] = y
 
@@ -1035,8 +1042,8 @@ class Window():
 
         if y >= self.height - y_margin: return
         if start_x >= self.width - x_margin: return
-        if end_x >= self.width - x_margin:
-            end_x = self.width - x_margin - x
+        if end_x > self.width - x_margin:
+            end_x = self.width - x_margin
 
         self.screen.clear_line_partial( self.content_position[1] + y,
                                         self.content_position[0] + start_x,
@@ -1057,17 +1064,20 @@ class Window():
                             style)
 
     def _screen_write(self, x, y, string, style):
-        x_margin = self.content_position[0] - self.position[0]
-        y_margin = self.content_position[1] - self.position[1]
-        if x >= self.width - x_margin: return
-        if y >= self.height - y_margin: return
+        try:
+            x_margin = self.content_position[0] - self.position[0]
+            y_margin = self.content_position[1] - self.position[1]
+            if x >= self.width - x_margin: return
+            if y >= self.height - y_margin: return
 
-        if x + len(string) - 1 >= self.width - x_margin:
-            space_for = self.width - x_margin - x
-            string  = string[:space_for]
+            if x + len(string) - 1 >= self.width - x_margin:
+                space_for = self.width - x_margin - x
+                string  = string[:space_for]
 
-        self.screen.write(  self.content_position[1] + y,
-                            self.content_position[0] + x,
-                            string,
-                            style)
+            self.screen.write(  self.content_position[1] + y,
+                                self.content_position[0] + x,
+                                string,
+                                style)
+        except Exception as e:
+            elog(f"Exception: {e}")
 

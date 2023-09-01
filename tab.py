@@ -320,8 +320,6 @@ class Tab():
         self.focus_window(new_window)
 
         self.draw()
-        # curr_window.draw()
-        # new_window.draw()
 
     def vsplit(self):
         if self.zoom_mode: self.zoom_toggle()
