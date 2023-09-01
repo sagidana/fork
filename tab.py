@@ -23,10 +23,10 @@ class Tab():
 
         self._adjust_sizes()
 
-    def __init__(   self, 
-                    screen, 
-                    width, 
-                    height, 
+    def __init__(   self,
+                    screen,
+                    width,
+                    height,
                     buffer=None):
         self.id = get_id(TAB_ID)
         self.screen = screen
@@ -35,8 +35,8 @@ class Tab():
 
         self.windows = []
         window = Window(self.screen,
-                        self.width, 
-                        self.height, 
+                        self.width,
+                        self.height,
                         position=(0,0),
                         buffer=buffer)
         self.add_window(window)
@@ -80,7 +80,7 @@ class Tab():
             while self._find_down_window(inner):
                 num_of_down_windows += 1
                 inner = self._find_down_window(inner)
-            
+
             num_of_horizontal_windows = num_of_left_windows + num_of_right_windows + 1
             num_of_vertical_windows = num_of_up_windows + num_of_down_windows + 1
 
@@ -134,7 +134,7 @@ class Tab():
                 found = curr
         return found
 
-    def _find_right_window(self, window): 
+    def _find_right_window(self, window):
         index = self._get_index_by_window(window)
         right_top_x = window.position[0] + window.width - 1
         right_top_y = window.position[1]
@@ -188,7 +188,7 @@ class Tab():
                 found = curr
         return found
 
-    def _find_down_window(self, window): 
+    def _find_down_window(self, window):
         index = self._get_index_by_window(window)
         bot_left_x = window.position[0]
         bot_left_y = window.position[1] + window.height - 1
@@ -250,33 +250,33 @@ class Tab():
         self.remove_window(window)
         self.draw()
 
-    def move_left_window(self): 
+    def move_left_window(self):
         found = self._find_left_window(self.get_curr_window())
-        if not found: return False 
+        if not found: return False
 
         self.focus_window(found)
         self.get_curr_window().draw_cursor()
         return True
 
-    def move_right_window(self): 
+    def move_right_window(self):
         found = self._find_right_window(self.get_curr_window())
-        if not found: return False 
+        if not found: return False
 
         self.focus_window(found)
         self.get_curr_window().draw_cursor()
         return True
 
-    def move_up_window(self): 
+    def move_up_window(self):
         found = self._find_up_window(self.get_curr_window())
-        if not found: return False 
+        if not found: return False
 
         self.focus_window(found)
         self.get_curr_window().draw_cursor()
         return True
 
-    def move_down_window(self): 
+    def move_down_window(self):
         found = self._find_down_window(self.get_curr_window())
-        if not found: return False 
+        if not found: return False
 
         self.focus_window(found)
         self.get_curr_window().draw_cursor()
@@ -291,15 +291,15 @@ class Tab():
 
         seperator_y = curr_window.position[1] + height
 
-        self.draw_horizontal_seperator( seperator_y, 
+        self.draw_horizontal_seperator( seperator_y,
                                         curr_window.position[0],
                                         width)
 
         curr_window.resize(width, height)
 
         new_window = Window(    self.screen,
-                                width, 
-                                height, 
+                                width,
+                                height,
                                 position=(  curr_window.position[0],
                                             curr_window.position[1] + height + 1),
                                 buffer=curr_buffer)
@@ -326,8 +326,8 @@ class Tab():
         curr_window.resize(width, height)
 
         new_window = Window(    self.screen,
-                                width, 
-                                height, 
+                                width,
+                                height,
                                 position=(  curr_window.position[0] + width + 1,
                                             curr_window.position[1]),
                                 buffer=curr_buffer)
@@ -346,7 +346,7 @@ class Tab():
                                 {'background': '#000000'})
 
     def draw_horizontal_seperator(self, y, x, size):
-        self.screen.write(  y, 
+        self.screen.write(  y,
                             x,
                             " "*size,
                             {'background': '#000000'})

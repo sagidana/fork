@@ -29,10 +29,10 @@ REPLACE = 'replace'
 MAP_TIMEOOUT = 2 # in seconds
 
 class Editor():
-    def on_buffer_destroy_after_callback(self, buf): 
+    def on_buffer_destroy_after_callback(self, buf):
         self.buffers.remove(buf)
 
-    def on_buffer_create_after_callback(self, buf): 
+    def on_buffer_create_after_callback(self, buf):
         self.buffers.append(buf)
 
     def draw(self):
@@ -71,7 +71,7 @@ class Editor():
         self.curr_maps = self.maps[self.mode]
 
     def initialize_theme(self):
-        with open(self.config['theme_path'], 'r') as f: 
+        with open(self.config['theme_path'], 'r') as f:
             self.theme = json.loads(f.read())
 
     def _initialize_legends_maps(self, mode):
@@ -175,8 +175,8 @@ class Editor():
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
 
-            scope = (   0, 
-                        y, 
+            scope = (   0,
+                        y,
                         len(self.get_curr_buffer().lines[y+1]) - 2,
                         y + 1)
             if scope: return cb(scope)
@@ -186,7 +186,7 @@ class Editor():
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
             scope = (   0,
-                        y - 1, 
+                        y - 1,
                         len(self.get_curr_buffer().lines[y]) - 2,
                         y)
             if scope: return cb(scope)
@@ -436,32 +436,32 @@ class Editor():
         self.maps[NORMAL][ord('>')] = {}    # indent right
         self.maps[NORMAL][ord('<')] = {}    # indent left
 
-        def change_object_map(scope): 
+        def change_object_map(scope):
             start_x, start_y, end_x, end_y = scope
             self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.change_mode(INSERT, effect_change=False)
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
-        def delete_object_map(scope): 
+        def delete_object_map(scope):
             start_x, start_y, end_x, end_y = scope
             self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
-        def yank_object_map(scope): 
+        def yank_object_map(scope):
             start_x, start_y, end_x, end_y = scope
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_map)
-        def indent_right_object_map(scope): 
+        def indent_right_object_map(scope):
             start_x, start_y, end_x, end_y = scope
             self.change_begin()
             self.get_curr_window().indent_lines(start_y, end_y, True)
             self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('>')], indent_right_object_map)
-        def indent_left_object_map(scope): 
+        def indent_left_object_map(scope):
             start_x, start_y, end_x, end_y = scope
             self.change_begin()
             self.get_curr_window().indent_lines(start_y, end_y, False)
@@ -781,12 +781,12 @@ class Editor():
     def _initialize_insert_maps(self):
         self._initialize_insert_ctrl_maps()
 
-    def _initialize_visual_line_maps(self): 
+    def _initialize_visual_line_maps(self):
         # TODO
         pass
 
-    def _initialize_visual_maps(self): 
-        def visual_object_map(scope): 
+    def _initialize_visual_maps(self):
+        def visual_object_map(scope):
             start_x, start_y, end_x, end_y = scope
 
             self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
@@ -910,17 +910,17 @@ class Editor():
 
         if len(tab.windows) == 1:
             return True
-        
+
         window = tab.get_curr_window()
         tab.close_window(window)
         return False
 
     def exec_command(self, command):
-        if command == 'q': 
+        if command == 'q':
             return self._quit_command()
-        # if command == 'w': 
+        # if command == 'w':
             # self.get_curr_window().buffer.write()
-        if command == 'qa': 
+        if command == 'qa':
             return True
         return False
 
@@ -929,10 +929,9 @@ class Editor():
 
         command_position[1] = int(self.height - 1)
         command_length = self.width - 1
-        
 
         cmd = f":{command}"
-        self.screen.write(  command_position[1], 
+        self.screen.write(  command_position[1],
                             command_position[0],
                             cmd.ljust(command_length))
         self.screen.move_cursor(    command_position[1],
@@ -987,7 +986,7 @@ class Editor():
         pos = self._find_closest_match(x, y, results, forward)
         if not pos: return
 
-        self.get_curr_window().move_cursor_to_buf_location( pos[0], 
+        self.get_curr_window().move_cursor_to_buf_location( pos[0],
                                                             pos[1])
 
         # reverse the colors for highlights
@@ -1010,19 +1009,19 @@ class Editor():
 
 
             elog(f"EDITOR: {key}")
-            if key == ENTER_KEY: 
+            if key == ENTER_KEY:
                 if len(pattern) > 0: success = True
                 break
             if key == ESC_KEY: break
-            if key == BACKSPACE_KEY: 
-                if len(pattern) > 0: 
-                    pattern = pattern[:-1] 
-                    self.get_curr_window().move_cursor_to_buf_location( origin_x, 
+            if key == BACKSPACE_KEY:
+                if len(pattern) > 0:
+                    pattern = pattern[:-1]
+                    self.get_curr_window().move_cursor_to_buf_location( origin_x,
                                                                         origin_y)
                     self.get_curr_buffer().clear_highlights()
                     self.get_curr_window().draw()
             else:
-                try: 
+                try:
                     char = chr(key)
                     if char in printable:
                         pattern += char
@@ -1034,7 +1033,7 @@ class Editor():
         if success:
             self.registers['/'] = pattern
         else:
-            self.get_curr_window().move_cursor_to_buf_location( origin_x, 
+            self.get_curr_window().move_cursor_to_buf_location( origin_x,
                                                                 origin_y)
             self.get_curr_buffer().clear_highlights()
             self.get_curr_window().draw()
@@ -1047,12 +1046,12 @@ class Editor():
             key = self.screen.get_key()
 
             if key == ESC_KEY: break
-            if key == BACKSPACE_KEY: command = command[:-1] 
+            if key == BACKSPACE_KEY: command = command[:-1]
             if key == ENTER_KEY: # enter
                 ret = self.exec_command(command)
                 break
 
-            try: 
+            try:
                 char = chr(key)
                 if re.match("[a-zA-Z 0-9-_()]", char): command += char
             except: pass
@@ -1063,7 +1062,7 @@ class Editor():
         return ret
 
     def on_key(self, key):
-        if self.mode == NORMAL: 
+        if self.mode == NORMAL:
             # If we on top level, start recording from top.
             if self.curr_maps == self.maps[self.mode]:
                 self.internal_registers["."] = [key]
@@ -1071,7 +1070,7 @@ class Editor():
             # existing keys
             else:
                 self.internal_registers["."].append(key)
-        if self.mode == INSERT: 
+        if self.mode == INSERT:
             self.internal_registers["."].append(key)
 
         if key == ESC_KEY:

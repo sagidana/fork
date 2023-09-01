@@ -36,11 +36,11 @@ class Window():
         self.move_cursor_to_buf_location(orig_x, orig_y)
         self.draw()
 
-    def __init__(   self, 
-                    screen, 
-                    width, 
-                    height, 
-                    position=(0,0), 
+    def __init__(   self,
+                    screen,
+                    width,
+                    height,
+                    position=(0,0),
                     buffer=None):
         if not buffer: raise Exception("Not implemented.")
 
@@ -58,7 +58,7 @@ class Window():
 
         self.width = width
         self.height = height
-        
+
         self.content_position = [position[0], position[1]]
         self.content_width = self.width
         self.content_height = self.height
@@ -116,7 +116,7 @@ class Window():
         for start_x, start_y, end_x, end_y, style in self.buffer.highlights:
             if start_y >= screen_end_y: return
             if end_y < screen_start_y: continue
-            
+
             if start_y == end_y:
                 string = self.get_line(start_y)[start_x:end_x]
 
@@ -129,7 +129,7 @@ class Window():
             # first line
             string = self.get_line(start_y)[start_x:]
             self._screen_write( start_x,
-                                start_y - screen_start_y, 
+                                start_y - screen_start_y,
                                 string,
                                 style)
 
@@ -140,11 +140,11 @@ class Window():
                                     y - screen_start_y,
                                     string,
                                     style)
-                                    
+
             # last line
             string = self.get_line(end_y)[:end_x]
             self._screen_write( 0,
-                                end_y - screen_start_y, 
+                                end_y - screen_start_y,
                                 string,
                                 style)
 
@@ -156,7 +156,7 @@ class Window():
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.height, buffer_height)
 
-        for node, style in get_syntax_highlights(   self.buffer.treesitter, 
+        for node, style in get_syntax_highlights(   self.buffer.treesitter,
                                                     g_settings['theme_opt']):
             start_y = node.start_point[0]
             start_x = node.start_point[1]
@@ -165,7 +165,7 @@ class Window():
 
             if start_y >= screen_end_y: return
             if end_y < screen_start_y: continue
-            
+
             if start_y == end_y:
                 self._screen_write( start_x,
                                     start_y - screen_start_y,
@@ -176,7 +176,7 @@ class Window():
             # first line
             string = self.get_line(start_y)[start_x:]
             self._screen_write( start_x,
-                                start_y - screen_start_y, 
+                                start_y - screen_start_y,
                                 string,
                                 style)
 
@@ -187,17 +187,17 @@ class Window():
                                     y - screen_start_y,
                                     string,
                                     style)
-                                    
+
             # last line
             string = self.get_line(end_y)[:end_x]
             self._screen_write( 0,
-                                end_y - screen_start_y, 
+                                end_y - screen_start_y,
                                 string,
                                 style)
 
     def _visualize_block(self): pass
-        
-    def _visualize(self): 
+
+    def _visualize(self):
         orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
         orig_end_x += 1
         buffer_height = len(self.buffer.lines) - 1
@@ -210,7 +210,7 @@ class Window():
         start_y = max(orig_start_y, screen_start_y)
         if start_y == orig_start_y: start_x = orig_start_x
         else: start_x = 0
-        
+
         end_y = min(orig_end_y, screen_end_y)
         if end_y == orig_end_y: end_x = orig_end_x
         else: end_x = len(self.get_line(end_y)) - 1
@@ -218,16 +218,15 @@ class Window():
         if start_y == end_y:
             string = self.get_line(start_y)[start_x:end_x]
             self._screen_write( start_x,
-                                start_y - screen_start_y, 
+                                start_y - screen_start_y,
                                 string,
                                 {'reverse': None})
             return
-        
 
         # first line
         string = self.get_line(start_y)[start_x:]
         self._screen_write( start_x,
-                            start_y - screen_start_y, 
+                            start_y - screen_start_y,
                             string,
                             {'reverse': None})
 
@@ -238,15 +237,15 @@ class Window():
                                 y - screen_start_y,
                                 string,
                                 {'reverse': None})
-                                
+
         # last line
         string = self.get_line(end_y)[:end_x]
         self._screen_write( 0,
-                            end_y - screen_start_y, 
+                            end_y - screen_start_y,
                             string,
                             {'reverse': None})
 
-    def _visualize_line(self): 
+    def _visualize_line(self):
         start_x, start_y, end_x, end_y = self.buffer.visual_get_scope()
 
         buffer_height = len(self.buffer.lines) - 1
@@ -262,7 +261,7 @@ class Window():
         for y in range(start_y, end_y + 1):
             string = self.get_line(y)
             self._screen_write( 0,
-                                y - screen_start_y, 
+                                y - screen_start_y,
                                 string,
                                 {'reverse': None})
 
@@ -316,7 +315,7 @@ class Window():
         for y in range(self.content_height):
             buffer_y = first_line + y
 
-            if buffer_y > buffer_height: 
+            if buffer_y > buffer_height:
                 line = ""
             else:
                 line = self.buffer.lines[first_line + y]
@@ -522,12 +521,12 @@ class Window():
             elog(f"{buf_x}, {buf_y}")
             if self.buffer_cursor[1] > buf_y:
                 y_diff = self.buffer_cursor[1] - buf_y
-                for i in range(y_diff): 
+                for i in range(y_diff):
                     ret = self._move_up()
                     if ret and ret[1]: scrolled = True
             else:
                 y_diff = buf_y - self.buffer_cursor[1]
-                for i in range(y_diff): 
+                for i in range(y_diff):
                     ret = self._move_down()
                     if ret and ret[1]: scrolled = True
 
@@ -596,18 +595,18 @@ class Window():
 
         self.draw()
 
-    def move_begin(self): 
+    def move_begin(self):
         self.window_cursor[0] = 0
         self.window_cursor[1] = 0
         self.buffer_cursor[0] = 0
         self.buffer_cursor[1] = 0
         self.draw()
 
-    def move_end(self): 
+    def move_end(self):
         self.window_cursor[0] = 0
         self.buffer_cursor[0] = 0
-        
-        buffer_len = len(self.buffer.lines) - 1 
+
+        buffer_len = len(self.buffer.lines) - 1
         self.buffer_cursor[1] = buffer_len
 
         if buffer_len > self.height - 1:
@@ -620,7 +619,7 @@ class Window():
         while self.window_cursor[1] > 0: self._move_up()
         self.draw_cursor()
 
-    def move_middle_visible(self): 
+    def move_middle_visible(self):
         middle =  int(self.height / 2)
         while self.window_cursor[1] < middle:
             if not self._move_down(): break
@@ -635,20 +634,20 @@ class Window():
 
     def move_line(self, line): pass
 
-    def _move_to_x(self, x): 
+    def _move_to_x(self, x):
         while self.buffer_cursor[0] > x: self._move_left()
         while self.buffer_cursor[0] < x: self._move_right()
 
-    def move_to_x(self, x): 
+    def move_to_x(self, x):
         self._move_to_x(x)
         self.draw_cursor()
 
     def _move_line_begin(self, ignore_spaces=False):
         while self.buffer_cursor[0] > 0: self._move_left()
 
-        if ignore_spaces: 
+        if ignore_spaces:
             line = self.get_line(self.buffer_cursor[1])
-            while self.buffer_cursor[0] < self.width - 1: 
+            while self.buffer_cursor[0] < self.width - 1:
                 if not re.match("\s", line[self.buffer_cursor[0]]): break
                 self._move_right()
 
@@ -657,39 +656,39 @@ class Window():
         self.draw_cursor()
 
     def move_line_end(self):
-        while self.buffer_cursor[0] < len(self.get_curr_line()) - 1: 
+        while self.buffer_cursor[0] < len(self.get_curr_line()) - 1:
             self._move_right()
         self.draw_cursor()
 
-    def move_word_forward(self): 
+    def move_word_forward(self):
         ret = self.buffer.find_next_word(   self.buffer_cursor[0],
                                             self.buffer_cursor[1])
         if not ret: return
         x, y = ret
         self.move_cursor_to_buf_location(x, y)
 
-    def move_word_backward(self): 
+    def move_word_backward(self):
         ret = self.buffer.find_prev_word(   self.buffer_cursor[0],
                                             self.buffer_cursor[1])
         if not ret: return
         x, y = ret
         self.move_cursor_to_buf_location(x, y)
 
-    def move_WORD_forward(self): 
+    def move_WORD_forward(self):
         ret = self.buffer.find_next_WORD(   self.buffer_cursor[0],
                                             self.buffer_cursor[1])
         if not ret: return
         x, y = ret
         self.move_cursor_to_buf_location(x, y)
 
-    def move_WORD_backward(self): 
+    def move_WORD_backward(self):
         ret = self.buffer.find_prev_WORD(   self.buffer_cursor[0],
                                             self.buffer_cursor[1])
         if not ret: return
         x, y = ret
         self.move_cursor_to_buf_location(x, y)
 
-    def move_word_end(self): 
+    def move_word_end(self):
         ret = self.buffer.find_word_end(    self.buffer_cursor[0],
                                             self.buffer_cursor[1])
         if not ret: return
@@ -718,8 +717,8 @@ class Window():
                                     char)
         self.draw()
 
-    def replace(self): 
-        try: 
+    def replace(self):
+        try:
             key = self.get_key()
             char = chr(key)
             self.buffer.replace_char(   self.buffer_cursor[0],
@@ -727,10 +726,10 @@ class Window():
                                         char)
             self.draw()
 
-        except Exception as e: 
+        except Exception as e:
             elog(f"WINDOW: {e}")
 
-    def find(self): 
+    def find(self):
         try: key = self.get_key()
         except: key = None
 
@@ -744,8 +743,8 @@ class Window():
             x, y = loc[0], loc[1]
             self.move_cursor_to_buf_location(x, y)
         except: pass
-        
-    def find_back(self): 
+
+    def find_back(self):
         try: key = self.get_key()
         except: key = None
 
@@ -759,7 +758,7 @@ class Window():
             self.move_cursor_to_buf_location(x, y)
         except: pass
 
-    def till(self): 
+    def till(self):
         try: key = self.get_key()
         except: key = None
 
@@ -774,7 +773,7 @@ class Window():
             self.move_cursor_to_buf_location(x, y)
         except: pass
 
-    def till_back(self): 
+    def till_back(self):
         try: key = self.get_key()
         except: key = None
 
@@ -788,7 +787,7 @@ class Window():
             x = x + 1 if x < len(self.get_line(y)) - 1 else x
             self.move_cursor_to_buf_location(x, y)
         except: pass
-    
+
     def remove_line_at(self, y):
         y = self.buffer.remove_line(y)
         x = self.buffer_cursor[0]
@@ -823,7 +822,7 @@ class Window():
 
     def indent_lines(   self,
                         start_y,
-                        end_y, 
+                        end_y,
                         is_right):
         indent_content = "    "
         if is_right:
@@ -857,18 +856,18 @@ class Window():
         self.move_cursor_to_buf_location(x, y)
         self.draw()
 
-    def new_line_after(self): 
+    def new_line_after(self):
         self.buffer.insert_line(self.buffer_cursor[1] + 1, "\n")
         self.move_down()
         self.move_line_begin()
         self.draw()
 
-    def new_line_before(self): 
+    def new_line_before(self):
         self.buffer.insert_line(self.buffer_cursor[1], "\n")
         self.move_line_begin()
         self.draw()
 
-    def remove_char_special(self, x): 
+    def remove_char_special(self, x):
         if x > self.get_curr_line_len() - 1: return
         if x <= 0: return
 
@@ -876,7 +875,7 @@ class Window():
                                     self.buffer_cursor[1])
         self.draw()
 
-    def _remove_char(self): 
+    def _remove_char(self):
         if self.buffer_cursor[0] == 0:
             if self.buffer_cursor[1] == 0: return
             # we are about to move line up because of our removal. this is our
@@ -893,12 +892,12 @@ class Window():
                                         self.buffer_cursor[1])
             self._move_left()
 
-    def remove_chars(self, num): 
+    def remove_chars(self, num):
         for i in range(num):
             self._remove_char()
         self.draw()
 
-    def remove_char(self): 
+    def remove_char(self):
         self._remove_char()
         self.draw()
 
@@ -941,7 +940,7 @@ class Window():
 
         next_line = self.get_line(curr_line + 1)
 
-        next_line = " " + next_line.lstrip() # make only one space at the begining 
+        next_line = " " + next_line.lstrip() # make only one space at the begining
 
         self.buffer.replace_line(curr_line + 1, next_line)
 
@@ -951,14 +950,14 @@ class Window():
 
         self.draw()
 
-    def undo(self): 
+    def undo(self):
         position = self.buffer.undo()
         if not position: return
         self.move_cursor_to_buf_location(   position[0],
                                             position[1])
         self.draw()
 
-    def redo(self): 
+    def redo(self):
         position = self.buffer.redo()
         if not position: return
 
@@ -968,7 +967,7 @@ class Window():
         self.draw()
 
     def visual_begin(self, mode):
-        self.buffer.visual_begin(   mode, 
+        self.buffer.visual_begin(   mode,
                                     self.buffer_cursor[0],
                                     self.buffer_cursor[1])
         self.draw()
@@ -1015,40 +1014,40 @@ class Window():
         self._move_left()
         self.draw_cursor()
 
-    def _screen_move(self, x, y): 
+    def _screen_move(self, x, y):
         x_margin = self.content_position[0] - self.position[0]
         y_margin = self.content_position[1] - self.position[1]
         if x >= self.width - x_margin: return
         if y >= self.height - y_margin: return
 
-        self.screen.move_cursor(    self.content_position[1] + y, 
+        self.screen.move_cursor(    self.content_position[1] + y,
                                     self.content_position[0] + x)
 
-    def _screen_clear_line_raw(self, y): 
+    def _screen_clear_line_raw(self, y):
         if y >= self.height: return
 
         self.screen.clear_line(y)
 
-    def _screen_clear_line(self, y): 
+    def _screen_clear_line(self, y):
         y_margin = self.content_position[1] - self.position[1]
         if y >= self.height - y_margin: return
 
         self.screen.clear_line(self.content_position[1] + y)
 
-    def _screen_clear_line_partial(self, y, start_x, end_x): 
+    def _screen_clear_line_partial(self, y, start_x, end_x):
         x_margin = self.content_position[0] - self.position[0]
         y_margin = self.content_position[1] - self.position[1]
 
         if y >= self.height - y_margin: return
         if start_x >= self.width - x_margin: return
-        if end_x >= self.width - x_margin: 
+        if end_x >= self.width - x_margin:
             end_x = self.width - x_margin - x
 
         self.screen.clear_line_partial( self.content_position[1] + y,
                                         self.content_position[0] + start_x,
                                         self.content_position[0] + end_x)
 
-    def _screen_write_raw(self, x, y, string, style): 
+    def _screen_write_raw(self, x, y, string, style):
         if x >= self.width: return
         if y >= self.height: return
 
@@ -1057,12 +1056,12 @@ class Window():
             string  = string[:space_for]
 
 
-        self.screen.write(  self.position[1] + y, 
+        self.screen.write(  self.position[1] + y,
                             self.position[0] + x,
                             string,
                             style)
 
-    def _screen_write(self, x, y, string, style): 
+    def _screen_write(self, x, y, string, style):
         x_margin = self.content_position[0] - self.position[0]
         y_margin = self.content_position[1] - self.position[1]
         if x >= self.width - x_margin: return
@@ -1072,7 +1071,7 @@ class Window():
             space_for = self.width - x_margin - x
             string  = string[:space_for]
 
-        self.screen.write(  self.content_position[1] + y, 
+        self.screen.write(  self.content_position[1] + y,
                             self.content_position[0] + x,
                             string,
                             style)

@@ -62,7 +62,7 @@ class Buffer():
         self.lines = []
         self.file_path = file_path
 
-        if not file_path: 
+        if not file_path:
             raise Exception('Not implemented!')
             Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
             return
@@ -143,14 +143,14 @@ class Buffer():
         elif    self.file_path.endswith('.vim'):
             # return "vimscript"  # treesitter not supporting
             return None
-        else: 
+        else:
             if len(self.lines) == 0: return None
 
             first_line = self.lines[0]
             if not first_line.startswith("#!/"): return None
 
             m = re.match("#!(?P<program>[a-zA-Z0-9/]+)\s*$", first_line)
-            if not m: 
+            if not m:
                 elog("1")
                 return None
             program = m.groups('program')[0]
@@ -178,7 +178,7 @@ class Buffer():
     def get_file_x_y(self, pos):
         curr = 0
         y = 0
-        for line in self.lines: 
+        for line in self.lines:
             if curr <= pos < curr + len(line):
                 x = pos - curr
                 return (x, y)
@@ -245,7 +245,7 @@ class Buffer():
             return  self.visual_start_point[0],     \
                     self.visual_start_point[1],     \
                     self.visual_current_point[0],   \
-                    self.visual_current_point[1]    
+                    self.visual_current_point[1]
         if self.visual_current_point[1] < self.visual_start_point[1]:
             return  self.visual_current_point[0],   \
                     self.visual_current_point[1],   \
@@ -280,7 +280,7 @@ class Buffer():
         first = line[:x] + '\n'
         second = line[x:]
         self.lines[y] = first
-        self.lines.insert(y + 1, second) 
+        self.lines.insert(y + 1, second)
 
     def _join_line(self, y):
         line = self.lines[y]
@@ -291,8 +291,8 @@ class Buffer():
     # CORE: change
     def remove_char(self, x, y):
         start_byte = self.get_file_pos(x, y)
-        if x == 0: 
-            if y == 0: return 
+        if x == 0:
+            if y == 0: return
             new_x = len(self.lines[y - 1]) - 1
             self._join_line(y - 1)
             change = {
@@ -373,7 +373,7 @@ class Buffer():
         start_byte = self.get_file_pos(0, y)
 
         change['start_byte'] = start_byte
-        change['old_end_byte'] = start_byte + len(line) 
+        change['old_end_byte'] = start_byte + len(line)
         change['new_end_byte'] = start_byte
         change['start_point'] = (y, 0)
         change['old_end_point'] = (y, len(line))
@@ -430,7 +430,7 @@ class Buffer():
             end_line = end_line[end_x + 1:]
 
             # remove lines from top to bottom
-            for i in range(end_y - start_y): 
+            for i in range(end_y - start_y):
                 self.remove_line(end_y - i)
 
             new_line = start_line + end_line
@@ -483,7 +483,7 @@ class Buffer():
         for line in lines_for_replacement:
             self.replace_line(line, lines_for_replacement[line])
 
-    def undo(self): 
+    def undo(self):
         if self.file_changed_on_disk():
             self.reload()
             # if file was changed under us,
@@ -503,7 +503,7 @@ class Buffer():
         self.redo_stack.append(change_wrapper)
         return change_wrapper['start_position']
 
-    def redo(self): 
+    def redo(self):
         if self.file_changed_on_disk():
             self.reload()
             # if file was changed under us,
@@ -524,7 +524,7 @@ class Buffer():
         return change_wrapper['end_position']
 
     def change_begin(self, x, y):
-        if self.file_changed_on_disk(): 
+        if self.file_changed_on_disk():
             elog("BUFFER: change begin: file changed!")
             self.reload()
         if self.shadow: elog("BUFFER: WTF, already in a change?")
@@ -554,12 +554,12 @@ class Buffer():
         for line in d.compare(self.shadow, self.lines):
             if not (line.startswith('?') or \
                     line.startswith('-') or \
-                    line.startswith('+')): 
+                    line.startswith('+')):
                 old_line_num += 1
                 new_line_num += 1
                 continue
 
-            if line.startswith('+'): 
+            if line.startswith('+'):
                 if new_line_num not in change: change[new_line_num] = {}
 
                 elog(f"BUFFER: {new_line_num}: {line.strip()}")
@@ -576,19 +576,19 @@ class Buffer():
         return change
 
     def change_end(self, x, y):
-        if self.file_changed_on_disk(): 
+        if self.file_changed_on_disk():
             elog("BUFFER: file_changed_on_disk")
             elog("BUFFER: change end: file changed!")
             self.reload()
             # discard changes if file changed underneath us
-            change = None 
+            change = None
             self.shadow = None
             self.change_start_position = None
             return
 
         change = self._analyze_change()
         change_wrapper = {}
-        if change: 
+        if change:
             change_wrapper['change'] = change
             change_wrapper['start_position'] = self.change_start_position
             change_wrapper['end_position'] = (x,y)
@@ -610,7 +610,7 @@ class Buffer():
 
         found = pos + 1
         for c in stream[pos + 1:]:
-            if c == char: 
+            if c == char:
                 return self.get_file_x_y(found)
             found += 1
         return None
@@ -622,7 +622,7 @@ class Buffer():
 
         found = pos - 1
         for c in stream[:pos][::-1]:
-            if c == char: 
+            if c == char:
                 return self.get_file_x_y(found)
             found -= 1
         return None
@@ -723,7 +723,7 @@ class Buffer():
         return None
 
     # CORE: movement
-    def find_word_end(self, x, y, skip_current=True): 
+    def find_word_end(self, x, y, skip_current=True):
         word_regex = '[a-zA-Z0-9_-]'
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
@@ -742,7 +742,7 @@ class Buffer():
         return None
 
     # CORE: movement
-    def find_WORD_end(self, x, y, skip_current=True): 
+    def find_WORD_end(self, x, y, skip_current=True):
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
@@ -791,64 +791,64 @@ class Buffer():
             curr_offset += len(self.lines[i])
         return start_x, start_y, end_x, end_y
 
-    def arround_parentheses(self, x, y): 
+    def arround_parentheses(self, x, y):
         prev = self.find_prev_char(x, y, '(')
         if not prev: return None
         next = self.find_next_char(x, y, ')')
         if not next: return None
         return prev[0], prev[1], next[0], next[1]
 
-    def arround_quotation(self, x, y): 
+    def arround_quotation(self, x, y):
         ret = self.find_prev_and_next_char(x, y, '"')
         if not ret: return None
         return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
 
-    def arround_square_brackets(self, x, y): 
+    def arround_square_brackets(self, x, y):
         prev = self.find_prev_char(x, y, '[')
         if not prev: return None
         next = self.find_next_char(x, y, ']')
         if not next: return None
         return prev[0], prev[1], next[0], next[1]
 
-    def arround_curly_brackets(self, x, y): 
+    def arround_curly_brackets(self, x, y):
         prev = self.find_prev_char(x, y, '{')
         if not prev: return None
         next = self.find_next_char(x, y, '}')
         if not next: return None
         return prev[0], prev[1], next[0], next[1]
 
-    def arround_greater_than(self, x, y): 
+    def arround_greater_than(self, x, y):
         prev = self.find_prev_char(x, y, '<')
         if not prev: return None
         next = self.find_next_char(x, y, '>')
         if not next: return None
         return prev[0], prev[1], next[0], next[1]
 
-    def arround_apostrophe(self, x, y): 
+    def arround_apostrophe(self, x, y):
         ret = self.find_prev_and_next_char(x, y, '\'')
         if not ret: return None
         return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
 
-    def arround_backtick(self, x, y): 
+    def arround_backtick(self, x, y):
         ret = self.find_prev_and_next_char(x, y, '`')
         if not ret: return None
         return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
 
-    def arround_word(self, x, y): 
+    def arround_word(self, x, y):
         begin = self.find_prev_word(x, y, skip_current=False)
         if not begin: return None
         end = self.find_word_end(x, y, skip_current=False)
         if not end: return None
         return begin[0]-1, begin[1], end[0]+1, end[1]
 
-    def arround_WORD(self, x, y): 
+    def arround_WORD(self, x, y):
         begin = self.find_prev_WORD(x, y, skip_current=False)
         if not begin: return None
         end = self.find_WORD_end(x, y, skip_current=False)
         if not end: return None
         return begin[0]-1, begin[1], end[0]+1, end[1]
 
-    def inner_parentheses(self, x, y): 
+    def inner_parentheses(self, x, y):
         ret = self.arround_parentheses(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
@@ -858,7 +858,7 @@ class Buffer():
 
         return start_x, start_y, end_x, end_y
 
-    def inner_quotation(self, x, y): 
+    def inner_quotation(self, x, y):
         ret = self.arround_quotation(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
@@ -868,7 +868,7 @@ class Buffer():
 
         return start_x, start_y, end_x, end_y
 
-    def inner_square_brackets(self, x, y): 
+    def inner_square_brackets(self, x, y):
         ret = self.arround_square_brackets(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
@@ -878,7 +878,7 @@ class Buffer():
 
         return start_x, start_y, end_x, end_y
 
-    def inner_curly_brackets(self, x, y): 
+    def inner_curly_brackets(self, x, y):
         ret = self.arround_curly_brackets(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
@@ -888,7 +888,7 @@ class Buffer():
 
         return start_x, start_y, end_x, end_y
 
-    def inner_greater_than(self, x, y): 
+    def inner_greater_than(self, x, y):
         ret = self.arround_greater_than(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
@@ -898,7 +898,7 @@ class Buffer():
 
         return start_x, start_y, end_x, end_y
 
-    def inner_apostrophe(self, x, y): 
+    def inner_apostrophe(self, x, y):
         ret = self.arround_apostrophe(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
@@ -908,7 +908,7 @@ class Buffer():
 
         return start_x, start_y, end_x, end_y
 
-    def inner_backtick(self, x, y): 
+    def inner_backtick(self, x, y):
         ret = self.arround_backtick(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
@@ -918,7 +918,7 @@ class Buffer():
 
         return start_x, start_y, end_x, end_y
 
-    def inner_word(self, x, y): 
+    def inner_word(self, x, y):
         ret = self.arround_word(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
@@ -928,7 +928,7 @@ class Buffer():
 
         return start_x, start_y, end_x, end_y
 
-    def inner_WORD(self, x, y): 
+    def inner_WORD(self, x, y):
         ret = self.arround_WORD(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
