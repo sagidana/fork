@@ -125,6 +125,11 @@ class Editor():
         self.maps[NORMAL][CTRL_W_KEY][ord('l')] = ctrl_w_l_map
         self.maps[NORMAL][CTRL_W_KEY][CTRL_L_KEY] = ctrl_w_l_map
 
+        def ctrl_w_w_map(self):
+            self.get_curr_tab().zoom_toggle()
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('w')] = ctrl_w_w_map
+
     def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):
             self.get_curr_window().scroll_up_half_page()

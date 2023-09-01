@@ -33,6 +33,12 @@ class Tab():
         self.width = width
         self.height = height
 
+        self.zoom_mode = False
+        self.zoom_x = -1
+        self.zoom_y = -1
+        self.zoom_height = -1
+        self.zoom_width = -1
+
         self.windows = []
         window = Window(self.screen,
                         self.width,
@@ -222,6 +228,7 @@ class Tab():
         return self.windows[self.curr_window_index]
 
     def remove_window(self, window):
+        if self.zoom_mode: self.zoom_toggle()
         index = self._get_index_by_window(window)
         if index is False: return # distinguish False from 0
 
@@ -233,6 +240,7 @@ class Tab():
         self._adjust_sizes()
 
     def add_window(self, window):
+        if self.zoom_mode: self.zoom_toggle()
         index = len(self.windows)
 
         self.windows.append(window)
@@ -251,6 +259,7 @@ class Tab():
         self.draw()
 
     def move_left_window(self):
+        if self.zoom_mode: self.zoom_toggle()
         found = self._find_left_window(self.get_curr_window())
         if not found: return False
 
@@ -259,6 +268,7 @@ class Tab():
         return True
 
     def move_right_window(self):
+        if self.zoom_mode: self.zoom_toggle()
         found = self._find_right_window(self.get_curr_window())
         if not found: return False
 
@@ -267,6 +277,7 @@ class Tab():
         return True
 
     def move_up_window(self):
+        if self.zoom_mode: self.zoom_toggle()
         found = self._find_up_window(self.get_curr_window())
         if not found: return False
 
@@ -275,6 +286,7 @@ class Tab():
         return True
 
     def move_down_window(self):
+        if self.zoom_mode: self.zoom_toggle()
         found = self._find_down_window(self.get_curr_window())
         if not found: return False
 
@@ -283,6 +295,7 @@ class Tab():
         return True
 
     def split(self):
+        if self.zoom_mode: self.zoom_toggle()
         curr_window = self.get_curr_window()
         curr_buffer = curr_window.buffer
 
@@ -311,6 +324,7 @@ class Tab():
         # new_window.draw()
 
     def vsplit(self):
+        if self.zoom_mode: self.zoom_toggle()
         curr_window = self.get_curr_window()
         curr_buffer = curr_window.buffer
 
@@ -381,9 +395,51 @@ class Tab():
                                                 inner.width)
                 inner = self._find_down_window(inner)
 
+    def zoom_toggle(self):
+        if self.zoom_mode:
+            elog("disable zoom mode")
+            curr = self.get_curr_window()
+
+            curr.set_position(self.zoom_x, self.zoom_y)
+            curr.resize(self.zoom_width, self.zoom_height)
+
+            elog(f"position: {curr.position}")
+            elog(f"width {curr.width}")
+            elog(f"height {curr.height}")
+
+            self.zoom_x = -1
+            self.zoom_y = -1
+            self.zoom_height = -1
+            self.zoom_width = -1
+            self.zoom_mode = False
+        else:
+            elog("enable zoom mode")
+            curr = self.get_curr_window()
+
+            self.zoom_x = curr.position[0]
+            self.zoom_y = curr.position[1]
+            self.zoom_height = curr.height
+            self.zoom_width = curr.width
+
+            curr.set_position(0, 0)
+            curr.resize(self.width, self.height)
+
+            elog(f"position: {curr.position}")
+            elog(f"width {curr.width}")
+            elog(f"height {curr.height}")
+            self.zoom_mode = True
+        self.draw()
+
     def draw(self):
-        for window in self.windows:
-            window.draw()
-        self.draw_seperators()
+        if self.zoom_mode:
+            self.get_curr_window().draw()
+        else:
+            for window in self.windows:
+                elog(f"position: {window.position}")
+                elog(f"width {window.width}")
+                elog(f"height {window.height}")
+
+                window.draw()
+            self.draw_seperators()
         self.get_curr_window().draw_cursor()
 
