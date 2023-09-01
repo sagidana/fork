@@ -71,6 +71,15 @@ class Window():
 
         self.events = {}
 
+    def change_buffer(self, buffer):
+        handlers = {}
+        handlers[ON_BUFFER_RELOAD] = self.on_buffer_reload_callback
+        self.buffer.unregister_events(handlers)
+
+        self.buffer = buffer
+        self.buffer.register_events(handlers)
+        self.draw()
+
     def enable_lines_numbers(self):
         if self.line_numbers: return
         self.content_position[0] += self.lines_margin

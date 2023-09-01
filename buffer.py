@@ -42,6 +42,19 @@ class Buffer():
                 self.events[event] = []
             self.events[event].append(handlers[event])
 
+    def unregister_events(self, handlers):
+        for event in handlers:
+            if event not in self.events: continue
+
+            event_index = -1
+            for i, handler in enumerate(self.events[event]):
+                if handler == handlers[event]:
+                    event_index = i
+                    break
+            if event_index == -1: continue
+
+            del self.events[event][event_index]
+
     def __init__(self, file_path=None):
         Hooks.execute(ON_BUFFER_CREATE_BEFORE, self)
 

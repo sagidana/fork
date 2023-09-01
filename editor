@@ -11,6 +11,7 @@ import os
 from settings import g_settings
 from buffer import Buffer
 from window import Window
+from plugins import fzf
 from screen import *
 from log import elog
 from tab import Tab
@@ -764,6 +765,21 @@ class Editor():
         self._initialize_normal_ctrl_maps()
         self._initialize_normal_symbol_maps()
 
+    def _initialize_leader_maps(self):
+        self.maps[NORMAL][ord(' ')] = {}        # leader
+        self.maps[NORMAL][ord(' ')][ord('s')] = {}
+        def leader_sf_map(self): # search file
+            file_path = fzf()
+            if file_path:
+                buffer = Buffer(file_path)
+                self.get_curr_window().change_buffer(buffer)
+            return False
+        self.maps[NORMAL][ord(' ')][ord('s')][ord('f')] = leader_sf_map
+        def leader_sc_map(self): # search content
+            elog("leader_sc_map")
+            return False
+        self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map
+
     def _initialize_normal_maps(self):
         def colon_map(self):
             return self.on_command()
@@ -782,6 +798,7 @@ class Editor():
         self._initialize_legends_maps(NORMAL)
         self._initialize_normal_mainstream_maps()
         self._initialize_normal_window_maps()
+        self._initialize_leader_maps()
 
     def _initialize_insert_ctrl_maps(self):
         def ctrl_w_map(self):
