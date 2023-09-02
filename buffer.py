@@ -33,8 +33,8 @@ class Buffer():
         return event_wrapper
 
     def _raise_event(self, event, args):
-            if event in self.events:
-                for cb in self.events[event]: cb(args)
+        if event in self.events:
+            for cb in self.events[event]: cb(args)
 
     def register_events(self, handlers):
         for event in handlers:

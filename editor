@@ -11,13 +11,15 @@ import os
 from settings import g_settings
 from buffer import Buffer
 from window import Window
-from plugins import fzf
 from screen import *
 from log import elog
 from tab import Tab
 
 from events import *
 from hooks import *
+
+from plugins import ripgrep
+from plugins import fzf
 
 args = None
 
@@ -776,7 +778,12 @@ class Editor():
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('f')] = leader_sf_map
         def leader_sc_map(self): # search content
-            elog("leader_sc_map")
+            try:
+                text = self.prompt("rg: ")
+                elog(f"text: {text}")
+                results = ripgrep(text)
+                elog(f"num of results: {len(results)}")
+            except Exception as e: elog(f"{e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map
 
@@ -972,12 +979,11 @@ class Editor():
         command_position[1] = int(self.height - 1)
         command_length = self.width - 1
 
-        cmd = f":{command}"
         self.screen.write(  command_position[1],
                             command_position[0],
-                            cmd.ljust(command_length))
+                            command.ljust(command_length))
         self.screen.move_cursor(    command_position[1],
-                                    command_position[0] + len(cmd))
+                                    command_position[0] + len(command))
 
     def on_insert(self, key):
         ret = False
@@ -1040,6 +1046,31 @@ class Editor():
         self.get_curr_buffer().set_highlights(highlights)
         self.get_curr_window().draw()
 
+    def prompt(self, ask=None):
+        text = ""
+        while True:
+            if ask: self.draw_command(f"{ask}{text}")
+            else: self.draw_command(f"{text}")
+
+            key = self.screen.get_key()
+
+            elog(f"EDITOR: {key}")
+            if key == ENTER_KEY: break
+            if key == ESC_KEY: break
+            if key == BACKSPACE_KEY:
+                if len(text) > 0:
+                    text = text[:-1]
+            else:
+                try:
+                    char = chr(key)
+                    if char in printable:
+                        text += char
+                except: continue
+
+        self.screen.clear()
+        self.get_curr_tab().draw()
+        return text
+
     def on_search(self, forward):
         origin_x = self.get_curr_window().buffer_cursor[0]
         origin_y = self.get_curr_window().buffer_cursor[1]
@@ -1097,7 +1128,7 @@ class Editor():
                 char = chr(key)
                 if re.match("[a-zA-Z 0-9-_()]", char): command += char
             except: pass
-            self.draw_command(command)
+            self.draw_command(f":{command}")
 
         self.screen.clear()
         self.get_curr_tab().draw()

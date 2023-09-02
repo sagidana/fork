@@ -4,14 +4,44 @@ import sys
 from log import elog
 
 def fzf():
+    """
+    This is so cool, fzf print out to stderr the fuzzing options,
+    and only the chosen result spit to the stdout.. this enables scripts like
+    this to work out of the box, no redirection of the stderr is need - and
+    only the result is redirected to our pipe (which contain the result)
+    FZF - good job :)
+    """
     try:
         cmd = ["fzf"]
         p = Popen(cmd, stdout=PIPE)
         output, errors = p.communicate()
         file_path = output.decode('utf-8').strip()
         file_path = file_path.replace("\n", "")
-        if len(file_path) > 0:
-            return file_path
+        if len(file_path) > 0: return file_path
     except Exception as e: elog(f"Exception: {e}")
+    return None
+
+def ripgrep(search):
+    try:
+        cmd = [ "rg",
+                "-g","!tags",
+                "--max-columns","100",
+                "--vimgrep", search]
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        output, errors = p.communicate()
+        results = []
+        _results = output.decode('utf-8')
+        for _result in _results.splitlines():
+            parts = _result.split(':')
+            if len(parts) < 4: continue
+
+            results.append({
+                "file": parts[0],
+                "line": parts[1],
+                "col": parts[2],
+                "text": parts[3]
+                })
+        return results
+    except Exception as e: elog(f"ripgrep exception: {e}")
     return None
 
