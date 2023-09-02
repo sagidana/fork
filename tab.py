@@ -319,7 +319,10 @@ class Tab():
                                 height,
                                 position=(  curr_window.position[0],
                                             curr_window.position[1] + height + 1),
-                                buffer=buffer)
+                                buffer=buffer,
+                                window_cursor=curr_window.window_cursor,
+                                buffer_cursor=curr_window.buffer_cursor,
+                                jumpslist=curr_window.jumpslist)
         self.add_window(new_window)
         self.focus_window(new_window)
 
@@ -346,13 +349,15 @@ class Tab():
                                 height,
                                 position=(  curr_window.position[0] + width + 1,
                                             curr_window.position[1]),
-                                buffer=curr_buffer)
+                                buffer=curr_buffer,
+                                window_cursor=curr_window.window_cursor,
+                                buffer_cursor=curr_window.buffer_cursor,
+                                jumpslist=curr_window.jumpslist)
+
         self.add_window(new_window)
         self.focus_window(new_window)
 
         self.draw()
-        # curr_window.draw()
-        # new_window.draw()
 
     def draw_vertical_seperator(self, x, y, size):
         for i in range(size):

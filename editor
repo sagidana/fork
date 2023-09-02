@@ -164,12 +164,12 @@ class Editor():
             if jump['file_path']:
                 buffer = self.get_or_create_buffer(jump['file_path'])
                 if self.get_curr_buffer().id != buffer.id:
-                    self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+                    self.get_curr_window().change_buffer(buffer)
             elif jump['buffer_id']:
                 buffer = self.get_buffer_by_id(jump['buffer_id'])
                 if not buffer: return False
                 if self.get_curr_buffer().id != buffer.id:
-                    self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+                    self.get_curr_window().change_buffer(buffer)
             else:
                 return False
 
@@ -186,12 +186,12 @@ class Editor():
             if jump['file_path']:
                 buffer = self.get_or_create_buffer(jump['file_path'])
                 if self.get_curr_buffer().id != buffer.id:
-                    self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+                    self.get_curr_window().change_buffer(buffer)
             elif jump['buffer_id']:
                 buffer = self.get_buffer_by_id(jump['buffer_id'])
                 if not buffer: return False
                 if self.get_curr_buffer().id != buffer.id:
-                    self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+                    self.get_curr_window().change_buffer(buffer)
             else:
                 return False
 
@@ -588,8 +588,10 @@ class Editor():
             if not file_path: return False
 
             buffer = self.get_or_create_buffer(file_path)
+            self.get_curr_window().add_jump()
             self.get_curr_window().change_buffer(buffer)
             self.get_curr_window().move_cursor_to_buf_location(file_col, file_line)
+            self.get_curr_window().add_jump()
             self.get_curr_window().align_center()
             return False
         self.maps[NORMAL][ord('g')][ord('f')] = gf_map
@@ -919,7 +921,6 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL][ord('d')] = d_map
-        pass
 
     def initialize_maps(self):
         self._initialize_normal_maps()
@@ -1044,8 +1045,6 @@ class Editor():
     def exec_command(self, command):
         if command == 'q':
             return self._quit_command()
-        # if command == 'w':
-            # self.get_curr_window().buffer.write()
         if command == 'qa':
             return True
         return False

@@ -41,7 +41,10 @@ class Window():
                     width,
                     height,
                     position=(0,0),
-                    buffer=None):
+                    buffer=None,
+                    window_cursor=[0,0],
+                    buffer_cursor=[0,0],
+                    jumpslist=list()):
         if not buffer: raise Exception("Not implemented.")
 
         self.id = get_id(WINDOW_ID)
@@ -65,19 +68,17 @@ class Window():
 
         self.line_numbers = False # default
 
-        self.window_cursor = [0,0]
-        self.buffer_cursor = [0,0]
+        self.window_cursor = window_cursor.copy()
+        self.buffer_cursor = buffer_cursor.copy()
         self.remember = 0
 
         self.events = {}
 
-        self.jumpslist = []
+        self.jumpslist = jumpslist.copy()
         self.jumpslist_cursor = -1
         self.discarded_jumps = []
 
-    def change_buffer(self, buffer, ignore_jump=False):
-        if not ignore_jump: self.add_jump() # add jump of the old buffer
-
+    def change_buffer(self, buffer):
         handlers = {}
         handlers[ON_BUFFER_RELOAD] = self.on_buffer_reload_callback
         self.buffer.unregister_events(handlers)
@@ -88,8 +89,6 @@ class Window():
         self.window_cursor = [0,0]
         self.buffer_cursor = [0,0]
         self.remember = 0
-
-        if not ignore_jump: self.add_jump() # add jump of the new buffer
 
         self.draw()
 
