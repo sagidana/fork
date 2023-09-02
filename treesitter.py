@@ -152,7 +152,6 @@ class TreeSitter():
     def get_captures(self):
         if not self.captures:
             self.captures = list(self.query.captures(self.tree.root_node))
-            elog(f"{len(self.captures)}")
         return self.captures
 
 if __name__ == '__main__':

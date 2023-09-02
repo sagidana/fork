@@ -758,7 +758,6 @@ class Editor():
             return False
         self.maps[NORMAL][ord('D')] = D_map
         def dot_map(self):
-            elog(f"EDITOR: registers: {self.registers['.']}")
             for k in self.registers['.']: self.on_key(k)
             return False
         self.maps[NORMAL][ord('.')] = dot_map
@@ -797,7 +796,7 @@ class Editor():
                 if not results_path: return False
 
                 self.get_curr_tab().split(self.get_or_create_buffer(results_path))
-            except Exception as e: elog(f"{e}")
+            except Exception as e: elog(f"Exception: {e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map
 
@@ -957,8 +956,6 @@ class Editor():
         if not args.filename:
             raise Exception("No files provided.")
 
-        elog(f"EDITOR: {args.filename}")
-
         if not os.path.isfile(args.filename[0]):
             raise Exception("No files provided.")
         file = args.filename[0]
@@ -1025,7 +1022,7 @@ class Editor():
 
         try: 
             char = chr(key)
-            elog(f"INSERT: ({key}) -> {char}")
+            # elog(f"INSERT: ({key}) -> {char}")
             if char in printable:
                 self.get_curr_window().insert_char(char)
             else:
@@ -1074,7 +1071,6 @@ class Editor():
 
             key = self.screen.get_key()
 
-            elog(f"EDITOR: {key}")
             if key == ENTER_KEY: break
             if key == ESC_KEY: break
             if key == BACKSPACE_KEY:
@@ -1100,8 +1096,6 @@ class Editor():
         while True:
             key = self.screen.get_key()
 
-
-            elog(f"EDITOR: {key}")
             if key == ENTER_KEY:
                 if len(pattern) > 0: success = True
                 break

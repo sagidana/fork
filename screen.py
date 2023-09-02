@@ -78,12 +78,6 @@ def get_terminal_size():
         return cr
     cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
 
-    elog(f"cr: {cr}")
-    # cr = ioctl_GWINSZ(0)
-    # cr = ioctl_GWINSZ(1)
-    # print(cr)
-    # cr = ioctl_GWINSZ(2)
-    # print(cr)
     if not cr:
         try:
             fd = os.open(os.ctermid(), os.O_RDONLY)
@@ -104,7 +98,6 @@ def get_terminal_size():
 class Screen():
     def screen_resize_handler(self, signum, frame):
         size = get_terminal_size()
-        elog(f"size: {size}")
         self.width, self.height = size
         Hooks.execute(ON_RESIZE, size)
 

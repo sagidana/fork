@@ -306,7 +306,7 @@ class Window():
                                         y,
                                         lineno,
                                         style)
-            except Exception as e: elog(f"Exception: 1 {e}")
+            except Exception as e: elog(f"Exception: {e}")
 
     def clear(self):
         for y in range(self.height):
@@ -322,9 +322,7 @@ class Window():
         style = {}
         style['background'] = g_settings['theme']['colors']['editor.background']
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
-        # attr = self.style_to_attr(style)
 
-        elog(f"window position: {self.position}, window height: {self.height}")
         for y in range(self.content_height):
             buffer_y = first_line + y
 
@@ -339,7 +337,7 @@ class Window():
                                     y,
                                     line[:x_range],
                                     style)
-            except Exception as e: elog(f"Exception: 1 {e}")
+            except Exception as e: elog(f"Exception: {e}")
 
             x_rest = self.content_width - x_range
             try:
@@ -394,8 +392,6 @@ class Window():
             self.content_width = width
         else:
             self.content_width = width - self.lines_margin
-
-        elog(f"width:{self.width}, height:{self.height}")
 
         if self.window_cursor[0] >= self.content_width- 1:
             diff = self.window_cursor[0] - (self.content_width - 1)
@@ -535,7 +531,6 @@ class Window():
     def move_cursor_to_buf_location(self, buf_x, buf_y):
         if self.is_visible(buf_x, buf_y):
             scrolled = False
-            elog(f"{buf_x}, {buf_y}")
             if self.buffer_cursor[1] > buf_y:
                 y_diff = self.buffer_cursor[1] - buf_y
                 for i in range(y_diff):
@@ -576,7 +571,7 @@ class Window():
         try:
             return self.buffer.lines[line_num]
         except Exception as e:
-            elog(f"{e}")
+            elog(f"Exception: {e}")
             return None
 
     def half_page_down(self):
@@ -743,8 +738,7 @@ class Window():
                                         char)
             self.draw()
 
-        except Exception as e:
-            elog(f"WINDOW: {e}")
+        except Exception as e: elog(f"Exception: {e}")
 
     def find(self):
         try: key = self.get_key()

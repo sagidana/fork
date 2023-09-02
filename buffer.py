@@ -14,7 +14,6 @@ import re
 
 class Buffer():
     def on_buffer_change_callback(self, change):
-        elog(f"on_buffer_change_callback: {change}")
         if self.treesitter and change:
             self.treesitter.edit(change, self.get_file_bytes())
 
@@ -166,10 +165,8 @@ class Buffer():
 
             m = re.match("#!(?P<program>[a-zA-Z0-9/]+)\s*$", first_line)
             if not m:
-                elog("1")
                 return None
             program = m.groups('program')[0]
-            elog(f"{program}")
             if  program == "/usr/bin/python3" or \
                 program == "/usr/bin/python2" or \
                 program == "/usr/bin/python":
@@ -219,7 +216,6 @@ class Buffer():
         self._raise_event(ON_BUFFER_RELOAD, None)
 
     def write(self):
-        elog("BUFFER: writing to file!")
         if not self.file_path:
             raise Exception("No file attached to buffer.")
 
@@ -540,10 +536,9 @@ class Buffer():
 
     def change_begin(self, x, y):
         if self.file_changed_on_disk():
-            elog("BUFFER: change begin: file changed!")
             self.reload()
-        if self.shadow: elog("BUFFER: WTF, already in a change?")
-        if self.change_start_position: elog("BUFFER: WTF, already in a change?")
+        # if self.shadow: elog("BUFFER: WTF, already in a change?")
+        # if self.change_start_position: elog("BUFFER: WTF, already in a change?")
         self.shadow = self.lines.copy()
         self.change_start_position = (x, y)
         self.redo_stack = [] # reset the redo stack on new edit.
@@ -584,7 +579,6 @@ class Buffer():
             elif line.startswith('-'):
                 if old_line_num not in change: change[old_line_num] = {}
 
-                elog(f"BUFFER: {old_line_num}: {line.strip()}")
                 change[old_line_num]['old'] = line[2:]
                 old_line_num += 1
 
@@ -592,8 +586,6 @@ class Buffer():
 
     def change_end(self, x, y):
         if self.file_changed_on_disk():
-            elog("BUFFER: file_changed_on_disk")
-            elog("BUFFER: change end: file changed!")
             self.reload()
             # discard changes if file changed underneath us
             change = None
@@ -779,7 +771,6 @@ class Buffer():
 
         found = None
         for m in pattern.finditer(''.join(self.lines)):
-            elog(f"BUFFER: {m}")
             start, end = m.span()
             if start <= curr_index <= end:
                 found = m

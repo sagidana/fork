@@ -428,10 +428,6 @@ class Tab():
             self.get_curr_window().draw()
         else:
             for window in self.windows:
-                elog(f"position: {window.position}")
-                elog(f"width {window.width}")
-                elog(f"height {window.height}")
-
                 window.draw()
             self.draw_seperators()
         self.get_curr_window().draw_cursor()

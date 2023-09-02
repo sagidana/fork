@@ -19,8 +19,6 @@ g_settings['theme_opt'] = {}
 def add_to_theme(scope, style):
     if scope not in g_settings['theme_opt']:
         g_settings['theme_opt'][scope] = style
-    else: 
-        elog(f"scope: {scope}")
 
 def optimize_theme():
     theme = g_settings['theme']

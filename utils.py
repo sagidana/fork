@@ -20,7 +20,6 @@ def extract_destination(string):
         file_col = m.group('file_col')
         if file_col: file_col = int(file_col) - 1
         if not path.isfile(file_path): return None, None, None
-    except Exception as e:
-        elog(f"{e}")
+    except Exception as e: elog(f"Exception: {e}")
 
     return file_path, file_line, file_col
