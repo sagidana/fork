@@ -769,20 +769,31 @@ class Window():
 
         except Exception as e: elog(f"Exception: {e}")
 
+    def _find(self, char):
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+        loc = self.buffer.find_next_char(x, y, char)
+        if not loc: return
+        x, y = loc[0], loc[1]
+        self.move_cursor_to_buf_location(x, y)
+
     def find(self):
         try: key = self.get_key()
         except: key = None
 
         try:
             char = chr(key)
-
-            x = self.buffer_cursor[0]
-            y = self.buffer_cursor[1]
-            loc = self.buffer.find_next_char(x, y, char)
-            if not loc: return
-            x, y = loc[0], loc[1]
-            self.move_cursor_to_buf_location(x, y)
+            self._find(char)
+            return char
         except: pass
+
+    def _find_back(self, char):
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+        loc = self.buffer.find_prev_char(x, y, char)
+        if not loc: return
+        x, y = loc[0], loc[1]
+        self.move_cursor_to_buf_location(x, y)
 
     def find_back(self):
         try: key = self.get_key()
@@ -790,13 +801,18 @@ class Window():
 
         try:
             char = chr(key)
-            x = self.buffer_cursor[0]
-            y = self.buffer_cursor[1]
-            loc = self.buffer.find_prev_char(x, y, char)
-            if not loc: return
-            x, y = loc[0], loc[1]
-            self.move_cursor_to_buf_location(x, y)
+            self._find_back(char)
+            return char
         except: pass
+
+    def _till(self, char):
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+        loc = self.buffer.find_next_char(x, y, char)
+        if not loc: return
+        x, y = loc[0], loc[1]
+        x = x - 1 if x > 0 else x
+        self.move_cursor_to_buf_location(x, y)
 
     def till(self):
         try: key = self.get_key()
@@ -804,14 +820,18 @@ class Window():
 
         try:
             char = chr(key)
-            x = self.buffer_cursor[0]
-            y = self.buffer_cursor[1]
-            loc = self.buffer.find_next_char(x, y, char)
-            if not loc: return
-            x, y = loc[0], loc[1]
-            x = x - 1 if x > 0 else x
-            self.move_cursor_to_buf_location(x, y)
+            self._till(char)
+            return char
         except: pass
+
+    def _till_back(self, char):
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+        loc = self.buffer.find_prev_char(x, y, char)
+        if not loc: return
+        x, y = loc[0], loc[1]
+        x = x + 1 if x < len(self.get_line(y)) - 1 else x
+        self.move_cursor_to_buf_location(x, y)
 
     def till_back(self):
         try: key = self.get_key()
@@ -819,13 +839,8 @@ class Window():
 
         try:
             char = chr(key)
-            x = self.buffer_cursor[0]
-            y = self.buffer_cursor[1]
-            loc = self.buffer.find_prev_char(x, y, char)
-            if not loc: return
-            x, y = loc[0], loc[1]
-            x = x + 1 if x < len(self.get_line(y)) - 1 else x
-            self.move_cursor_to_buf_location(x, y)
+            self._till_back(char)
+            return char
         except: pass
 
     def remove_line_at(self, y):

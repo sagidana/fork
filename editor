@@ -632,19 +632,55 @@ class Editor():
             return False
         self.maps[NORMAL][ord('E')] = E_map
         def f_map(self):
-            self.get_curr_window().find()
+            char = self.get_curr_window().find()
+            self._action = 'f'
+            self._char = char
             return False
         self.maps[NORMAL][ord('f')] = f_map
         def F_map(self):
-            self.get_curr_window().find_back()
+            char = self.get_curr_window().find_back()
+            self._action = 'F'
+            self._char = char
             return False
         self.maps[NORMAL][ord('F')] = F_map
         def t_map(self):
-            self.get_curr_window().till()
+            char = self.get_curr_window().till()
+            self._action = 't'
+            self._char = char
             return False
         self.maps[NORMAL][ord('t')] = t_map
         def T_map(self):
-            self.get_curr_window().till_back()
+            char = self.get_curr_window().till_back()
+            self._action = 'T'
+            self._char = char
+            return False
+        self.maps[NORMAL][ord('T')] = T_map
+        def semicolon_map(self):
+            if self._action == 'f':
+                self.get_curr_window()._find(self._char)
+            if self._action == 'F':
+                self.get_curr_window()._find_back(self._char)
+            if self._action == 't':
+                self.get_curr_window()._till(self._char)
+            if self._action == 'T':
+                self.get_curr_window()._till_back(self._char)
+            return False
+        self.maps[NORMAL][ord(';')] = semicolon_map
+        def comma_map(self):
+            if self._action == 'f':
+                self.get_curr_window()._find_back(self._char)
+            if self._action == 'F':
+                self.get_curr_window()._find(self._char)
+            if self._action == 't':
+                self.get_curr_window()._till_back(self._char)
+            if self._action == 'T':
+                self.get_curr_window()._till(self._char)
+            return False
+        self.maps[NORMAL][ord(',')] = comma_map
+        def T_map(self):
+            char = self.get_curr_window().till_back()
+            self._dir = 'backward'
+            self._char = char
             return False
         self.maps[NORMAL][ord('T')] = T_map
         def H_map(self):
@@ -953,6 +989,8 @@ class Editor():
         self.height, self.width = screen.get_height(), screen.get_width()
 
         self.initialize_registers()
+        self._action = 'f' # options are 'f','F','t','T'
+        self._char = None
 
         self.maps = {}
         self.maps[NORMAL] = {}
