@@ -325,7 +325,6 @@ class Editor():
             end_x, end_y = self.get_curr_window().half_page_up()
             scope = (start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
-            return False
         maps[CTRL_U_KEY] = ctrl_u_map
         def ctrl_d_map(self):
             start_x = self.get_curr_window().buffer_cursor[0]
@@ -333,21 +332,72 @@ class Editor():
             end_x, end_y = self.get_curr_window().half_page_down()
             scope = (start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
-            return False
         maps[CTRL_D_KEY] = ctrl_d_map
 
-        # def move_f(self):
-            # start_x = self.get_curr_window().buffer_cursor[0]
-            # start_y = self.get_curr_window().buffer_cursor[1]
-            # ret = self.get_curr_buffer().find_WORD_end(x, y)
-            # if not ret: return
-            # end_x, end_y = ret
-            # scope = (start_x, start_y, end_x, end_y)
-            # if scope: cb(scope)
-        # maps[ord('f')] = move_f
-        # maps[ord('F')] = move_F
-        # maps[ord('t')] = move_t
-        # maps[ord('T')] = move_T
+        def move_f_map(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+
+            try:
+                char = chr(self.screen.get_key())
+                loc = self.get_curr_buffer().find_next_char(start_x,
+                                                            start_y,
+                                                            char)
+                if not loc: return
+                end_x, end_y = loc[0], loc[1]
+                scope = (start_x, start_y, end_x, end_y)
+                if scope: return cb(scope)
+            except Exception as e: elog(f"{e}")
+        maps[ord('f')] = move_f_map
+        def move_F_map(self):
+            end_x = self.get_curr_window().buffer_cursor[0]
+            end_y = self.get_curr_window().buffer_cursor[1]
+
+            try:
+                char = chr(self.screen.get_key())
+                loc = self.get_curr_buffer().find_prev_char(end_x,
+                                                            end_y,
+                                                            char)
+                if not loc: return
+                start_x, start_y = loc[0], loc[1]
+                scope = (start_x, start_y, end_x, end_y)
+                if scope: return cb(scope)
+            except Exception as e: elog(f"{e}")
+        maps[ord('F')] = move_F_map
+        def move_t_map(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+
+            try:
+                char = chr(self.screen.get_key())
+                loc = self.get_curr_buffer().find_next_char(start_x,
+                                                            start_y,
+                                                            char)
+                if not loc: return
+                end_x, end_y = loc[0], loc[1]
+                end_x = end_x - 1 if end_x > 0 else x
+
+                scope = (start_x, start_y, end_x, end_y)
+                if scope: return cb(scope)
+            except Exception as e: elog(f"{e}")
+        maps[ord('t')] = move_t_map
+        def move_T_map(self):
+            end_x = self.get_curr_window().buffer_cursor[0]
+            end_y = self.get_curr_window().buffer_cursor[1]
+
+            try:
+                char = chr(self.screen.get_key())
+                loc = self.get_curr_buffer().find_prev_char(end_x,
+                                                            end_y,
+                                                            char)
+                if not loc: return
+                start_x, start_y = loc[0], loc[1]
+                start_x = start_x + 1 if start_x < len(self.get_curr_window().get_line(start_y)) - 1 else start_x
+
+                scope = (start_x, start_y, end_x, end_y)
+                if scope: return cb(scope)
+            except Exception as e: elog(f"{e}")
+        maps[ord('T')] = move_T_map
 
         maps[ord('g')] = {} # TODO
         maps[ord('g')][ord('g')] = move_ # TODO
