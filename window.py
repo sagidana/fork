@@ -1095,4 +1095,3 @@ class Window():
                                 style)
         except Exception as e:
             elog(f"Exception: {e}")
-

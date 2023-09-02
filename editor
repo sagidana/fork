@@ -1155,6 +1155,7 @@ class Editor():
         return ret
 
     def on_key(self, key):
+        # dot functionality, recording.
         if self.mode == NORMAL:
             # If we on top level, start recording from top.
             if self.curr_maps == self.maps[self.mode]:

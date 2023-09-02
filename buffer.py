@@ -98,6 +98,10 @@ class Buffer():
         handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
         self.register_events(handlers)
 
+        # if file is empty, insert line to work with..
+        if len(self.lines) == 0:
+            self.insert_line(0, '\n')
+
         Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
 
     def _hash_file(self):
