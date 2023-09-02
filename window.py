@@ -71,7 +71,12 @@ class Window():
 
         self.events = {}
 
-    def change_buffer(self, buffer):
+        self.jumpslist = []
+        self.jumpslist_cursor = -1
+
+    def change_buffer(self, buffer, ignore_jump=False):
+        if not ignore_jump: self.add_jump() # add jump of the old buffer
+
         handlers = {}
         handlers[ON_BUFFER_RELOAD] = self.on_buffer_reload_callback
         self.buffer.unregister_events(handlers)
@@ -82,6 +87,8 @@ class Window():
         self.window_cursor = [0,0]
         self.buffer_cursor = [0,0]
         self.remember = 0
+
+        if not ignore_jump: self.add_jump() # add jump of the new buffer
 
         self.draw()
 
@@ -98,6 +105,31 @@ class Window():
         self.content_width += self.lines_margin
         self.line_numbers = False
         self.draw()
+
+    def add_jump(self):
+        jump =  {
+                "file_path": self.buffer.file_path,
+                "col": self.buffer_cursor[0],
+                "line": self.buffer_cursor[1]
+                }
+        if self.jumpslist_cursor < len(self.jumpslist) - 1:
+            # TODO: keep the trash for farther queries
+            # cut the forward end of jumps now that we create a new line of
+            # jumps
+            self.jumpslist = self.jumpslist[:self.jumpslist_cursor+1]
+        self.jumpslist.append(jump)
+        self.jumpslist_cursor += 1
+
+    def prev_jump(self):
+        if self.jumpslist_cursor < 0: return None
+        jump = self.jumpslist[self.jumpslist_cursor]
+        self.jumpslist_cursor -= 1
+        return jump
+    def next_jump(self):
+        if self.jumpslist_cursor >= len(self.jumpslist) - 1: return None
+        self.jumpslist_cursor += 1
+        jump = self.jumpslist[self.jumpslist_cursor]
+        return jump
 
     def register_events(self, handlers):
         for event in handlers:

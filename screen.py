@@ -55,8 +55,10 @@ CTRL_L_KEY = 12
 CTRL_D_KEY = 4
 CTRL_U_KEY = 21
 CTRL_H_KEY = 8
+CTRL_I_KEY = 9
 CTRL_J_KEY = 10
 CTRL_K_KEY = 11
+CTRL_O_KEY = 15
 CTRL_R_KEY = 18
 BACKSPACE_KEY = 127
 
@@ -222,7 +224,7 @@ if __name__ == '__main__':
     # screen._write_to_stdout("\x1b[2 q") # set block
     # screen._write_to_stdout("\x1b[1 q") # set block blinking
     # screen._write_to_stdout("\x1b[0 q") # reset
-    
+
     # screen._write_to_stdout("\x1b[?17;14;224c")
     # screen._write_to_stdout("\x1b[?17;14;224c")
     # screen._write_to_stdout("\x1b[?16;1000]")

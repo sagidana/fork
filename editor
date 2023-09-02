@@ -158,6 +158,33 @@ class Editor():
             self.get_curr_window().redo()
             return False
         self.maps[NORMAL][CTRL_R_KEY] = ctrl_r_map
+        def ctrl_i_map(self):
+            jump = self.get_curr_window().next_jump()
+            if not jump: return False
+            elog(f"next jump: {jump}")
+            buffer = self.get_or_create_buffer(jump['file_path'])
+            if self.get_curr_buffer().id != buffer.id:
+                self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+            self.get_curr_window().move_cursor_to_buf_location( jump['col'],
+                                                                jump['line'])
+            self.get_curr_window().align_center()
+            return False
+        self.maps[NORMAL][CTRL_I_KEY] = ctrl_i_map
+
+        def ctrl_o_map(self):
+            jump = self.get_curr_window().prev_jump()
+            if not jump: return False
+            elog(f"prev jump: {jump}")
+
+            buffer = self.get_or_create_buffer(jump['file_path'])
+            if self.get_curr_buffer().id != buffer.id:
+                self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+            self.get_curr_window().move_cursor_to_buf_location( jump['col'],
+                                                                jump['line'])
+            self.get_curr_window().align_center()
+
+            return False
+        self.maps[NORMAL][CTRL_O_KEY] = ctrl_o_map
 
     def _initialize_normal_symbol_maps(self):
         def zero_map(self):
@@ -792,6 +819,8 @@ class Editor():
         def leader_sc_map(self): # search content
             try:
                 text = self.prompt("rg: ")
+                if len(text) == 0: return False
+
                 results_path = ripgrep(text)
                 if not results_path: return False
 
@@ -1210,6 +1239,7 @@ def main():
         if to_exit: break
 
         k = screen.get_key()
+        elog(f"key {k}")
 
     screen.clear()
     screen.move_cursor(0,0)
