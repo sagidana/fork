@@ -136,7 +136,6 @@ class Editor():
         self.maps[NORMAL][CTRL_W_KEY][ord('w')] = ctrl_w_w_map
 
         def ctrl_w_t_map(self):
-            # self.get_curr_tab().
             self._create_tab(self.get_curr_buffer())
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('t')] = ctrl_w_t_map
@@ -545,7 +544,7 @@ class Editor():
             file_path, file_line, file_col = extract_destination(line)
             if not file_path: return False
 
-            buffer = Buffer(file_path)
+            buffer = self.get_or_create_buffer(file_path)
             self.get_curr_window().change_buffer(buffer)
             self.get_curr_window().move_cursor_to_buf_location(file_col, file_line)
             self.get_curr_window().align_center()
@@ -787,7 +786,7 @@ class Editor():
         def leader_sf_map(self): # search file
             file_path = fzf()
             if file_path:
-                buffer = Buffer(file_path)
+                buffer = self.get_or_create_buffer(file_path)
                 self.get_curr_window().change_buffer(buffer)
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('f')] = leader_sf_map
@@ -797,7 +796,7 @@ class Editor():
                 results_path = ripgrep(text)
                 if not results_path: return False
 
-                self.get_curr_tab().split(Buffer(results_path))
+                self.get_curr_tab().split(self.get_or_create_buffer(results_path))
             except Exception as e: elog(f"{e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map
@@ -924,6 +923,12 @@ class Editor():
         Hooks.register(ON_BUFFER_CREATE_AFTER, self.on_buffer_create_after_callback)
         Hooks.register(ON_BUFFER_DESTROY_AFTER, self.on_buffer_destroy_after_callback)
 
+    def get_or_create_buffer(self, file_path):
+        for buf in self.buffers:
+            if buf.file_path == os.path.abspath(file_path):
+                return buf
+        return Buffer(file_path)
+
     def _create_tab(self, buffer=None):
         self.tabs.append(Tab(self.screen, self.width, self.height, buffer))
         self.curr_tab = len(self.tabs) - 1
@@ -958,7 +963,7 @@ class Editor():
             raise Exception("No files provided.")
         file = args.filename[0]
 
-        buffer = Buffer(file)
+        buffer = self.get_or_create_buffer(file)
         tab = self._create_tab(buffer)
 
     def screen_resize_handler(self, signum, frame):

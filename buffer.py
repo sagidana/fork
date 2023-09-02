@@ -7,6 +7,7 @@ from idr import *
 from treesitter import TreeSitter
 
 from difflib import Differ
+from os import path
 import hashlib
 import json
 import re
@@ -73,7 +74,7 @@ class Buffer():
 
         self.events = {}
         self.lines = []
-        self.file_path = file_path
+        self.file_path = path.abspath(file_path)
 
         if not file_path:
             raise Exception('Not implemented!')
