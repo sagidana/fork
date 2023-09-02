@@ -21,6 +21,8 @@ from hooks import *
 from plugins import ripgrep
 from plugins import fzf
 
+from utils import *
+
 args = None
 
 NORMAL = 'normal'
@@ -537,6 +539,18 @@ class Editor():
             self.next_tab()
             return False
         self.maps[NORMAL][ord('g')][ord('t')] = gt_map
+        def gf_map(self):
+            line = self.get_curr_window().get_curr_line()
+            line = line[self.get_curr_window().buffer_cursor[0]:]
+            file_path, file_line, file_col = extract_destination(line)
+            if not file_path: return False
+
+            buffer = Buffer(file_path)
+            self.get_curr_window().change_buffer(buffer)
+            self.get_curr_window().move_cursor_to_buf_location(file_col, file_line)
+            self.get_curr_window().align_center()
+            return False
+        self.maps[NORMAL][ord('g')][ord('f')] = gf_map
         def gg_map(self):
             self.get_curr_window().move_begin()
             return False
@@ -780,9 +794,10 @@ class Editor():
         def leader_sc_map(self): # search content
             try:
                 text = self.prompt("rg: ")
-                elog(f"text: {text}")
-                results = ripgrep(text)
-                elog(f"num of results: {len(results)}")
+                results_path = ripgrep(text)
+                if not results_path: return False
+
+                self.get_curr_tab().split(Buffer(results_path))
             except Exception as e: elog(f"{e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map

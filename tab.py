@@ -294,10 +294,12 @@ class Tab():
         self.get_curr_window().draw_cursor()
         return True
 
-    def split(self):
+    def split(self, buffer=None):
         if self.zoom_mode: self.zoom_toggle()
         curr_window = self.get_curr_window()
-        curr_buffer = curr_window.buffer
+        if not buffer:
+
+            buffer = curr_window.buffer
 
         total_height = curr_window.height
 
@@ -317,7 +319,7 @@ class Tab():
                                 height,
                                 position=(  curr_window.position[0],
                                             curr_window.position[1] + height + 1),
-                                buffer=curr_buffer)
+                                buffer=buffer)
         self.add_window(new_window)
         self.focus_window(new_window)
 

@@ -78,6 +78,11 @@ class Window():
 
         self.buffer = buffer
         self.buffer.register_events(handlers)
+
+        self.window_cursor = [0,0]
+        self.buffer_cursor = [0,0]
+        self.remember = 0
+
         self.draw()
 
     def enable_lines_numbers(self):

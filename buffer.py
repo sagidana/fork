@@ -77,7 +77,6 @@ class Buffer():
 
         if not file_path:
             raise Exception('Not implemented!')
-            Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
             return
 
         with open(file_path, 'r') as f:
@@ -85,9 +84,7 @@ class Buffer():
 
         self.hash = self._hash_file()
         if not self.hash:
-            elog("here2")
             raise Exception('Not implemented!')
-            Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
             return
 
         language = self.detect_language()
