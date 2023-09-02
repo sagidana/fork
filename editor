@@ -848,14 +848,14 @@ class Editor():
             last_pattern = self.registers['/']
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
-            self._on_search(x, y, last_pattern, True)
+            self._on_search(x, y, last_pattern, self._search_forward)
             return False
         self.maps[NORMAL][ord('n')] = n_map
         def N_map(self):
             last_pattern = self.registers['/']
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
-            self._on_search(x, y, last_pattern, False)
+            self._on_search(x, y, last_pattern, not self._search_forward)
             return False
         self.maps[NORMAL][ord('N')] = N_map
         def J_map(self):
@@ -1041,6 +1041,7 @@ class Editor():
         self.initialize_registers()
         self._action = 'f' # options are 'f','F','t','T'
         self._char = None
+        self._search_forward = True
 
         self.maps = {}
         self.maps[NORMAL] = {}
@@ -1183,13 +1184,15 @@ class Editor():
                 if start_y < y: continue
                 if start_y == y and start_x <= x: continue
                 return (start_x, start_y)
-            return None
+            # wrap to start
+            return matches[0][0], matches[0][1]
         else:
             for start_x, start_y, end_x, end_y in reversed(matches):
                 if start_y > y: continue
                 if start_y == y and start_x >= x: continue
                 return (start_x, start_y)
-            return None
+            # wrap to end
+            return matches[-1][0], matches[-1][1]
 
     def _on_search(self, x, y, pattern, forward):
         results = self.get_curr_buffer().search_pattern(pattern)
@@ -1266,6 +1269,7 @@ class Editor():
 
         if success:
             self.registers['/'] = pattern
+            self._search_forward = forward
         else:
             self.get_curr_window().move_cursor_to_buf_location( origin_x,
                                                                 origin_y)
