@@ -161,10 +161,18 @@ class Editor():
         def ctrl_i_map(self):
             jump = self.get_curr_window().next_jump()
             if not jump: return False
-            elog(f"next jump: {jump}")
-            buffer = self.get_or_create_buffer(jump['file_path'])
-            if self.get_curr_buffer().id != buffer.id:
-                self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+            if jump['file_path']:
+                buffer = self.get_or_create_buffer(jump['file_path'])
+                if self.get_curr_buffer().id != buffer.id:
+                    self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+            elif jump['buffer_id']:
+                buffer = self.get_buffer_by_id(jump['buffer_id'])
+                if not buffer: return False
+                if self.get_curr_buffer().id != buffer.id:
+                    self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+            else:
+                return False
+
             self.get_curr_window().move_cursor_to_buf_location( jump['col'],
                                                                 jump['line'])
             self.get_curr_window().align_center()
@@ -174,11 +182,19 @@ class Editor():
         def ctrl_o_map(self):
             jump = self.get_curr_window().prev_jump()
             if not jump: return False
-            elog(f"prev jump: {jump}")
 
-            buffer = self.get_or_create_buffer(jump['file_path'])
-            if self.get_curr_buffer().id != buffer.id:
-                self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+            if jump['file_path']:
+                buffer = self.get_or_create_buffer(jump['file_path'])
+                if self.get_curr_buffer().id != buffer.id:
+                    self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+            elif jump['buffer_id']:
+                buffer = self.get_buffer_by_id(jump['buffer_id'])
+                if not buffer: return False
+                if self.get_curr_buffer().id != buffer.id:
+                    self.get_curr_window().change_buffer(buffer, ignore_jump=True)
+            else:
+                return False
+
             self.get_curr_window().move_cursor_to_buf_location( jump['col'],
                                                                 jump['line'])
             self.get_curr_window().align_center()
@@ -578,11 +594,15 @@ class Editor():
             return False
         self.maps[NORMAL][ord('g')][ord('f')] = gf_map
         def gg_map(self):
+            self.get_curr_window().add_jump()
             self.get_curr_window().move_begin()
+            self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('g')][ord('g')] = gg_map
         def G_map(self):
+            self.get_curr_window().add_jump()
             self.get_curr_window().move_end()
+            self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('G')] = G_map
         def w_map(self):
@@ -626,15 +646,21 @@ class Editor():
             return False
         self.maps[NORMAL][ord('T')] = T_map
         def H_map(self):
+            self.get_curr_window().add_jump()
             self.get_curr_window().move_begin_visible()
+            self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('H')] = H_map
         def M_map(self):
+            self.get_curr_window().add_jump()
             self.get_curr_window().move_middle_visible()
+            self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('M')] = M_map
         def L_map(self):
+            self.get_curr_window().add_jump()
             self.get_curr_window().move_end_visible()
+            self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('L')] = L_map
         def o_map(self):
@@ -821,10 +847,10 @@ class Editor():
                 text = self.prompt("rg: ")
                 if len(text) == 0: return False
 
-                results_path = ripgrep(text)
-                if not results_path: return False
+                results = ripgrep(text)
+                if not results: return False
 
-                self.get_curr_tab().split(self.get_or_create_buffer(results_path))
+                self.get_curr_tab().split(Buffer(data_in_bytes=results))
             except Exception as e: elog(f"Exception: {e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map
@@ -956,6 +982,11 @@ class Editor():
             if buf.file_path == os.path.abspath(file_path):
                 return buf
         return Buffer(file_path)
+    def get_buffer_by_id(self, buffer_id):
+        for buf in self.buffers:
+            if buf.id == buffer_id:
+                return buf
+        return None
 
     def _create_tab(self, buffer=None):
         self.tabs.append(Tab(self.screen, self.width, self.height, buffer))

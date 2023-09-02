@@ -55,7 +55,7 @@ class Buffer():
 
             del self.events[event][event_index]
 
-    def __init__(self, file_path=None):
+    def __init__(self, file_path=None, data_in_bytes=None):
         Hooks.execute(ON_BUFFER_CREATE_BEFORE, self)
 
         # When change is starting, this is where original is saved
@@ -73,25 +73,30 @@ class Buffer():
 
         self.events = {}
         self.lines = []
-        self.file_path = path.abspath(file_path)
+        self.file_path = None
+        self.in_memory_data = None
 
         if not file_path:
-            raise Exception('Not implemented!')
-            return
+            if not data_in_bytes:
+                self.in_memory_data = bytes()
+            else:
+                self.in_memory_data = data_in_bytes
+            self.lines = self.in_memory_data.decode('utf-8').splitlines()
+        else:
+            self.file_path = path.abspath(file_path)
+            with open(file_path, 'r') as f:
+                self.lines = f.readlines()
 
-        with open(file_path, 'r') as f:
-            self.lines = f.readlines()
-
-        self.hash = self._hash_file()
-        if not self.hash:
-            raise Exception('Not implemented!')
-            return
+            self.hash = self._hash_file()
+            if not self.hash:
+                raise Exception('Not implemented!')
+                return
 
         language = self.detect_language()
         self.treesitter = None
         if language:
-            with open(file_path, "rb") as f: file_bytes = f.read()
-            self.treesitter = TreeSitter(file_bytes, language)
+            with open(file_path, "rb") as f: _bytes = f.read()
+            self.treesitter = TreeSitter(_bytes, language)
 
         handlers = {}
         handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
@@ -118,9 +123,13 @@ class Buffer():
             return False
 
     def file_changed_on_disk(self):
+        if not self.file_path: return False
         return not self._match_hash()
 
     def detect_language(self):
+        # in memory buffer without language detection.
+        if not self.file_path: return None
+
         if      self.file_path.endswith('.py'):
             return "python"
         elif    self.file_path.endswith('.c') or \
@@ -203,26 +212,27 @@ class Buffer():
         Hooks.execute(ON_BUFFER_DESTROY_AFTER, self)
 
     def reload(self):
-        with open(self.file_path, 'r') as f:
-            self.lines = f.readlines()
-
-        self.hash = self._hash_file()
-        if not self.hash:
-            raise Exception('Not implemented!')
-            Hooks.execute(ON_BUFFER_CREATE_AFTER, self)
-            return
+        if self.file_path:
+            with open(self.file_path, 'r') as f:
+                self.lines = f.readlines()
+            self.hash = self._hash_file()
+            if not self.hash:
+                raise Exception('Not implemented!')
+                return
+        else:
+            self.lines = self.in_memory_data.decode('utf-8').splitlines()
 
         self.resync_treesitter()
         self._raise_event(ON_BUFFER_RELOAD, None)
 
     def write(self):
         if not self.file_path:
-            raise Exception("No file attached to buffer.")
+            self.in_memory_data = "\n".join(self.lines).encode('utf-8')
+        else:
+            with open(self.file_path, 'w+') as f:
+                f.writelines(self.lines)
 
-        with open(self.file_path, 'w+') as f:
-            f.writelines(self.lines)
-
-        self.hash = self._hash_file()
+            self.hash = self._hash_file()
 
     def set_highlights(self, highlights):
         self.highlights = highlights

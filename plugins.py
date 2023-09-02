@@ -30,22 +30,23 @@ def random_string(len=10):
 
 def ripgrep(search):
     try:
-        results_path = f"/tmp/rg-{random_string()}"
-        while path.isfile(results_path):
-            results_path = f"/tmp/rg-{random_string()}"
-        results_file = open(results_path, 'w')
+        # results_path = f"/tmp/rg-{random_string()}"
+        # while path.isfile(results_path):
+            # results_path = f"/tmp/rg-{random_string()}"
+        # results_file = open(results_path, 'w')
 
         cmd = [ "rg",
                 "-g","!tags",
                 "--max-columns","100",
                 "--vimgrep", search]
-        p = Popen(cmd, stdout=results_file, stderr=PIPE)
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
         output, errors = p.communicate()
 
-        if path.getsize(results_path) > 0:
-            return results_path
+        if len(output) > 0:
+            return output
+        # if path.getsize(results_path) > 0:
+            # return results_path
         # results = []
-        # _results = output.decode('utf-8')
         # for _result in _results.splitlines():
             # parts = _result.split(':')
             # if len(parts) < 4: continue
