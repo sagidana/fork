@@ -979,10 +979,17 @@ class Editor():
             return False
         self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
         def ctrl_n_map(self):
+            abs_position = [0,0]
+            window_x = self.get_curr_window().position[0]
+            window_y = self.get_curr_window().position[1]
+            window_cursor_x = self.get_curr_window().window_cursor[0]
+            window_cursor_y = self.get_curr_window().window_cursor[1]
+            abs_position[0] = window_x + window_cursor_x
+            abs_position[1] = window_y + window_cursor_y
+
+
             completion = Completion(self.screen,
-                                    20,
-                                    10,
-                                    position=(20,10),
+                                    position=abs_position,
                                     options=[   "option_1",
                                                 "option_2",
                                                 "option_3",
@@ -990,7 +997,9 @@ class Editor():
                                                 "option_5"])
             choise = completion.pop()
             self.get_curr_tab().draw() # need to redraw after completion
-            elog(choise)
+
+            if choise:
+                self.get_curr_window().insert_string(choise)
             return False
         self.maps[INSERT][CTRL_N_KEY] = ctrl_n_map
 
