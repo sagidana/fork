@@ -8,7 +8,6 @@ from hooks import *
 from syntax import get_syntax_highlights
 
 from string import printable
-import curses
 import time
 import re
 

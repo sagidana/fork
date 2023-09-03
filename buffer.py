@@ -547,8 +547,6 @@ class Buffer():
     def change_begin(self, x, y):
         if self.file_changed_on_disk():
             self.reload()
-        # if self.shadow: elog("BUFFER: WTF, already in a change?")
-        # if self.change_start_position: elog("BUFFER: WTF, already in a change?")
         self.shadow = self.lines.copy()
         self.change_start_position = (x, y)
         self.redo_stack = [] # reset the redo stack on new edit.
@@ -582,7 +580,6 @@ class Buffer():
             if line.startswith('+'):
                 if new_line_num not in change: change[new_line_num] = {}
 
-                elog(f"BUFFER: {new_line_num}: {line.strip()}")
                 change[new_line_num]['new'] = line[2:]
 
                 new_line_num += 1
@@ -654,7 +651,7 @@ class Buffer():
 
     # CORE: movement
     def find_next_word(self, x, y, skip_current=True):
-        word_regex = '[a-zA-Z0-9_-]'
+        word_regex = '[a-zA-Z0-9\=_-]'
         single_regex = '[\)\(\}\{\]\[\,\.\/\'\;\:]'
 
         pos = self.get_file_pos(x, y)

@@ -17,6 +17,7 @@ from tab import Tab
 
 from events import *
 from hooks import *
+from popup import *
 
 from plugins import ripgrep
 from plugins import fzf
@@ -178,7 +179,6 @@ class Editor():
             self.get_curr_window().align_center()
             return False
         self.maps[NORMAL][CTRL_I_KEY] = ctrl_i_map
-
         def ctrl_o_map(self):
             jump = self.get_curr_window().prev_jump()
             if not jump: return False
@@ -927,7 +927,9 @@ class Editor():
             file_path = fzf()
             if file_path:
                 buffer = self.get_or_create_buffer(file_path)
+                self.get_curr_window().add_jump()
                 self.get_curr_window().change_buffer(buffer)
+                self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('f')] = leader_sf_map
         def leader_sc_map(self): # search content
@@ -976,6 +978,21 @@ class Editor():
             window.remove_scope(start_x, start_y, end_x, end_y)
             return False
         self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
+        def ctrl_n_map(self):
+            completion = Completion(self.screen,
+                                    20,
+                                    10,
+                                    position=(20,10),
+                                    options=[   "option_1",
+                                                "option_2",
+                                                "option_3",
+                                                "option_4",
+                                                "option_5"])
+            choise = completion.pop()
+            self.get_curr_tab().draw() # need to redraw after completion
+            elog(choise)
+            return False
+        self.maps[INSERT][CTRL_N_KEY] = ctrl_n_map
 
     def _initialize_insert_maps(self):
         self._initialize_insert_ctrl_maps()
