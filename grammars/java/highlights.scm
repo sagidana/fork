@@ -1,78 +1,139 @@
-(class_declaration
-  body: (class_body) @class.inner) @class.outer
-
-(method_declaration) @function.outer
+; Methods
 
 (method_declaration
-  body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
- (#make-range! "function.inner" @_start @_end)))
+  name: (identifier) @function.method)
+(method_invocation
+  name: (identifier) @function.method)
+(super) @function.builtin
 
-(constructor_declaration) @function.outer
+; Annotations
+
+(annotation
+  name: (identifier) @attribute)
+(marker_annotation
+  name: (identifier) @attribute)
+
+"@" @operator
+
+; Types
+
+(type_identifier) @type
+
+(interface_declaration
+  name: (identifier) @type)
+(class_declaration
+  name: (identifier) @type)
+(enum_declaration
+  name: (identifier) @type)
+
+((field_access
+  object: (identifier) @type)
+ (#match? @type "^[A-Z]"))
+((scoped_identifier
+  scope: (identifier) @type)
+ (#match? @type "^[A-Z]"))
+((method_invocation
+  object: (identifier) @type)
+ (#match? @type "^[A-Z]"))
+((method_reference
+  . (identifier) @type)
+ (#match? @type "^[A-Z]"))
 
 (constructor_declaration
-  body: (constructor_body . "{" . (_) @_start @_end (_)? @_end . "}"
- (#make-range! "function.inner" @_start @_end)))
+  name: (identifier) @type)
 
-(for_statement
-  body: (_)? @loop.inner) @loop.outer
+[
+  (boolean_type)
+  (integral_type)
+  (floating_point_type)
+  (floating_point_type)
+  (void_type)
+] @type.builtin
 
-(enhanced_for_statement
-  body: (_)? @loop.inner) @loop.outer
+; Variables
 
-(while_statement
-  body: (_)? @loop.inner) @loop.outer
+((identifier) @constant
+ (#match? @constant "^_*[A-Z][A-Z\\d_]+$"))
 
-(do_statement
-  body: (_)? @loop.inner) @loop.outer
+(identifier) @variable
 
-(if_statement
-  condition: (_ (parenthesized_expression) @conditional.inner)  @conditional.outer)
+(this) @variable.builtin
 
-(if_statement
-  consequence: (_)? @conditional.inner
-  alternative: (_)? @conditional.inner
-  ) @conditional.outer
+; Literals
 
-(switch_expression
-  body: (_)? @conditional.inner) @conditional.outer
+[
+  (hex_integer_literal)
+  (decimal_integer_literal)
+  (octal_integer_literal)
+  (decimal_floating_point_literal)
+  (hex_floating_point_literal)
+] @number
 
-;; blocks
-(block) @block.outer
+[
+  (character_literal)
+  (string_literal)
+] @string
 
-
-(method_invocation) @call.outer
-(method_invocation
-  arguments: (argument_list . "(" . (_) @_start (_)? @_end . ")"
-  (#make-range! "call.inner" @_start @_end)))
-
-;; parameters
-(formal_parameters
-  "," @_start .
-  (formal_parameter) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
-(formal_parameters
-  . (formal_parameter) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
-
-(argument_list
-  "," @_start .
-  (_) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
-(argument_list
-  . (_) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
+[
+  (true)
+  (false)
+  (null_literal)
+] @constant.builtin
 
 [
   (line_comment)
   (block_comment)
-] @comment.outer
+] @comment
+
+; Keywords
 
 [
-  (decimal_integer_literal)
-  (decimal_floating_point_literal)
-  (hex_integer_literal)
-  (binary_integer_literal)
-  (octal_integer_literal)
-] @number.inner
+  "abstract"
+  "assert"
+  "break"
+  "case"
+  "catch"
+  "class"
+  "continue"
+  "default"
+  "do"
+  "else"
+  "enum"
+  "exports"
+  "extends"
+  "final"
+  "finally"
+  "for"
+  "if"
+  "implements"
+  "import"
+  "instanceof"
+  "interface"
+  "module"
+  "native"
+  "new"
+  "open"
+  "opens"
+  "package"
+  "private"
+  "protected"
+  "provides"
+  "public"
+  "requires"
+  "record"
+  "return"
+  "static"
+  "strictfp"
+  "switch"
+  "synchronized"
+  "throw"
+  "throws"
+  "to"
+  "transient"
+  "transitive"
+  "try"
+  "uses"
+  "volatile"
+  "while"
+  "with"
+] @keyword

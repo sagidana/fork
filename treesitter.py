@@ -109,24 +109,27 @@ class TreeSitter():
         self.parser = Parser()
         query_path = path.join(EDITOR_HOME_PATH, "grammars/{}/highlights.scm")
 
-        if language == 'python':
-            with open(query_path.format("python"),"r") as f: query = f.read()
-            self.query = PYTHON_LANGUAGE.query(query)
-            self.parser.set_language(PYTHON_LANGUAGE)
-        elif language == 'c':
-            with open(query_path.format("c"),"r") as f: query = f.read()
-            self.query = C_LANGUAGE.query(query)
-            self.parser.set_language(C_LANGUAGE)
-        elif language == 'java':
-            with open(query_path.format("java"),"r") as f: query = f.read()
-            self.query = JAVA_LANGUAGE.query(query)
-            self.parser.set_language(JAVA_LANGUAGE)
-        elif language == 'javascript':
-            with open(query_path.format("javascript"),"r") as f: query = f.read()
-            self.query = JAVASCRIPT_LANGUAGE.query(query)
-            self.parser.set_language(JAVASCRIPT_LANGUAGE)
-        else:
-            raise Exception("treesitter not support that language.. :(")
+        try:
+            if language == 'python':
+                with open(query_path.format("python"),"r") as f: query = f.read()
+                self.query = PYTHON_LANGUAGE.query(query)
+                self.parser.set_language(PYTHON_LANGUAGE)
+            elif language == 'c':
+                with open(query_path.format("c"),"r") as f: query = f.read()
+                self.query = C_LANGUAGE.query(query)
+                self.parser.set_language(C_LANGUAGE)
+            elif language == 'java':
+                with open(query_path.format("java"),"r") as f: query = f.read()
+                self.query = JAVA_LANGUAGE.query(query)
+                self.parser.set_language(JAVA_LANGUAGE)
+            elif language == 'javascript':
+                with open(query_path.format("javascript"),"r") as f: query = f.read()
+                self.query = JAVASCRIPT_LANGUAGE.query(query)
+                self.parser.set_language(JAVASCRIPT_LANGUAGE)
+                elog("here..")
+            else:
+                raise Exception("treesitter not support that language.. :(")
+        except Exception as e: elog(f"Exception: {e}")
 
     def resync(self, file_bytes):
         self.tree = self.parser.parse(file_bytes)

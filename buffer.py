@@ -135,37 +135,37 @@ class Buffer():
         elif    self.file_path.endswith('.c') or \
                 self.file_path.endswith('.h'):
             return "c"
-        elif    self.file_path.endswith('.md'):
-            return "markdown"
-        elif    self.file_path.endswith('.php'):
-            return "php"
-        elif    self.file_path.endswith('.go'):
-            return "go"
-        elif    self.file_path.endswith('.html'):
-            return "html"
-        elif    self.file_path.endswith('.css'):
-            return "css"
+        # elif    self.file_path.endswith('.md'):
+            # return "markdown"
+        # elif    self.file_path.endswith('.php'):
+            # return "php"
+        # elif    self.file_path.endswith('.go'):
+            # return "go"
+        # elif    self.file_path.endswith('.html'):
+            # return "html"
+        # elif    self.file_path.endswith('.css'):
+            # return "css"
         elif    self.file_path.endswith('.java'):
             return "java"
         elif    self.file_path.endswith('.js'):
             return "javascript"
-        elif    self.file_path.endswith('.rb'):
-            return "ruby"
-        elif    self.file_path.endswith('.rs'):
-            return "rust"
-        elif    self.file_path.endswith('.sh'):
-            return "sh"
-        elif    self.file_path.endswith('.cpp') or \
-                self.file_path.endswith('.hpp'):
-            return "cpp"
-        elif    self.file_path.endswith('.json'):
-            return "json"
-        elif    self.file_path.endswith('.xml'):
-            # return "xml"  # treesitter not supporting
-            return None
-        elif    self.file_path.endswith('.vim'):
-            # return "vimscript"  # treesitter not supporting
-            return None
+        # elif    self.file_path.endswith('.rb'):
+            # return "ruby"
+        # elif    self.file_path.endswith('.rs'):
+            # return "rust"
+        # elif    self.file_path.endswith('.sh'):
+            # return "sh"
+        # elif    self.file_path.endswith('.cpp') or \
+                # self.file_path.endswith('.hpp'):
+            # return "cpp"
+        # elif    self.file_path.endswith('.json'):
+            # return "json"
+        # elif    self.file_path.endswith('.xml'):
+            # # return "xml"  # treesitter not supporting
+            # return None
+        # elif    self.file_path.endswith('.vim'):
+            # # return "vimscript"  # treesitter not supporting
+            # return None
         else:
             if len(self.lines) == 0: return None
 

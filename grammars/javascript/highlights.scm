@@ -1,117 +1,198 @@
-(function_declaration
-  body: (statement_block)) @function.outer
+; Special identifiers
+;--------------------
+
+([
+    (identifier)
+    (shorthand_property_identifier)
+    (shorthand_property_identifier_pattern)
+ ] @constant
+ (#match? @constant "^[A-Z_][A-Z\\d_]+$"))
+
+
+((identifier) @constructor
+ (#match? @constructor "^[A-Z]"))
+
+((identifier) @variable.builtin
+ (#match? @variable.builtin "^(arguments|module|console|window|document)$")
+ (#is-not? local))
+
+((identifier) @function.builtin
+ (#eq? @function.builtin "require")
+ (#is-not? local))
+
+; Function and method definitions
+;--------------------------------
 
 (function
-  body: (statement_block)) @function.outer
-
+  name: (identifier) @function)
 (function_declaration
-  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
- (#make-range! "function.inner" @_start @_end)))
-
-(function
-  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
- (#make-range! "function.inner" @_start @_end)))
-
-(export_statement
-  (function_declaration) @function.outer) @function.outer.start
-
-(arrow_function
-  body: (_) @function.inner) @function.outer
-
-(arrow_function
-  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
- (#make-range! "function.inner" @_start @_end)))
-
+  name: (identifier) @function)
 (method_definition
-  body: (statement_block)) @function.outer
+  name: (property_identifier) @function.method)
 
-(method_definition
-  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
- (#make-range! "function.inner" @_start @_end)))
+(pair
+  key: (property_identifier) @function.method
+  value: [(function) (arrow_function)])
 
-(class_declaration
-  body: (class_body) @class.inner) @class.outer
+(assignment_expression
+  left: (member_expression
+    property: (property_identifier) @function.method)
+  right: [(function) (arrow_function)])
 
-(export_statement
-  (class_declaration) @class.outer) @class.outer.start
+(variable_declarator
+  name: (identifier) @function
+  value: [(function) (arrow_function)])
 
-(for_in_statement
-  body: (_)? @loop.inner) @loop.outer
+(assignment_expression
+  left: (identifier) @function
+  right: [(function) (arrow_function)])
 
-(for_statement
-  body: (_)? @loop.inner) @loop.outer
+; Function and method calls
+;--------------------------
 
-(while_statement
-  body: (_)? @loop.inner) @loop.outer
-
-(do_statement
-  body: (_)? @loop.inner) @loop.outer
-
-(if_statement
-  consequence: (_)? @conditional.inner
-  alternative: (_)? @conditional.inner) @conditional.outer
-
-(switch_statement
-  body: (_)? @conditional.inner) @conditional.outer
-
-(call_expression) @call.outer
 (call_expression
-  arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
-  (#make-range! "call.inner" @_start @_end)))
+  function: (identifier) @function)
 
-;; blocks
-(_ (statement_block) @block.inner) @block.outer
+(call_expression
+  function: (member_expression
+    property: (property_identifier) @function.method))
 
-;; parameters
-; function ({ x }) ...
-; function ([ x ]) ...
-; function (v = default_value)
-(formal_parameters
-  "," @_start .
-  (_) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
-(formal_parameters
-  . (_) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
+; Variables
+;----------
 
-; If the array/object pattern is the first parameter, treat its elements as the argument list
-(formal_parameters
-  . (_
-    [(object_pattern "," @_start .  (_) @parameter.inner)
-    (array_pattern "," @_start .  (_) @parameter.inner)]
-    )
- (#make-range! "parameter.outer" @_start @parameter.inner))
-(formal_parameters
-  . (_
-    [(object_pattern . (_) @parameter.inner . ","? @_end)
-    (array_pattern . (_) @parameter.inner . ","? @_end)]
-    )
- (#make-range! "parameter.outer" @parameter.inner @_end))
+(identifier) @variable
 
+; Properties
+;-----------
 
-;; arguments
-(arguments
-  "," @_start .
-  (_) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
-(arguments
-  . (_) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
+(property_identifier) @property
 
-;; comment
-(comment) @comment.outer
+; Literals
+;---------
 
-;; regex
-(regex (regex_pattern) @regex.inner) @regex.outer
+(this) @variable.builtin
+(super) @variable.builtin
 
-;; number
-(number) @number.inner
+[
+  (true)
+  (false)
+  (null)
+  (undefined)
+] @constant.builtin
 
-(variable_declarator
- name: (_) @assignment.lhs
- value: (_) @assignment.inner @assignment.rhs) @assignment.outer
+(comment) @comment
 
-(variable_declarator
- name: (_) @assignment.inner)
+[
+  (string)
+  (template_string)
+] @string
+
+(regex) @string.special
+(number) @number
+
+; Tokens
+;-------
+
+(template_substitution
+  "${" @punctuation.special
+  "}" @punctuation.special) @embedded
+
+[
+  "-"
+  "--"
+  "-="
+  "+"
+  "++"
+  "+="
+  "*"
+  "*="
+  "**"
+  "**="
+  "/"
+  "/="
+  "%"
+  "%="
+  "<"
+  "<="
+  "<<"
+  "<<="
+  "="
+  "=="
+  "==="
+  "!"
+  "!="
+  "!=="
+  "=>"
+  ">"
+  ">="
+  ">>"
+  ">>="
+  ">>>"
+  ">>>="
+  "~"
+  "^"
+  "&"
+  "|"
+  "^="
+  "&="
+  "|="
+  "&&"
+  "||"
+  "??"
+  "&&="
+  "||="
+  "??="
+] @operator
+
+[
+  "("
+  ")"
+  "["
+  "]"
+  "{"
+  "}"
+]  @punctuation.bracket
+
+[
+  "as"
+  "async"
+  "await"
+  "break"
+  "case"
+  "catch"
+  "class"
+  "const"
+  "continue"
+  "debugger"
+  "default"
+  "delete"
+  "do"
+  "else"
+  "export"
+  "extends"
+  "finally"
+  "for"
+  "from"
+  "function"
+  "get"
+  "if"
+  "import"
+  "in"
+  "instanceof"
+  "let"
+  "new"
+  "of"
+  "return"
+  "set"
+  "static"
+  "switch"
+  "target"
+  "throw"
+  "try"
+  "typeof"
+  "var"
+  "void"
+  "while"
+  "with"
+  "yield"
+] @keyword
