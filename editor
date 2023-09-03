@@ -987,14 +987,15 @@ class Editor():
             abs_position[0] = window_x + window_cursor_x
             abs_position[1] = window_y + window_cursor_y
 
+            options = self.generate_completion_options()
+            if len(options) == 0: return False
+            if len(options) == 1:
+                self.get_curr_window().insert_string(options[0])
+                return False
 
             completion = Completion(self.screen,
                                     position=abs_position,
-                                    options=[   "option_1",
-                                                "option_2",
-                                                "option_3",
-                                                "option_4",
-                                                "option_5"])
+                                    options=options)
             choise = completion.pop()
             self.get_curr_tab().draw() # need to redraw after completion
 
@@ -1368,6 +1369,32 @@ class Editor():
         # mode.
         self.change_mode(NORMAL)
         return False
+
+    def generate_completion_options(self):
+        options = []
+
+        try:
+            end_x = self.get_curr_window().buffer_cursor[0]
+            end_y = self.get_curr_window().buffer_cursor[1]
+
+            words = re.findall('\w+', self.get_curr_buffer().get_file_stream())
+            if len(words) == 0: return None
+
+            line = self.get_curr_window().get_curr_line()
+            if re.match('\s', line[end_x - 1]):
+                options = words
+            else:
+                ret = self.get_curr_buffer().find_prev_word(end_x, end_y)
+                if not ret: return None
+
+                start_x, start_y = ret
+                curr_word = line[start_x:end_x]
+                for word in words:
+                    if word.startswith(curr_word) and word != curr_word:
+                        options.append(word[len(curr_word):])
+        except Exception as e: elog(f"Exception: {e}")
+
+        return list(set(options))
 
 
 def main():
