@@ -196,44 +196,50 @@ class Window():
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.height, buffer_height)
 
-        for node, style in get_syntax_highlights(   self.buffer.treesitter,
-                                                    g_settings['theme_opt']):
-            start_y = node.start_point[0]
-            start_x = node.start_point[1]
-            end_y = node.end_point[0]
-            end_x = node.end_point[1]
+        try:
+            for node, style in get_syntax_highlights(   self.buffer.treesitter,
+                                                        start_point=(screen_start_y, 0),
+                                                        end_point=(screen_end_y+1, 0)):
+                start_y = node.start_point[0]
+                start_x = node.start_point[1]
+                end_y = node.end_point[0]
+                end_x = node.end_point[1]
 
-            if start_y >= screen_end_y: return
-            if end_y < screen_start_y: continue
+                if start_y >= screen_end_y: return
+                if end_y < screen_start_y: continue
 
-            if start_y == end_y:
+                # node is relevant
+
+                if start_y == end_y:
+                    self._screen_write( start_x,
+                                        start_y - screen_start_y,
+                                        node.text.decode(),
+                                        style)
+                    continue
+
+                # first line
+                string = self.get_line(start_y)[start_x:]
                 self._screen_write( start_x,
                                     start_y - screen_start_y,
-                                    node.text.decode(),
-                                    style)
-                continue
-
-            # first line
-            string = self.get_line(start_y)[start_x:]
-            self._screen_write( start_x,
-                                start_y - screen_start_y,
-                                string,
-                                style)
-
-            # lines in between
-            for y in range(start_y + 1, end_y):
-                string = self.get_line(y)
-                self._screen_write( 0,
-                                    y - screen_start_y,
                                     string,
                                     style)
 
-            # last line
-            string = self.get_line(end_y)[:end_x]
-            self._screen_write( 0,
-                                end_y - screen_start_y,
-                                string,
-                                style)
+                # lines in between
+                for y in range(start_y + 1, end_y):
+                    string = self.get_line(y)
+                    self._screen_write( 0,
+                                        y - screen_start_y,
+                                        string,
+                                        style)
+
+                # last line
+                string = self.get_line(end_y)[:end_x]
+                self._screen_write( 0,
+                                    end_y - screen_start_y,
+                                    string,
+                                    style)
+
+        except Exception as e: elog(f"Exception: {e}")
 
     def _visualize_block(self): pass
 

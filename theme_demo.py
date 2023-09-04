@@ -33,7 +33,7 @@ def walk(node, cb, level=0, nth_child=0):
     for child in node.children:
         walk(child, cb, level + 1, curr_nth_child)
         curr_nth_child += 1
-    
+
 def traverse_tree(tree):
     cursor = tree.walk()
     reached_root = False
@@ -118,7 +118,7 @@ def map_node_to_scope(node, grammar, nth_child=0):
         if re.match(pattern, node.text.decode('utf-8')): 
             return grammar['scope']
         return None
-    
+
     # choose most specific type
     nth_type = f"{_type}:nth-child({nth_child})"
     if nth_type in grammar: 
@@ -142,7 +142,7 @@ def map_node_to_scope(node, grammar, nth_child=0):
             if ret: return ret
 
     if _type not in grammar: return None
-    
+
     # str
     if isinstance(grammar[_type], str): 
         return grammar[_type]
@@ -179,7 +179,7 @@ def highlight_file(file_path):
 
     grammar = get_grammar("grammars/python.json")
     tree = parser.parse(file_bytes)
-    
+
     # set default colors
     default_bg_color = theme['colors']['editor.background']
     default_fg_color = theme['colors']['editor.foreground']
@@ -199,7 +199,7 @@ def highlight_file(file_path):
             sys.stdout.write(BACKGROUND_TRUE_COLOR.format(convert(style['bg'])))
         if 'fg' in style:
             sys.stdout.write(FOREGROUND_TRUE_COLOR.format(convert(style['fg'])))
-            
+
     def get_style(x, y): 
         style = {}
         pos = get_file_pos(x, y)
@@ -217,7 +217,7 @@ def highlight_file(file_path):
         if 'fontStyle' in settings:
             style['font_style'] = settings['fontStyle']
         return style
-    
+
     def update_styles(x, y): return None
 
     def map_styles(node, level, nth_child):
@@ -230,14 +230,13 @@ def highlight_file(file_path):
             return
 
         start_point = node.start_point
-        start_pos = get_file_pos(   start_point[1], 
+        start_pos = get_file_pos(   start_point[1],
                                     start_point[0])
 
         end_point = node.end_point
         end_pos = get_file_pos( end_point[1], 
                                 end_point[0])
 
-        # print(f"{start_pos}:{end_pos}")
         style_map[start_pos:end_pos] = style
 
     walk(tree.root_node, map_styles)

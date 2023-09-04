@@ -1414,11 +1414,15 @@ def main():
         if to_exit: break
 
         k = screen.get_key()
-        elog(f"key {k}")
+        # elog(f"key {k}")
 
     screen.clear()
     screen.move_cursor(0,0)
 
+import cProfile
 
 if __name__ == "__main__":
-    main()
+    with cProfile.Profile() as profile:
+        # ... do something ...
+        main()
+    profile.dump_stats("/tmp/stats.csv")

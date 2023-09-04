@@ -156,10 +156,13 @@ class TreeSitter():
         self.captures = None # reset cache.
         self.tree = new_tree
 
-    def get_captures(self):
-        if not self.captures:
-            self.captures = list(self.query.captures(self.tree.root_node))
-        return self.captures
+    def get_captures(self, node=None, start_point=None, end_point=None):
+        if not node: target_node = self.tree.root_node
+        else: target_node = node
+
+        return list(self.query.captures(target_node,
+                                        start_point=start_point,
+                                        end_point=end_point))
 
 if __name__ == '__main__':
     # with open("editor", "rb") as f: file_bytes = f.read()

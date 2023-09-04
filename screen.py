@@ -65,6 +65,8 @@ CTRL_R_KEY = 18
 BACKSPACE_KEY = 127
 
 
+from functools import lru_cache
+@lru_cache(None)
 def convert(a):
     r, g, b = int(a[1:3], 16), int(a[3:5], 16), int(a[5:7], 16)
     return f"{r};{g};{b}"
@@ -117,14 +119,14 @@ class Screen():
         setraw(self.fd)
 
     def __del__(self):
-        tcsetattr(  self.fd, 
-                    TCSADRAIN, 
+        tcsetattr(  self.fd,
+                    TCSADRAIN,
                     self.old_stdin_settings)
         self._enable_wrap()
 
-    def _write_to_stdout(self, to_write):
+    def _write_to_stdout(self, to_write, to_flush=True):
         stdout.write(to_write)
-        stdout.flush()
+        if to_flush: stdout.flush()
 
     def get_key(self):
         try: return ord(stdin.read(1))
@@ -136,31 +138,32 @@ class Screen():
     def get_width(self):
         return self.width
 
-    def _enable_wrap(self):
-        self._write_to_stdout(WRAP)
+    def _enable_wrap(self, to_flush=True):
+        self._write_to_stdout(WRAP, to_flush)
 
-    def _disable_wrap(self):
-        self._write_to_stdout(NO_WRAP)
+    def _disable_wrap(self, to_flush=True):
+        self._write_to_stdout(NO_WRAP, to_flush)
 
-    def _enable_echo(self):
-        self._write_to_stdout(ECHO)
+    def _enable_echo(self, to_flush=True):
+        self._write_to_stdout(ECHO, to_flush)
 
-    def _disable_echo(self):
-        self._write_to_stdout(NO_ECHO)
+    def _disable_echo(self, to_flush=True):
+        self._write_to_stdout(NO_ECHO, to_flush)
 
-    def _save_cursor(self):
-        self._write_to_stdout(SAVE_CURSOR)
+    def _save_cursor(self, to_flush=True):
+        self._write_to_stdout(SAVE_CURSOR, to_flush)
 
-    def _restore_cursor(self):
-        self._write_to_stdout(RESTORE_CURSOR)
+    def _restore_cursor(self, to_flush=True):
+        self._write_to_stdout(RESTORE_CURSOR, to_flush)
 
     def clear_line(self, y):
-        self._save_cursor()
+        self._save_cursor(to_flush=False)
 
-        self.move_cursor(y, 0)
-        self._write_to_stdout(CLEAR_LINE)
+        self.move_cursor(y, 0, to_flush=False)
+        self._write_to_stdout(CLEAR_LINE, to_flush=False)
 
-        self._restore_cursor()
+        self._restore_cursor(to_flush=False)
+        stdout.flush()
 
     def clear_line_partial(self, y, start_x, end_x):
         empty = " " * (end_x - start_x)
@@ -175,32 +178,34 @@ class Screen():
     def set_cursor_block_blink(self):
         self._write_to_stdout(CURSOR_BLOCK_BLINK)
 
-    def move_cursor(self, y, x):
+    def move_cursor(self, y, x, to_flush=True):
         y += 1; x += 1
         escape = MOVE.format(y, x)
         self._write_to_stdout(escape)
 
-    def _set_style(self, style):
+    def _set_style(self, style, to_flush=True):
         if not style: style = {}
         fg =    style['foreground'] if 'foreground' in style else  \
                 g_settings['theme']['colors']['editor.foreground']
         bg =    style['background'] if 'background' in style else  \
                 g_settings['theme']['colors']['editor.background']
 
-        if fg: self._write_to_stdout(FOREGROUND_TRUE_COLOR.format(convert(fg)))
-        if bg: self._write_to_stdout(BACKGROUND_TRUE_COLOR.format(convert(bg)))
+        if fg: self._write_to_stdout(FOREGROUND_TRUE_COLOR.format(convert(fg)), to_flush=False)
+        if bg: self._write_to_stdout(BACKGROUND_TRUE_COLOR.format(convert(bg)), to_flush=False)
 
         if 'reverse' in style: 
-            self._write_to_stdout(REVERSE)
+            self._write_to_stdout(REVERSE, to_flush=False)
+        if to_flush: stdout.flush()
 
     def write(self, y, x, string, style=None): 
-        self._save_cursor()
+        self._save_cursor(to_flush=False)
 
-        self.move_cursor(y, x)
-        self._set_style(style)
-        self._write_to_stdout(string)
+        self.move_cursor(y, x, to_flush=False)
+        self._set_style(style, to_flush=False)
+        self._write_to_stdout(string, to_flush=False)
 
-        self._restore_cursor()
+        self._restore_cursor(to_flush=False)
+        stdout.flush()
 
 
 if __name__ == '__main__':
