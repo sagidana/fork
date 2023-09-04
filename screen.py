@@ -181,7 +181,7 @@ class Screen():
     def move_cursor(self, y, x, to_flush=True):
         y += 1; x += 1
         escape = MOVE.format(y, x)
-        self._write_to_stdout(escape)
+        self._write_to_stdout(escape, to_flush=to_flush)
 
     def _set_style(self, style, to_flush=True):
         if not style: style = {}
@@ -197,7 +197,7 @@ class Screen():
             self._write_to_stdout(REVERSE, to_flush=False)
         if to_flush: stdout.flush()
 
-    def write(self, y, x, string, style=None): 
+    def write(self, y, x, string, style=None, to_flush=True):
         self._save_cursor(to_flush=False)
 
         self.move_cursor(y, x, to_flush=False)
@@ -205,7 +205,7 @@ class Screen():
         self._write_to_stdout(string, to_flush=False)
 
         self._restore_cursor(to_flush=False)
-        stdout.flush()
+        if to_flush: stdout.flush()
 
 
 if __name__ == '__main__':

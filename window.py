@@ -214,7 +214,8 @@ class Window():
                     self._screen_write( start_x,
                                         start_y - screen_start_y,
                                         node.text.decode(),
-                                        style)
+                                        style,
+                                        to_flush=False)
                     continue
 
                 # first line
@@ -222,7 +223,8 @@ class Window():
                 self._screen_write( start_x,
                                     start_y - screen_start_y,
                                     string,
-                                    style)
+                                    style,
+                                    to_flush=False)
 
                 # lines in between
                 for y in range(start_y + 1, end_y):
@@ -230,14 +232,16 @@ class Window():
                     self._screen_write( 0,
                                         y - screen_start_y,
                                         string,
-                                        style)
+                                        style,
+                                        to_flush=False)
 
                 # last line
                 string = self.get_line(end_y)[:end_x]
                 self._screen_write( 0,
                                     end_y - screen_start_y,
                                     string,
-                                    style)
+                                    style,
+                                    to_flush=False)
 
         except Exception as e: elog(f"Exception: {e}")
 
@@ -370,7 +374,8 @@ class Window():
                 self._screen_write( 0,
                                     y,
                                     line[:x_range],
-                                    style)
+                                    style,
+                                    to_flush=False)
             except Exception as e: elog(f"Exception: {e}")
 
             x_rest = self.content_width - x_range
@@ -378,11 +383,14 @@ class Window():
                 self._screen_write( x_range,
                                     y,
                                     ' '* x_rest,
-                                    style)
+                                    style,
+                                    to_flush=False)
             except Exception as e: elog(f"Exception: {x} {x_range} {e}")
 
         # - on top of thaat draw highlights
         self.syntax_highlight()
+
+        # the rest calls will do implicit flush.
         self.highlight()
         self.visualize()
         self.draw_cursor()
@@ -1121,7 +1129,7 @@ class Window():
                             string,
                             style)
 
-    def _screen_write(self, x, y, string, style):
+    def _screen_write(self, x, y, string, style, to_flush=True):
         try:
             x_margin = self.content_position[0] - self.position[0]
             y_margin = self.content_position[1] - self.position[1]
@@ -1135,6 +1143,7 @@ class Window():
             self.screen.write(  self.content_position[1] + y,
                                 self.content_position[0] + x,
                                 string,
-                                style)
+                                style,
+                                to_flush=to_flush)
         except Exception as e:
             elog(f"Exception: {e}")
