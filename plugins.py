@@ -37,7 +37,7 @@ def ripgrep(search):
 
         cmd = [ "rg",
                 "-g","!tags",
-                "--max-columns","100",
+                "--max-columns","200",
                 "--vimgrep", search]
         p = Popen(cmd, stdout=PIPE, stderr=PIPE)
         output, errors = p.communicate()
