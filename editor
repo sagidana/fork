@@ -1419,10 +1419,11 @@ def main():
     screen.clear()
     screen.move_cursor(0,0)
 
-import cProfile
+# import cProfile
 
 if __name__ == "__main__":
-    with cProfile.Profile() as profile:
+    # with cProfile.Profile() as profile:
         # ... do something ...
-        main()
-    profile.dump_stats("/tmp/stats.csv")
+    main()
+    # profile.dump_stats("/tmp/stats.csv")
+

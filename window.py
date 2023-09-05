@@ -1,12 +1,12 @@
 from log import elog
 
-# from colors import get_curses_color_pair
 from settings import g_settings
 from idr import *
 from buffer import *
 from hooks import *
 from syntax import get_syntax_highlights
 
+from intervaltree import Interval, IntervalTree
 from string import printable
 import time
 import re
@@ -188,11 +188,28 @@ class Window():
                                 string,
                                 style)
 
+    def get_syntax(self):
+        syntax_map = IntervalTree()
+        if not self.buffer.treesitter: return syntax_map
+
+        buffer_height = len(self.buffer.lines) - 1
+
+        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+        screen_end_y = min(screen_start_y + self.height, buffer_height)
+
+        for node, style in get_syntax_highlights(   self.buffer.treesitter,
+                                                    start_point=(screen_start_y, 0),
+                                                    end_point=(screen_end_y+1, 0)):
+            start_pos = self.buffer.get_file_pos(node.start_point[1],node.start_point[0])
+            end_pos = self.buffer.get_file_pos(node.end_point[1],node.end_point[0])
+
+            syntax_map[start_pos:end_pos] = style
+        return syntax_map
+
     def syntax_highlight(self):
         if not self.buffer.treesitter: return # no syntax tree..
 
         buffer_height = len(self.buffer.lines) - 1
-
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.height, buffer_height)
 
@@ -353,6 +370,80 @@ class Window():
             self._screen_clear_line_partial(y, start_x, end_x)
 
     def draw(self):
+        before = self.window_cursor[1]
+        first_line = self.buffer_cursor[1] - before
+        buffer_height = len(self.buffer.lines) - 1
+
+        default_style = {}
+        default_style['background'] = g_settings['theme']['colors']['editor.background']
+        default_style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+
+        syntax_map = self.get_syntax()
+
+        buffer_height = len(self.buffer.lines) - 1
+        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+        screen_end_y = min(screen_start_y + self.height, buffer_height)
+
+        curr_pos = self.buffer.get_file_pos(screen_start_x, screen_start_y)
+        for item in sorted(syntax_map):
+            if item.start > end_pos: break
+
+            if curr_pos < item.start:
+                style = default_style
+
+                _buffer_start_x, _buffer_start_y = self.buffer.get_file_x_y(curr_pos)
+                _buffer_end_x, _buffer_end_y = self.buffer.get_file_x_y(item.begin - 1)
+
+                # write to screen buffer_start -> buffer_end with default style
+
+                curr_pos = item.begin
+                
+            style = item.data
+
+            _buffer_start_x, _buffer_start_y = self.buffer.get_file_x_y(curr_pos)
+            _buffer_end_x, _buffer_end_y = self.buffer.get_file_x_y(item.end)
+            
+            # write to screen buffer_start -> buffer_end with syntax
+
+            curr_pos = item.end + 1
+
+            # elog(f"syntax item: {item.begin}->{item.end}")
+            # elog(f"syntax item: {dir(item)}")
+
+        # for y in range(self.content_height):
+            # buffer_y = first_line + y
+
+            # if buffer_y > buffer_height:
+                # line = ""
+            # else:
+                # line = self.buffer.lines[first_line + y]
+
+            # x_range = min(self.content_width, max(0, len(line) - 1))
+            # try:
+                # self._screen_write( 0,
+                                    # y,
+                                    # line[:x_range],
+                                    # style,
+                                    # to_flush=False)
+            # except Exception as e: elog(f"Exception: {e}")
+
+            # x_rest = self.content_width - x_range
+            # try:
+                # self._screen_write( x_range,
+                                    # y,
+                                    # ' '* x_rest,
+                                    # style,
+                                    # to_flush=False)
+            # except Exception as e: elog(f"Exception: {x} {x_range} {e}")
+
+        # # - on top of thaat draw highlights
+        # self.syntax_highlight()
+
+        # the rest calls will do implicit flush.
+        self.highlight()
+        self.visualize()
+        self.draw_cursor()
+    def _draw(self):
         before = self.window_cursor[1]
         first_line = self.buffer_cursor[1] - before
         buffer_height = len(self.buffer.lines) - 1
