@@ -1231,6 +1231,7 @@ class Window():
                 space_for = self.width - x_margin - x
                 string  = string[:space_for]
 
+            string = string.replace('\t', '    ')
             self.screen.write(  self.content_position[1] + y,
                                 self.content_position[0] + x,
                                 string,
