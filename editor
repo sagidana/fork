@@ -1064,6 +1064,7 @@ class Editor():
         self.screen.set_cursor_block_blink() # default for normal mode
 
         self.height, self.width = screen.get_height(), screen.get_width()
+        Hooks.register(ON_RESIZE, self.screen_resize_handler)
 
         self.initialize_registers()
         self._action = 'f' # options are 'f','F','t','T'
@@ -1140,13 +1141,8 @@ class Editor():
         buffer = self.get_or_create_buffer(file)
         tab = self._create_tab(buffer)
 
-    def screen_resize_handler(self, signum, frame):
-        # curses.endwin()
-        # curses.initscr()
-        # self.height, self.width = self.stdscr.getmaxyx()
-        self.height, self.width = 0,0 # TODO
-
-        Hooks.execute(ON_RESIZE, (self.width, self.height))
+    def screen_resize_handler(self, size):
+        self.height, self.width = size
 
     def _quit_command(self):
         tab = self.get_curr_tab()
