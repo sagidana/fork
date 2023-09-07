@@ -212,11 +212,12 @@ class Window():
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.height, buffer_height)
+        screen_end_x = max(self.screen.width, len(self.buffer.lines[screen_end_y]) - 1)
 
         try:
             for node, style in get_syntax_highlights(   self.buffer.treesitter,
                                                         start_point=(screen_start_y, 0),
-                                                        end_point=(screen_end_y+1, 0)):
+                                                        end_point=(screen_end_y, screen_end_x)):
                 start_y = node.start_point[0]
                 start_x = node.start_point[1]
                 end_y = node.end_point[0]
@@ -369,80 +370,107 @@ class Window():
             end_x = self.width - 1
             self._screen_clear_line_partial(y, start_x, end_x)
 
+    def _get_scope_text(self, start_x, start_y, end_x, end_y):
+        if start_y == end_y:
+            return self.buffer.lines[start_y][start_x:end_x]
+
+        # first line
+        text = self.buffers.lines[start_y][start_x:]
+
+        # middle
+        curr_line_number = start_y + 1
+        while curr_line_number < end_y:
+            text += self.buffer.lines[curr_line_number]
+            curr_line_number += 1
+
+        # last line
+        text += self.buffers.lines[end_y][:end_x]
+
+        return text
+
     def draw(self):
-        before = self.window_cursor[1]
-        first_line = self.buffer_cursor[1] - before
-        buffer_height = len(self.buffer.lines) - 1
+        debug = False
+        try:
+            before = self.window_cursor[1]
+            first_line = self.buffer_cursor[1] - before
+            buffer_height = len(self.buffer.lines) - 1
 
-        default_style = {}
-        default_style['background'] = g_settings['theme']['colors']['editor.background']
-        default_style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+            default_style = {}
+            default_style['background'] = g_settings['theme']['colors']['editor.background']
+            default_style['foreground'] = g_settings['theme']['colors']['editor.foreground']
 
-        syntax_map = self.get_syntax()
+            syntax_map = self.get_syntax()
 
-        buffer_height = len(self.buffer.lines) - 1
-        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
-        screen_end_y = min(screen_start_y + self.height, buffer_height)
+            for y in range(self.content_height):
+                x = 0
 
-        curr_pos = self.buffer.get_file_pos(screen_start_x, screen_start_y)
-        for item in sorted(syntax_map):
-            if item.start > end_pos: break
+                buffer_y = first_line + y
+                buffer_start_x = 0
+                if buffer_y > buffer_height:
+                    self._screen_write( x, y,
+                                        " "*(self.content_width - 1),
+                                        default_style,
+                                        to_flush=debug)
+                    continue
+                line = self.get_line(buffer_y)
+                buffer_end_x = max(0, len(line) - 1)
 
-            if curr_pos < item.start:
-                style = default_style
+                _start_pos = self.buffer.get_file_pos(buffer_start_x, buffer_y)
+                _end_pos = self.buffer.get_file_pos(buffer_end_x, buffer_y)
 
-                _buffer_start_x, _buffer_start_y = self.buffer.get_file_x_y(curr_pos)
-                _buffer_end_x, _buffer_end_y = self.buffer.get_file_x_y(item.begin - 1)
+                syntax = sorted(list(syntax_map[_start_pos:_end_pos]))
 
-                # write to screen buffer_start -> buffer_end with default style
+                if len(syntax) == 0:
+                    self._screen_write( x, y,
+                                        line[:-1],
+                                        default_style,
+                                        to_flush=debug)
+                    x += len(line) - 1
+                    if x < self.screen.width:
+                        x_rest = self.content_width - x - 1
+                        self._screen_write( x, y,
+                                            " "*x_rest,
+                                            default_style,
+                                            to_flush=debug)
+                    continue
 
-                curr_pos = item.begin
-                
-            style = item.data
+                while len(syntax) > 0:
+                    curr_syntax = syntax.pop(0)
+                    syntax_start_x = curr_syntax.begin - _start_pos
+                    syntax_end_x = curr_syntax.end - _start_pos
 
-            _buffer_start_x, _buffer_start_y = self.buffer.get_file_x_y(curr_pos)
-            _buffer_end_x, _buffer_end_y = self.buffer.get_file_x_y(item.end)
-            
-            # write to screen buffer_start -> buffer_end with syntax
+                    if x < syntax_start_x:
+                        self._screen_write( x, y,
+                                            line[x:syntax_start_x],
+                                            default_style,
+                                            to_flush=debug)
+                    x = syntax_start_x
 
-            curr_pos = item.end + 1
+                    self._screen_write( x, y,
+                                        line[syntax_start_x:syntax_end_x],
+                                        curr_syntax.data,
+                                        to_flush=debug)
+                    x = syntax_end_x
+                if x < buffer_end_x:
+                    self._screen_write( x, y,
+                                        line[x:buffer_end_x],
+                                        default_style,
+                                        to_flush=debug)
+                    x = buffer_end_x
 
-            # elog(f"syntax item: {item.begin}->{item.end}")
-            # elog(f"syntax item: {dir(item)}")
+                if x < self.screen.width:
+                    x_rest = self.content_width - x - 1
+                    self._screen_write( x, y,
+                                        " "*x_rest,
+                                        default_style,
+                                        to_flush=debug)
 
-        # for y in range(self.content_height):
-            # buffer_y = first_line + y
+            # the rest calls will do implicit flush.
+            self.highlight()
+            self.visualize()
+            self.draw_cursor()
+        except Exception as e: elog(f"Exception: {e}")
 
-            # if buffer_y > buffer_height:
-                # line = ""
-            # else:
-                # line = self.buffer.lines[first_line + y]
-
-            # x_range = min(self.content_width, max(0, len(line) - 1))
-            # try:
-                # self._screen_write( 0,
-                                    # y,
-                                    # line[:x_range],
-                                    # style,
-                                    # to_flush=False)
-            # except Exception as e: elog(f"Exception: {e}")
-
-            # x_rest = self.content_width - x_range
-            # try:
-                # self._screen_write( x_range,
-                                    # y,
-                                    # ' '* x_rest,
-                                    # style,
-                                    # to_flush=False)
-            # except Exception as e: elog(f"Exception: {x} {x_range} {e}")
-
-        # # - on top of thaat draw highlights
-        # self.syntax_highlight()
-
-        # the rest calls will do implicit flush.
-        self.highlight()
-        self.visualize()
-        self.draw_cursor()
     def _draw(self):
         before = self.window_cursor[1]
         first_line = self.buffer_cursor[1] - before
@@ -453,6 +481,8 @@ class Window():
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
 
         for y in range(self.content_height):
+            # time.sleep(0.02)
+            # self.screen.flush()
             buffer_y = first_line + y
 
             if buffer_y > buffer_height:

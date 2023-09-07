@@ -197,6 +197,9 @@ class Screen():
             self._write_to_stdout(REVERSE, to_flush=False)
         if to_flush: stdout.flush()
 
+    def flush(self):
+        stdout.flush()
+
     def write(self, y, x, string, style=None, to_flush=True):
         self._save_cursor(to_flush=False)
 
