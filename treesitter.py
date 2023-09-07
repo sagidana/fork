@@ -44,16 +44,16 @@ GO_LANGUAGE = Language(         path.join(EDITOR_HOME_PATH, 'grammars/tree-sitte
 HTML_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'html')
 JAVA_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'java')
 JAVASCRIPT_LANGUAGE = Language( path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'javascript')
-MARKDOWN_LANGUAGE = Language(   path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'markdown')
+# MARKDOWN_LANGUAGE = Language(   path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'markdown')
 PHP_LANGUAGE = Language(        path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'php')
 RUBY_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'ruby')
 RUST_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'rust')
-MAKE_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'make')
+# MAKE_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'make')
 CSHARP_LANGUAGE = Language(     path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'c_sharp')
-ELISP_LANGUAGE = Language(      path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'elisp')
-LUA_LANGUAGE = Language(        path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'lua')
-YAML_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'yaml')
-R_LANGUAGE = Language(          path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'r')
+# ELISP_LANGUAGE = Language(      path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'elisp')
+# LUA_LANGUAGE = Language(        path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'lua')
+# YAML_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'yaml')
+# R_LANGUAGE = Language(          path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'r')
 JSON_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'json')
 
 def walk(node, cb, level=0, nth_child=0):
@@ -165,6 +165,59 @@ class TreeSitter():
                                         end_point=end_point))
 
 if __name__ == '__main__':
+
+    Language.build_library(
+        # Store the library in the `build` directory
+        'grammars/tree-sitter-lib/my-languages.so',
+
+        # do into vendor/:
+        # git clone https://github.com/tree-sitter/tree-sitter-python
+        # git clone https://github.com/tree-sitter/tree-sitter-bash
+        # git clone https://github.com/tree-sitter/tree-sitter-c
+        # git clone https://github.com/tree-sitter/tree-sitter-cpp
+        # git clone https://github.com/tree-sitter/tree-sitter-css
+        # git clone https://github.com/tree-sitter/tree-sitter-go
+        # git clone https://github.com/tree-sitter/tree-sitter-html
+        # git clone https://github.com/tree-sitter/tree-sitter-java
+        # git clone https://github.com/tree-sitter/tree-sitter-javascript
+        # git clone https://github.com/tree-sitter/tree-sitter-markdown
+        # git clone https://github.com/tree-sitter/tree-sitter-php
+        # git clone https://github.com/tree-sitter/tree-sitter-ruby
+        # git clone https://github.com/tree-sitter/tree-sitter-rust
+        # git clone https://github.com/tree-sitter/tree-sitter-make
+        # git clone https://github.com/tree-sitter/tree-sitter-c-sharp
+        # git clone https://github.com/tree-sitter/tree-sitter-elisp
+        # git clone https://github.com/tree-sitter/tree-sitter-lua
+        # git clone https://github.com/tree-sitter/tree-sitter-yaml
+        # git clone https://github.com/tree-sitter/tree-sitter-r
+        # git clone https://github.com/tree-sitter/tree-sitter-json
+
+        # Include one or more languages
+
+        [
+            'vendor/tree-sitter-python',
+            'vendor/tree-sitter-bash',
+            'vendor/tree-sitter-c',
+            'vendor/tree-sitter-cpp',
+            'vendor/tree-sitter-css',
+            'vendor/tree-sitter-go',
+            'vendor/tree-sitter-html',
+            'vendor/tree-sitter-java',
+            'vendor/tree-sitter-javascript',
+            # 'vendor/tree-sitter-markdown',
+            'vendor/tree-sitter-php',
+            'vendor/tree-sitter-ruby',
+            'vendor/tree-sitter-rust',
+            # 'vendor/tree-sitter-make',
+            'vendor/tree-sitter-c-sharp',
+            # 'vendor/tree-sitter-elisp',
+            # 'vendor/tree-sitter-lua',
+            # 'vendor/tree-sitter-yaml',
+            # 'vendor/tree-sitter-r',
+            'vendor/tree-sitter-json',
+        ]
+    )
+
     # with open("editor", "rb") as f: file_bytes = f.read()
 
     # ts = TreeSitter(file_bytes)
@@ -172,23 +225,23 @@ if __name__ == '__main__':
     # for c in captures:
         # print(c)
 
-    print(PYTHON_LANGUAGE)
-    print(BASH_LANGUAGE)
-    print(C_LANGUAGE)
-    print(CPP_LANGUAGE)
-    print(CSS_LANGUAGE)
-    print(GO_LANGUAGE)
-    print(HTML_LANGUAGE)
-    print(JAVA_LANGUAGE)
-    print(JAVASCRIPT_LANGUAGE)
-    print(MARKDOWN_LANGUAGE)
-    print(PHP_LANGUAGE)
-    print(RUBY_LANGUAGE)
-    print(RUST_LANGUAGE)
-    print(MAKE_LANGUAGE)
-    print(CSHARP_LANGUAGE)
-    print(ELISP_LANGUAGE)
-    print(LUA_LANGUAGE)
-    print(YAML_LANGUAGE)
-    print(R_LANGUAGE)
-    print(JSON_LANGUAGE)
+    # print(PYTHON_LANGUAGE)
+    # print(BASH_LANGUAGE)
+    # print(C_LANGUAGE)
+    # print(CPP_LANGUAGE)
+    # print(CSS_LANGUAGE)
+    # print(GO_LANGUAGE)
+    # print(HTML_LANGUAGE)
+    # print(JAVA_LANGUAGE)
+    # print(JAVASCRIPT_LANGUAGE)
+    # print(MARKDOWN_LANGUAGE)
+    # print(PHP_LANGUAGE)
+    # print(RUBY_LANGUAGE)
+    # print(RUST_LANGUAGE)
+    # print(MAKE_LANGUAGE)
+    # print(CSHARP_LANGUAGE)
+    # print(ELISP_LANGUAGE)
+    # print(LUA_LANGUAGE)
+    # print(YAML_LANGUAGE)
+    # print(R_LANGUAGE)
+    # print(JSON_LANGUAGE)

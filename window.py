@@ -361,7 +361,8 @@ class Window():
                 self._screen_write_raw( 0,
                                         y,
                                         lineno,
-                                        style)
+                                        style,
+                                        to_flush=False)
             except Exception as e: elog(f"Exception: {e}")
 
     def clear(self):
@@ -1236,7 +1237,7 @@ class Window():
                                         self.content_position[0] + start_x,
                                         self.content_position[0] + end_x)
 
-    def _screen_write_raw(self, x, y, string, style):
+    def _screen_write_raw(self, x, y, string, style, to_flush=True):
         if x >= self.width: return
         if y >= self.height: return
 
@@ -1248,7 +1249,8 @@ class Window():
         self.screen.write(  self.position[1] + y,
                             self.position[0] + x,
                             string,
-                            style)
+                            style,
+                            to_flush=to_flush)
 
     def _screen_write(self, x, y, string, style, to_flush=True):
         try:
