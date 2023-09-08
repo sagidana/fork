@@ -246,6 +246,7 @@ class Buffer():
         self.visual_mode = mode
         self.visual_start_point = [x, y]
         self.visual_current_point = [x, y]
+        self._raise_event(ON_BUFFER_CHANGE, None)
 
     def visual_set_scope(self, start_x, start_y, end_x, end_y):
         self.visual_start_point[0] = start_x

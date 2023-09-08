@@ -336,7 +336,7 @@ class Window():
             string = self.get_line(y)
             self._screen_write( 0,
                                 y - screen_start_y,
-                                string,
+                                string[:-1],
                                 {'reverse': None})
 
     def visualize(self):
@@ -434,7 +434,7 @@ class Window():
                                         to_flush=debug)
                     x += len(line) - 1
                     if x < self.screen.width:
-                        x_rest = self.content_width - x - 1
+                        x_rest = self.content_width - x
                         self._screen_write( x, y,
                                             " "*x_rest,
                                             default_style,
@@ -466,7 +466,7 @@ class Window():
                     x = buffer_end_x
 
                 if x < self.screen.width:
-                    x_rest = self.content_width - x - 1
+                    x_rest = self.content_width - x
                     self._screen_write( x, y,
                                         " "*x_rest,
                                         default_style,
