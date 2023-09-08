@@ -557,6 +557,15 @@ class Editor():
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
         def yank_object_map(scope):
             start_x, start_y, end_x, end_y = scope
+            text = self.get_curr_buffer().get_scope_text(   start_x,
+                                                            start_y,
+                                                            end_x,
+                                                            end_y)
+            if len(text) == 0: return False
+            data = {}
+            data['meta'] = 'char'
+            data['data'] = text
+            self.registers['"'] = data
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_map)
         def indent_right_object_map(scope):
@@ -854,7 +863,12 @@ class Editor():
                 if data['meta'] == 'line':
                     line = data['data']
                     self.get_curr_window().insert_line_after(line)
-                elif data['meta'] == 'char': pass
+                elif data['meta'] == 'char':
+                    data = data['data']
+                    if len(data) > 0:
+                        if len(data) == 1:
+                            self.get_curr_window().insert_string(data[0])
+                        else: pass
                 elif data['meta'] == 'block': pass
             self.change_end()
             return False
@@ -1061,6 +1075,147 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL][ord('d')] = d_map
+        def y_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+
+            start_x, start_y, end_x, end_y = scope
+            text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+            if len(text) == 0: return False
+            data = {}
+            data['meta'] = 'char'
+            data['data'] = text
+            self.registers['"'] = data
+
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL][ord('y')] = y_map
+        def j_map(self):
+            self.get_curr_window()._move_down()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('j')] = j_map
+        def k_map(self):
+            self.get_curr_window()._move_up()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('k')] = k_map
+        def l_map(self):
+            self.get_curr_window()._move_right()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('l')] = l_map
+        def h_map(self):
+            self.get_curr_window()._move_left()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('h')] = h_map
+        def w_map(self):
+            self.get_curr_window().move_word_forward()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('w')] = w_map
+        def b_map(self):
+            self.get_curr_window().move_word_backward()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('b')] = b_map
+        def f_map(self):
+            try:
+                char = self.get_curr_window().find()
+                self._action = 'f'
+                self._char = char
+
+                x = self.get_curr_window().buffer_cursor[0]
+                y = self.get_curr_window().buffer_cursor[1]
+                self.get_curr_buffer().visual_set_current(x, y)
+                self.draw()
+            except Exception as e: elog(f"Exception: {e}")
+            return False
+        self.maps[VISUAL][ord('f')] = f_map
+        def F_map(self):
+            char = self.get_curr_window().find_back()
+            self._action = 'F'
+            self._char = char
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('F')] = F_map
+        def t_map(self):
+            char = self.get_curr_window().till()
+            self._action = 't'
+            self._char = char
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('t')] = t_map
+        def T_map(self):
+            char = self.get_curr_window().till_back()
+            self._action = 'T'
+            self._char = char
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('T')] = T_map
+        def semicolon_map(self):
+            if self._action == 'f':
+                self.get_curr_window()._find(self._char)
+            if self._action == 'F':
+                self.get_curr_window()._find_back(self._char)
+            if self._action == 't':
+                self.get_curr_window()._till(self._char)
+            if self._action == 'T':
+                self.get_curr_window()._till_back(self._char)
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord(';')] = semicolon_map
+        def comma_map(self):
+            if self._action == 'f':
+                self.get_curr_window()._find_back(self._char)
+            if self._action == 'F':
+                self.get_curr_window()._find(self._char)
+            if self._action == 't':
+                self.get_curr_window()._till_back(self._char)
+            if self._action == 'T':
+                self.get_curr_window()._till(self._char)
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord(',')] = comma_map
 
     def initialize_maps(self):
         self._initialize_normal_maps()

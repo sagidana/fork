@@ -287,6 +287,7 @@ class Buffer():
         self.visual_mode = None
         self.visual_start_point = None
         self.visual_current_point = None
+        self._raise_event(ON_BUFFER_CHANGE, None)
 
     def _insert_char_to_line(self, x, y, char):
         try:

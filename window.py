@@ -698,7 +698,7 @@ class Window():
     def is_visible(self, buf_x, buf_y):
         return True # TODO:
 
-    def move_cursor_to_buf_location(self, buf_x, buf_y):
+    def move_cursor_to_buf_location(self, buf_x, buf_y, to_draw=True):
         if self.is_visible(buf_x, buf_y):
             scrolled = False
             if self.buffer_cursor[1] > buf_y:
@@ -720,7 +720,7 @@ class Window():
                 for i in range(x_diff): self._move_right()
 
             if scrolled:
-                self.draw()
+                if to_draw: self.draw()
             else:
                 self.draw_cursor()
             # self.window_cursor[0] = buf_x
@@ -1049,7 +1049,7 @@ class Window():
                         end_y):
         x, y = self.buffer.remove_scope(start_x, start_y, end_x, end_y)
 
-        self.move_cursor_to_buf_location(x, y)
+        self.move_cursor_to_buf_location(x, y, to_draw=False)
         self.draw()
 
     def new_line_after(self):
@@ -1097,13 +1097,14 @@ class Window():
         self._remove_char()
         self.draw()
 
-    def _insert_char(self, char):
+    def _insert_char(self, char, to_draw=True):
         self.buffer.insert_char(    self.buffer_cursor[0],
                                     self.buffer_cursor[1],
                                     char)
         if char == '\n' or char == '\r':
             ret = self._move_down()
-            if ret and ret[1]: self.draw() # scrolled
+            if ret and ret[1]:
+                if to_draw: self.draw() # scrolled
             self._move_line_begin()
         else:
             self._move_right()
@@ -1114,7 +1115,7 @@ class Window():
 
     def insert_string(self, string):
         for c in string:
-            self._insert_char(c)
+            self._insert_char(c, to_draw=False)
         self.draw()
 
     def insert_line_before(self, line):
