@@ -109,7 +109,6 @@ class Editor():
             self.get_curr_tab().vsplit()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('v')] = ctrl_w_v_map
-
         def ctrl_w_h_map(self):
             self.get_curr_tab().move_left_window()
             return False
@@ -130,12 +129,10 @@ class Editor():
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('l')] = ctrl_w_l_map
         self.maps[NORMAL][CTRL_W_KEY][CTRL_L_KEY] = ctrl_w_l_map
-
         def ctrl_w_w_map(self):
             self.get_curr_tab().zoom_toggle()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('w')] = ctrl_w_w_map
-
         def ctrl_w_t_map(self):
             self._create_tab(self.get_curr_buffer())
             return False
@@ -733,6 +730,36 @@ class Editor():
             self._char = char
             return False
         self.maps[NORMAL][ord('T')] = T_map
+        def hash_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_buffer().inner_word(x, y)
+            pattern = self.get_curr_buffer().get_scope_text(scope[0],
+                                                            scope[1],
+                                                            scope[2],
+                                                            scope[3])
+            if len(pattern) == 0: return False
+            pattern = pattern[0]
+            self.registers['/'] = pattern
+            self._search_forward = False
+            self._on_search(x, y, pattern, self._search_forward)
+            return False
+        self.maps[NORMAL][ord('#')] = hash_map
+        def asterisk_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_buffer().inner_word(x, y)
+            pattern = self.get_curr_buffer().get_scope_text(scope[0],
+                                                            scope[1],
+                                                            scope[2],
+                                                            scope[3])
+            if len(pattern) == 0: return False
+            pattern = pattern[0]
+            self.registers['/'] = pattern
+            self._search_forward = True
+            self._on_search(x, y, pattern, self._search_forward)
+            return False
+        self.maps[NORMAL][ord('*')] = asterisk_map
         def H_map(self):
             self.get_curr_window().add_jump()
             self.get_curr_window().move_begin_visible()

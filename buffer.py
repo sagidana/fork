@@ -463,6 +463,49 @@ class Buffer():
 
         return start_x, start_y
 
+    def get_scope_text( self,
+                        start_x,
+                        start_y,
+                        end_x,
+                        end_y):
+        text = []
+        if start_y > len(self.lines) - 1: return text
+        if end_y > len(self.lines) - 1: return text
+
+        # switch
+        if  (start_y > end_y) or \
+            (start_y == end_y and start_x > end_x):
+            tmp_y, tmp_x, = start_y, start_x
+            start_y, start_x = end_y, end_x
+            end_y, end_x = tmp_y, tmp_x
+
+        # one line
+        if start_y == end_y:
+            if start_x > end_x: return text
+            line = self.lines[start_y]
+            if end_x > len(line) + 1: return text
+            text.append(line[start_x:end_x+1])
+            return text
+
+        # multiple lines
+
+        # first_line
+        line = self.lines[start_y]
+        line = line[start_x:]
+        text.append(line)
+
+        # middle
+        for y in range((end_y - start_y) - 1):
+            line = self.lines[start_y + y + 1]
+            text.append(line)
+
+        # last_line
+        line = self.lines[end_y]
+        line = line[:end_x+1]
+        text.append(line)
+
+        return text
+
     def _change(self, change, undo=True):
         lines_for_deletion = []
         lines_for_insertion = {}
