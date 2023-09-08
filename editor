@@ -1169,7 +1169,9 @@ class Editor():
         tab = self._create_tab(buffer)
 
     def screen_resize_handler(self, size):
-        self.height, self.width = size
+        self.width, self.height = size
+        self.get_curr_tab().resize(self.width, self.height)
+        self.get_curr_tab().draw()
 
     def _quit_command(self):
         tab = self.get_curr_tab()

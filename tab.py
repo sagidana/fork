@@ -17,12 +17,6 @@ class Tab():
             if event in self.events:
                 for cb in self.events[event]: cb(self)
 
-    def on_resize_callbak(self, size):
-        self.width = size[0]
-        self.height = size[1]
-
-        self._adjust_sizes()
-
     def __init__(   self,
                     screen,
                     width,
@@ -48,7 +42,6 @@ class Tab():
         self.add_window(window)
 
         self.events = {}
-        Hooks.register(ON_RESIZE, self.on_resize_callbak)
 
     def register_events(self, handlers):
         for event in handlers:
@@ -220,6 +213,12 @@ class Tab():
             if self._windows_distance(curr, window) < self._windows_distance(found, window):
                 found = curr
         return found
+
+    def resize(self, width, height):
+        self.width = width
+        self.height = height
+
+        self._adjust_sizes()
 
     def set_curr_window(self, index):
         self.curr_window_index = index

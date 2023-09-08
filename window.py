@@ -35,6 +35,10 @@ class Window():
         self.move_cursor_to_buf_location(orig_x, orig_y)
         self.draw()
 
+    def on_buffer_change_callback(self, priv):
+        # TODO: update cursor pos if needed
+        self.draw()
+
     def __init__(   self,
                     screen,
                     width,
@@ -52,6 +56,8 @@ class Window():
         self.buffer = buffer
         handlers = {}
         handlers[ON_BUFFER_RELOAD] = self.on_buffer_reload_callback
+        self.buffer.register_events(handlers)
+        handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
         self.buffer.register_events(handlers)
 
         self.set_lines_margin()
