@@ -410,6 +410,8 @@ class Window():
 
             for y in range(self.content_height):
                 x = 0
+                # time.sleep(0.1)
+                # self.screen.flush()
 
                 buffer_y = first_line + y
                 buffer_start_x = 0

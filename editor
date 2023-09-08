@@ -849,8 +849,9 @@ class Editor():
             data = self.registers['"']
             if data:
                 if data['meta'] == 'line':
-                    line = data['data']
-                    self.get_curr_window().insert_line_before(line)
+                    lines = data['data']
+                    for line in reversed(lines):
+                        self.get_curr_window().insert_line_before(line)
                 elif data['meta'] == 'char': pass
                 elif data['meta'] == 'block': pass
             self.change_end()
@@ -861,8 +862,9 @@ class Editor():
             data = self.registers['"']
             if data:
                 if data['meta'] == 'line':
-                    line = data['data']
-                    self.get_curr_window().insert_line_after(line)
+                    lines = data['data']
+                    for line in lines:
+                        self.get_curr_window().insert_line_after(line)
                 elif data['meta'] == 'char':
                     data = data['data']
                     if len(data) > 0:
@@ -1049,8 +1051,71 @@ class Editor():
         self._initialize_insert_ctrl_maps()
 
     def _initialize_visual_line_maps(self):
-        # TODO
-        pass
+        def d_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            self.change_begin()
+
+            start_x, start_y, end_x, end_y = scope
+
+            for y in reversed(range(start_y, end_y + 1)):
+                self.get_curr_window().remove_line_at(y)
+            # self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+
+            self.change_end()
+
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_LINE][ord('d')] = d_map
+        def y_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+
+            lines = []
+            for y in range(start_y, end_y + 1):
+                lines.append(self.get_curr_buffer().lines[y])
+            if len(lines) == 0: return False
+            data = {}
+            data['meta'] = 'line'
+            data['data'] = lines
+            self.registers['"'] = data
+
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_LINE][ord('y')] = y_map
+        def j_map(self):
+            self.get_curr_window()._move_down()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_LINE][ord('j')] = j_map
+        def k_map(self):
+            self.get_curr_window()._move_up()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_LINE][ord('k')] = k_map
+        def l_map(self):
+            self.get_curr_window()._move_right()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_LINE][ord('l')] = l_map
+        def h_map(self):
+            self.get_curr_window()._move_left()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_LINE][ord('h')] = h_map
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):
