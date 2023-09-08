@@ -298,6 +298,14 @@ class Buffer():
             return True
         except: return False
 
+    def _insert_string_to_line(self, x, y, string):
+        try:
+            line = self.lines[y]
+            line = line[:x] + string + line[x:]
+            self.lines[y] = line
+            return True
+        except: return False
+
     def _split_line(self, x, y):
         line = self.lines[y]
         first = line[:x] + '\n'
@@ -341,6 +349,52 @@ class Buffer():
                     }
 
         self._raise_event(ON_BUFFER_CHANGE, change)
+
+    # CORE: change
+    def insert_string(self, x, y, string):
+        start_byte = self.get_file_pos(x, y)
+        end_byte = start_byte + len(string)
+
+        if '\n' not in string and '\r' not in string:
+            self._insert_string_to_line(x, y, string)
+            end_x = x + len(string)
+            end_y = y
+            change = {
+                    'start_byte': start_byte,
+                    'old_end_byte': start_byte,
+                    'new_end_byte': end_byte,
+                    'start_point': (y, x),
+                    'old_end_point': (y, x),
+                    'new_end_point': (end_y, end_x),
+                    }
+        else:
+            # raise Exception("insert string does not support new lines")
+            end_x = x
+            end_y = y
+            while string.find('\n') != -1:
+                to_insert = string[:string.find('\n')]
+                self._insert_string_to_line(end_x, end_y, to_insert)
+                end_x += len(to_insert)
+                self._split_line(end_x, end_y)
+                end_y += 1
+                end_x = 0
+                string = string[string.find('\n') + 1:]
+
+            if len(string) > 0:
+                self._insert_string_to_line(end_x, end_y, string)
+                end_x += len(string)
+
+            change = {
+                    'start_byte': start_byte,
+                    'old_end_byte': start_byte,
+                    'new_end_byte': end_byte,
+                    'start_point': (y, x),
+                    'old_end_point': (y, x),
+                    'new_end_point': (end_y, end_x),
+                    }
+
+        self._raise_event(ON_BUFFER_CHANGE, change)
+        return end_x, end_y
 
     # CORE: change
     def insert_char(self, x, y, char):

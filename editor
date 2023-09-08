@@ -585,7 +585,7 @@ class Editor():
 
         def yy_map(self):
             data = {}
-            data["data"] = self.get_curr_window().get_curr_line()
+            data["data"] = [self.get_curr_window().get_curr_line()]
             data["meta"] = "line" # to let the paste know the data is entire line.
             self.registers['"'] = data
             return False
@@ -852,7 +852,10 @@ class Editor():
                     lines = data['data']
                     for line in reversed(lines):
                         self.get_curr_window().insert_line_before(line)
-                elif data['meta'] == 'char': pass
+                elif data['meta'] == 'char':
+                    lines = data['data']
+                    string = '\n'.join(lines)
+                    self.get_curr_window().insert_string(string)
                 elif data['meta'] == 'block': pass
             self.change_end()
             return False
@@ -866,11 +869,9 @@ class Editor():
                     for line in lines:
                         self.get_curr_window().insert_line_after(line)
                 elif data['meta'] == 'char':
-                    data = data['data']
-                    if len(data) > 0:
-                        if len(data) == 1:
-                            self.get_curr_window().insert_string(data[0])
-                        else: pass
+                    lines = data['data']
+                    string = '\n'.join(lines)
+                    self.get_curr_window().insert_string(string)
                 elif data['meta'] == 'block': pass
             self.change_end()
             return False

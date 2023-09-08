@@ -1116,8 +1116,12 @@ class Window():
         self.draw()
 
     def insert_string(self, string):
-        for c in string:
-            self._insert_char(c, to_draw=False)
+        x, y = self.buffer.insert_string(   self.buffer_cursor[0],
+                                            self.buffer_cursor[1],
+                                            string)
+
+        self.move_cursor_to_buf_location(   x,
+                                            y)
         self.draw()
 
     def insert_line_before(self, line):
