@@ -62,6 +62,9 @@ CTRL_N_KEY = 14
 CTRL_O_KEY = 15
 CTRL_P_KEY = 16
 CTRL_R_KEY = 18
+CTRL_S_KEY = 19
+CTRL_T_KEY = 20
+CTRL_V_KEY = 22
 BACKSPACE_KEY = 127
 
 
@@ -129,7 +132,10 @@ class Screen():
         if to_flush: stdout.flush()
 
     def get_key(self):
-        try: return ord(stdin.read(1))
+        try:
+            k = ord(stdin.read(1))
+            elog(f"key: {k}")
+            return k
         except: return None
 
     def get_height(self):

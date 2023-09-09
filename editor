@@ -105,10 +105,12 @@ class Editor():
             self.get_curr_tab().split()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('s')] = ctrl_w_s_map
+        self.maps[NORMAL][CTRL_W_KEY][CTRL_S_KEY] = ctrl_w_s_map
         def ctrl_w_v_map(self):
             self.get_curr_tab().vsplit()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('v')] = ctrl_w_v_map
+        self.maps[NORMAL][CTRL_W_KEY][CTRL_V_KEY] = ctrl_w_v_map
         def ctrl_w_h_map(self):
             self.get_curr_tab().move_left_window()
             return False
@@ -133,10 +135,12 @@ class Editor():
             self.get_curr_tab().zoom_toggle()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('w')] = ctrl_w_w_map
+        self.maps[NORMAL][CTRL_W_KEY][CTRL_W_KEY] = ctrl_w_w_map
         def ctrl_w_t_map(self):
             self._create_tab(self.get_curr_buffer())
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('t')] = ctrl_w_t_map
+        self.maps[NORMAL][CTRL_W_KEY][CTRL_T_KEY] = ctrl_w_t_map
 
     def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):
