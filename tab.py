@@ -255,6 +255,7 @@ class Tab():
 
     def close_window(self, window):
         self.remove_window(window)
+        window.close()
         self.draw()
 
     def move_left_window(self):
