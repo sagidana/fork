@@ -1384,14 +1384,15 @@ class Editor():
         global args
 
         if not args.filename:
+            buffer = Buffer()
+            self._create_tab(buffer)
+        elif not os.path.isfile(args.filename[0]):
             raise Exception("No files provided.")
+        else:
+            file = args.filename[0]
 
-        if not os.path.isfile(args.filename[0]):
-            raise Exception("No files provided.")
-        file = args.filename[0]
-
-        buffer = self.get_or_create_buffer(file)
-        tab = self._create_tab(buffer)
+            buffer = self.get_or_create_buffer(file)
+            self._create_tab(buffer)
 
     def screen_resize_handler(self, size):
         self.width, self.height = size
@@ -1651,7 +1652,7 @@ def main():
     global args
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('filename', nargs='+')
+    parser.add_argument('filename', nargs='*')
     args = parser.parse_args()
 
     screen = Screen()
