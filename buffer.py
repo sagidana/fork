@@ -12,6 +12,9 @@ import hashlib
 import json
 import re
 
+WORD_REGEX = '[a-zA-Z0-9\=_-]'
+SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\'\;\:]'
+
 class Buffer():
     def on_buffer_change_callback(self, change):
         if self.treesitter and change:
@@ -19,17 +22,14 @@ class Buffer():
 
     def raise_event(func):
         def event_wrapper(self):
-            # self = args[0]
             func_name = func.__name__
             event = f"on_buffer_{func_name}_before"
             self._raise_event(event, self)
-            # if event in self.events:
-                # for cb in self.events[event]: cb(self)
+
             func(self)
+
             event = f"on_buffer_{func_name}_after"
             self._raise_event(event, self)
-            # if event in self.events:
-                # for cb in self.events[event]: cb(self)
         return event_wrapper
 
     def _raise_event(self, event, args):
@@ -750,28 +750,25 @@ class Buffer():
 
     # CORE: movement
     def find_next_word(self, x, y, skip_current=True):
-        word_regex = '[a-zA-Z0-9\=_-]'
-        single_regex = '[\)\(\}\{\]\[\,\.\/\'\;\:]'
-
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
         # skip current word
         if skip_current:
             found = pos + 1
-            if re.match(single_regex, stream[pos]): pass
+            if re.match(SINGLE_REGEX, stream[pos]): pass
             else:
                 for c in stream[found:]:
-                    if not re.match(word_regex, c):
+                    if not re.match(WORD_REGEX, c):
                         break
                     found += 1
         else: found = pos
 
         if found >= len(stream) - 1: return None
         for c in stream[found:]:
-            if re.match(word_regex, c):
+            if re.match(WORD_REGEX, c):
                 return self.get_file_x_y(found)
-            elif re.match(single_regex, c):
+            elif re.match(SINGLE_REGEX, c):
                 return self.get_file_x_y(found)
 
             found += 1
@@ -779,15 +776,13 @@ class Buffer():
 
     # CORE: movement
     def find_prev_word(self, x, y, skip_current=True):
-        word_regex = '[a-zA-Z0-9_-]'
-        symbols_regex = '[\)\(\}\{\]\[\,\.\/\'\;]'
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
         # skip current word
         found = pos - 1 if skip_current else pos
         for c in stream[:found+1][::-1]:
-            if re.match(word_regex, c):
+            if re.match(WORD_REGEX, c):
                 break
             elif re.match(symbols_regex, c):
                 return self.get_file_x_y(found)
@@ -795,7 +790,7 @@ class Buffer():
             found -= 1
         if found <= 0: return None
         for c in stream[:found][::-1]:
-            if not re.match(word_regex, c):
+            if not re.match(WORD_REGEX, c):
                 return self.get_file_x_y(found)
             found -= 1
         return None
@@ -837,19 +832,19 @@ class Buffer():
 
     # CORE: movement
     def find_word_end(self, x, y, skip_current=True):
-        word_regex = '[a-zA-Z0-9_-]'
+        WORD_REGEX = '[a-zA-Z0-9_-]'
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
         # skip current end
         found = pos + 1 if skip_current else pos
         for c in stream[found:]:
-            if re.match(word_regex, c): break
+            if re.match(WORD_REGEX, c): break
             found += 1
 
         if found >= len(stream) - 1: return None
         for c in stream[found:]:
-            if not re.match(word_regex, c):
+            if not re.match(WORD_REGEX, c):
                 return self.get_file_x_y(found - 1)
             found += 1
         return None
