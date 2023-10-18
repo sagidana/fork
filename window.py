@@ -172,7 +172,7 @@ class Window():
             if start_y == end_y:
                 string = self.get_line(start_y)[start_x:end_x]
 
-                self._screen_write( start_x,
+                self._screen_write( self._expanded_x(y, start_x),
                                     start_y - screen_start_y,
                                     string,
                                     style)
@@ -180,7 +180,7 @@ class Window():
 
             # first line
             string = self.get_line(start_y)[start_x:]
-            self._screen_write( start_x,
+            self._screen_write( self._expanded_x(start_y, start_x),
                                 start_y - screen_start_y,
                                 string,
                                 style)
@@ -218,63 +218,6 @@ class Window():
             syntax_map[start_pos:end_pos] = style
         return syntax_map
 
-    def syntax_highlight(self):
-        if not self.buffer.treesitter: return # no syntax tree..
-
-        buffer_height = len(self.buffer.lines) - 1
-        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
-        screen_end_y = min(screen_start_y + self.height, buffer_height)
-        screen_end_x = max(self.screen.width, len(self.buffer.lines[screen_end_y]) - 1)
-
-        try:
-            for node, style in get_syntax_highlights(   self.buffer.treesitter,
-                                                        start_point=(screen_start_y, 0),
-                                                        end_point=(screen_end_y, screen_end_x)):
-                start_y = node.start_point[0]
-                start_x = node.start_point[1]
-                end_y = node.end_point[0]
-                end_x = node.end_point[1]
-
-                if start_y >= screen_end_y: return
-                if end_y < screen_start_y: continue
-
-                # node is relevant
-
-                if start_y == end_y:
-                    self._screen_write( start_x,
-                                        start_y - screen_start_y,
-                                        node.text.decode(),
-                                        style,
-                                        to_flush=False)
-                    continue
-
-                # first line
-                string = self.get_line(start_y)[start_x:]
-                self._screen_write( start_x,
-                                    start_y - screen_start_y,
-                                    string,
-                                    style,
-                                    to_flush=False)
-
-                # lines in between
-                for y in range(start_y + 1, end_y):
-                    string = self.get_line(y)
-                    self._screen_write( 0,
-                                        y - screen_start_y,
-                                        string,
-                                        style,
-                                        to_flush=False)
-
-                # last line
-                string = self.get_line(end_y)[:end_x]
-                self._screen_write( 0,
-                                    end_y - screen_start_y,
-                                    string,
-                                    style,
-                                    to_flush=False)
-
-        except Exception as e: elog(f"Exception: {e}")
-
     def _visualize_block(self): pass
 
     def _visualize(self):
@@ -297,7 +240,7 @@ class Window():
 
         if start_y == end_y:
             string = self.get_line(start_y)[start_x:end_x]
-            self._screen_write( start_x,
+            self._screen_write( self._expanded_x(start_y, start_x),
                                 start_y - screen_start_y,
                                 string,
                                 {'reverse': None})
@@ -305,7 +248,7 @@ class Window():
 
         # first line
         string = self.get_line(start_y)[start_x:]
-        self._screen_write( start_x,
+        self._screen_write( self._expanded_x(start_y, start_x),
                             start_y - screen_start_y,
                             string,
                             {'reverse': None})
@@ -445,7 +388,8 @@ class Window():
 
                 # there is not syntax, draw with default style.
                 if len(syntax) == 0:
-                    self._screen_write( x, y,
+                    self._screen_write( self._expanded_x(buffer_y, x),
+                                        y,
                                         line[:-1], # do not draw '\n'
                                         default_style,
                                         to_flush=debug)
@@ -453,7 +397,7 @@ class Window():
                     # draw rest of window background.
                     if x < self.screen.width:
                         x_rest = self.content_width - x
-                        self._screen_write( x, y,
+                        self._screen_write( self._expanded_x(buffer_y, x), y,
                                             " "*x_rest,
                                             default_style,
                                             to_flush=debug)
@@ -479,20 +423,20 @@ class Window():
 
                     # draw with default until the syntax portion
                     if x < syntax_start_x:
-                        self._screen_write( x, y,
+                        self._screen_write( self._expanded_x(buffer_y, x), y,
                                             line[x:syntax_start_x],
                                             default_style,
                                             to_flush=debug)
                     # draw with syntax style
                     x = syntax_start_x
-                    self._screen_write( x, y,
+                    self._screen_write( self._expanded_x(buffer_y, x), y,
                                         line[syntax_start_x:syntax_end_x],
                                         curr_syntax.data,
                                         to_flush=debug)
                     x = syntax_end_x
                 # draw to the end of the window with default style
                 if x < buffer_end_x:
-                    self._screen_write( x, y,
+                    self._screen_write( self._expanded_x(buffer_y, x), y,
                                         line[x:buffer_end_x],
                                         default_style,
                                         to_flush=debug)
@@ -501,7 +445,7 @@ class Window():
                 # fill end of window with background
                 if x < self.screen.width:
                     x_rest = self.content_width - x
-                    self._screen_write( x, y,
+                    self._screen_write( self._expanded_x(buffer_y, x), y,
                                         " "*x_rest,
                                         default_style,
                                         to_flush=debug)
@@ -512,50 +456,15 @@ class Window():
             self.draw_cursor()
         except Exception as e: elog(f"Exception: {e}")
 
-    def _draw(self):
-        before = self.window_cursor[1]
-        first_line = self.buffer_cursor[1] - before
-        buffer_height = len(self.buffer.lines) - 1
+    def _expanded_x(self, y, x):
+        _x = 0
+        for c in self.get_line(y):
+            if x == 0: break
+            x -= 1
 
-        style = {}
-        style['background'] = g_settings['theme']['colors']['editor.background']
-        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
-
-        for y in range(self.content_height):
-            # time.sleep(0.02)
-            # self.screen.flush()
-            buffer_y = first_line + y
-
-            if buffer_y > buffer_height:
-                line = ""
-            else:
-                line = self.buffer.lines[first_line + y]
-
-            x_range = min(self.content_width, max(0, len(line) - 1))
-            try:
-                self._screen_write( 0,
-                                    y,
-                                    line[:x_range],
-                                    style,
-                                    to_flush=False)
-            except Exception as e: elog(f"Exception: {e}")
-
-            x_rest = self.content_width - x_range
-            try:
-                self._screen_write( x_range,
-                                    y,
-                                    ' '* x_rest,
-                                    style,
-                                    to_flush=False)
-            except Exception as e: elog(f"Exception: {x} {x_range} {e}")
-
-        # - on top of thaat draw highlights
-        self.syntax_highlight()
-
-        # the rest calls will do implicit flush.
-        self.highlight()
-        self.visualize()
-        self.draw_cursor()
+            if c == '\t': _x += 4
+            else: _x += 1
+        return _x
 
     def _scroll_up(self):
         self.buffer_cursor[1] -= 1
@@ -1291,8 +1200,8 @@ class Window():
             string  = string[:space_for]
 
 
-        # string = string.replace('\t', '    ')
-        string = string.replace('\t', ' ')
+        string = string.replace('\t', '    ')
+        # string = string.replace('\t', ' ')
         self.screen.write(  self.position[1] + y,
                             self.position[0] + x,
                             string,
@@ -1310,8 +1219,8 @@ class Window():
                 space_for = self.width - x_margin - x
                 string  = string[:space_for]
 
-            # string = string.replace('\t', '    ')
-            string = string.replace('\t', ' ')
+            string = string.replace('\t', '    ')
+            # string = string.replace('\t', ' ')
             self.screen.write(  self.content_position[1] + y,
                                 self.content_position[0] + x,
                                 string,
