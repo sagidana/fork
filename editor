@@ -204,6 +204,20 @@ class Editor():
             return False
         self.maps[NORMAL][CTRL_O_KEY] = ctrl_o_map
 
+        self.maps[NORMAL][CTRL_BACKSLASH_KEY] = {}
+        def ctrl_backslash_c_map(self):
+            elog("ctrl_backslash_c_map")
+            return False
+        self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('c')] = ctrl_backslash_c_map
+        def ctrl_backslash_s_map(self):
+            elog("ctrl_backslash_s_map")
+            return False
+        self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('s')] = ctrl_backslash_s_map
+        def ctrl_close_bracket_map(self):
+            elog("ctrl_close_bracket_map")
+            return False
+        self.maps[NORMAL][CTRL_CLOSE_BRACKET_KEY] = ctrl_close_bracket_map
+
     def _initialize_normal_symbol_maps(self):
         def zero_map(self):
             self.get_curr_window().move_line_begin()

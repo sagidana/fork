@@ -13,8 +13,7 @@ class Task():
         self.future = None
         self.on_done_callback = None
 
-    def __on_done(self, future):
-        pass
+    def __on_done(self, future): pass
 
     def on_done(self, callback):
         self.on_done_callback = callback
@@ -26,6 +25,10 @@ class Task():
         self.future.add_done_callback(self.__on_done)
         if self.on_done_callback:
             self.future.add_done_callback(self.on_done_callback)
+
+    def abort(self):
+        # TODO
+        pass
 
     def done(self):
         if not self.future: return True
