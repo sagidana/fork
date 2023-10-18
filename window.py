@@ -5,6 +5,7 @@ from idr import *
 from buffer import *
 from hooks import *
 from syntax import get_syntax_highlights
+from syntax import get_scope_style
 
 from intervaltree import Interval, IntervalTree
 from string import printable
@@ -464,7 +465,7 @@ class Window():
             if x == 0: break
             x -= 1
 
-            if c == '\t': _x += 4
+            if c == '\t': _x += len(g_settings["tab_representation"])
             else: _x += 1
         return _x
 
@@ -1201,14 +1202,50 @@ class Window():
             space_for = self.width - x
             string  = string[:space_for]
 
+        tabs = [m.start() for m in re.finditer('\t', string)]
+        if len(tabs) == 0:
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x,
+                                string,
+                                style,
+                                to_flush=to_flush)
+            return
 
-        string = string.replace('\t', '    ')
-        # string = string.replace('\t', ' ')
+        string = string.replace('\t', g_settings["tab_representation"])
         self.screen.write(  self.position[1] + y,
                             self.position[0] + x,
                             string,
                             style,
                             to_flush=to_flush)
+        return
+
+        # tab_style = get_scope_style('meta.embedded')
+        tab_style = get_scope_style('comment')
+        if not tab_style:
+            elog(f"failed to find style for tab", type="ERROR")
+            return
+        if 'reverse' in style: tab_style['reverse'] = None
+
+        string_index = 0
+        screen_index = 0
+        for i in tabs:
+            part = string[string_index:i]
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x + screen_index,
+                                part,
+                                style,
+                                to_flush=to_flush)
+            string_index += len(part)
+            screen_index += len(part)
+
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x + screen_index,
+                                g_settings["tab_representation"],
+                                tab_style,
+                                to_flush=to_flush)
+
+            string_index += 1
+            screen_index += len(g_settings["tab_representation"])
 
     def _screen_write(self, x, y, string, style, to_flush=True):
         try:
@@ -1217,16 +1254,10 @@ class Window():
             if x >= self.width - x_margin: return
             if y >= self.height - y_margin: return
 
-            if x + len(string) - 1 >= self.width - x_margin:
-                space_for = self.width - x_margin - x
-                string  = string[:space_for]
-
-            string = string.replace('\t', '    ')
-            # string = string.replace('\t', ' ')
-            self.screen.write(  self.content_position[1] + y,
-                                self.content_position[0] + x,
-                                string,
-                                style,
-                                to_flush=to_flush)
+            self._screen_write_raw( x_margin + x,
+                                    y_margin + y,
+                                    string,
+                                    style,
+                                    to_flush=to_flush)
         except Exception as e:
             elog(f"Exception: {e}")
