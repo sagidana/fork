@@ -154,7 +154,9 @@ class Window():
         if self.line_numbers: self.draw_line_numbers()
         self.visualize()
 
-        self._screen_move(cursor[0], cursor[1])
+        x = self._expanded_x(self.buffer_cursor[1], self.buffer_cursor[0])
+        # self._screen_move(cursor[0], cursor[1])
+        self._screen_move(x, cursor[1])
 
     def set_lines_margin(self):
         self.lines_margin = len(str(len(self.buffer.lines))) + 1
