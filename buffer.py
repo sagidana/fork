@@ -788,7 +788,7 @@ class Buffer():
         for c in stream[:found+1][::-1]:
             if re.match(WORD_REGEX, c):
                 break
-            elif re.match(symbols_regex, c):
+            elif re.match(SINGLE_REGEX, c):
                 return self.get_file_x_y(found)
 
             found -= 1
