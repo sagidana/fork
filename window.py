@@ -174,7 +174,7 @@ class Window():
             if start_y == end_y:
                 string = self.get_line(start_y)[start_x:end_x]
 
-                self._screen_write( self._expanded_x(y, start_x),
+                self._screen_write( self._expanded_x(start_y, start_x),
                                     start_y - screen_start_y,
                                     string,
                                     style)
