@@ -416,31 +416,41 @@ class Window():
 
             for y in range(self.content_height):
                 x = 0
-                # time.sleep(0.1)
-                # self.screen.flush()
+                if debug:
+                    time.sleep(0.1)
+                    self.screen.flush()
 
                 buffer_y = first_line + y
                 buffer_start_x = 0
+
+                # we at the end of the buffer, draw background.
                 if buffer_y > buffer_height:
                     self._screen_write( x, y,
                                         " "*(self.content_width - 1),
                                         default_style,
                                         to_flush=debug)
                     continue
+
                 line = self.get_line(buffer_y)
-                buffer_end_x = max(0, len(line) - 1)
+                buffer_end_x = max(0, len(line) - 1) # minus one because of '\n'
 
                 _start_pos = self.buffer.get_file_pos(buffer_start_x, buffer_y)
                 _end_pos = self.buffer.get_file_pos(buffer_end_x, buffer_y)
 
                 syntax = sorted(list(syntax_map[_start_pos:_end_pos]))
 
+                if debug:
+                    elog(f"syntax query: [{_start_pos},{_end_pos}]")
+                    for s in syntax: elog(f"\t{s}")
+
+                # there is not syntax, draw with default style.
                 if len(syntax) == 0:
                     self._screen_write( x, y,
-                                        line[:-1],
+                                        line[:-1], # do not draw '\n'
                                         default_style,
                                         to_flush=debug)
                     x += len(line) - 1
+                    # draw rest of window background.
                     if x < self.screen.width:
                         x_rest = self.content_width - x
                         self._screen_write( x, y,
@@ -449,23 +459,38 @@ class Window():
                                             to_flush=debug)
                     continue
 
-                while len(syntax) > 0:
-                    curr_syntax = syntax.pop(0)
-                    syntax_start_x = curr_syntax.begin - _start_pos
-                    syntax_end_x = curr_syntax.end - _start_pos
+                # drawing with syntax highlights...:
 
+                while len(syntax) > 0:
+                    if debug:
+                        time.sleep(0.1)
+                        self.screen.flush()
+
+                    curr_syntax = syntax.pop(0)
+                    if curr_syntax.begin <= _start_pos:
+                        syntax_start_x = 0
+                    else:
+                        syntax_start_x = curr_syntax.begin - _start_pos
+
+                    if curr_syntax.end >= _end_pos:
+                        syntax_end_x = _end_pos - _start_pos
+                    else:
+                        syntax_end_x = curr_syntax.end - _start_pos
+
+                    # draw with default until the syntax portion
                     if x < syntax_start_x:
                         self._screen_write( x, y,
                                             line[x:syntax_start_x],
                                             default_style,
                                             to_flush=debug)
+                    # draw with syntax style
                     x = syntax_start_x
-
                     self._screen_write( x, y,
                                         line[syntax_start_x:syntax_end_x],
                                         curr_syntax.data,
                                         to_flush=debug)
                     x = syntax_end_x
+                # draw to the end of the window with default style
                 if x < buffer_end_x:
                     self._screen_write( x, y,
                                         line[x:buffer_end_x],
@@ -473,6 +498,7 @@ class Window():
                                         to_flush=debug)
                     x = buffer_end_x
 
+                # fill end of window with background
                 if x < self.screen.width:
                     x_rest = self.content_width - x
                     self._screen_write( x, y,
@@ -1265,6 +1291,8 @@ class Window():
             string  = string[:space_for]
 
 
+        # string = string.replace('\t', '    ')
+        string = string.replace('\t', ' ')
         self.screen.write(  self.position[1] + y,
                             self.position[0] + x,
                             string,
@@ -1282,7 +1310,8 @@ class Window():
                 space_for = self.width - x_margin - x
                 string  = string[:space_for]
 
-            string = string.replace('\t', '    ')
+            # string = string.replace('\t', '    ')
+            string = string.replace('\t', ' ')
             self.screen.write(  self.content_position[1] + y,
                                 self.content_position[0] + x,
                                 string,
