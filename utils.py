@@ -4,6 +4,11 @@ import re
 from log import elog
 
 
+def is_binary_file(file):
+    bytes = open(file, 'rb').read()
+    textchars = bytearray({7,8,9,10,12,13,27} | set(range(0x20, 0x100)) - {0x7f})
+    return bytes.translate(None, textchars)
+
 def extract_destination(string):
     file_path = None
     file_line = None

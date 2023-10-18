@@ -1,6 +1,7 @@
 from log import elog
 
 from events import *
+from utils import *
 from hooks import *
 from idr import *
 
@@ -84,13 +85,16 @@ class Buffer():
             self.lines = self.in_memory_data.decode('utf-8').splitlines()
         else:
             self.file_path = path.abspath(file_path)
+            if is_binary_file(self.file_path):
+                elog("Failed loading binary file!")
+                raise Exception('Not implemented!')
+
             with open(file_path, 'r') as f:
                 self.lines = f.readlines()
 
             self.hash = self._hash_file()
             if not self.hash:
                 raise Exception('Not implemented!')
-                return
 
         language = self.detect_language()
         self.treesitter = None
