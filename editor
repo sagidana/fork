@@ -1286,6 +1286,14 @@ class Editor():
             self.draw()
             return False
         self.maps[VISUAL][ord(',')] = comma_map
+        def dollar_map(self):
+            self.get_curr_window().move_line_end()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord('$')] = dollar_map
 
     def initialize_maps(self):
         self._initialize_normal_maps()
