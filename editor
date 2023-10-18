@@ -11,6 +11,7 @@ import os
 from settings import g_settings
 from buffer import Buffer
 from window import Window
+from task import Task
 from screen import *
 from log import elog
 from tab import Tab
@@ -985,10 +986,18 @@ class Editor():
                 text = self.prompt("rg: ")
                 if len(text) == 0: return False
 
-                results = ripgrep(text)
-                if not results: return False
+                task = Task(ripgrep, text)
+                self.tasks.append(task)
+                def rg_on_done(future):
+                    results = future.result()
+                    if not results: return
+                    self.get_curr_tab().split(Buffer(data_in_bytes=results))
 
-                self.get_curr_tab().split(Buffer(data_in_bytes=results))
+                    # remove the task when done.
+                    self.tasks.remove(task)
+
+                task.on_done(rg_on_done)
+                task.start()
             except Exception as e: elog(f"Exception: {e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map
@@ -1348,6 +1357,7 @@ class Editor():
         self.tabs = []
         self.windows = []
         self.buffers = []
+        self.tasks = []
 
         self.curr_tab = -1
 
