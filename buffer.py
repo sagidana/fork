@@ -96,11 +96,11 @@ class Buffer():
             if not self.hash:
                 raise Exception('Not implemented!')
 
-        language = self.detect_language()
+        self.language = self.detect_language()
         self.treesitter = None
-        if language:
+        if self.language:
             with open(file_path, "rb") as f: _bytes = f.read()
-            self.treesitter = TreeSitter(_bytes, language)
+            self.treesitter = TreeSitter(_bytes, self.language)
 
         handlers = {}
         handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback

@@ -940,6 +940,18 @@ class Window():
         self.move_cursor_to_buf_location(x, y)
         self.draw()
 
+    def set_line(self, y, new_line):
+        _x = self.buffer_cursor[0]
+        _y = self.buffer_cursor[1]
+
+        self.buffer.replace_line(y, new_line)
+
+        if _y == y and _x >= len(self.get_line(_y)) - 1:
+            _x = len(self.get_line(_y)) - 1
+
+        self.move_cursor_to_buf_location(_x, _y)
+        self.draw()
+
     def empty_line(self):
         x = self.buffer_cursor[0]
         y = self.buffer_cursor[1]

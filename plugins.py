@@ -3,6 +3,7 @@ from os import path
 import string
 import random
 import sys
+import re
 
 from log import elog
 
@@ -60,4 +61,54 @@ def ripgrep(search):
         # return results
     except Exception as e: elog(f"ripgrep exception: {e}")
     return None
+
+def _get_comment_syntax(language):
+    comment_syntax = "#"
+    if language in ['c', 'cpp', 'rust', 'javascript', 'java']:
+        comment_syntax = "//"
+    if language == 'python':
+        comment_syntax = "#"
+    if language == 'vimscript':
+        comment_syntax = "\""
+    return comment_syntax
+
+def _index_of_first_nonspace_char(string):
+    m = re.match('(\s*)', string)
+    if m: return len(m.group(0))
+    return -1
+
+def comment(editor, start_y, end_y):
+    comment_syntax = _get_comment_syntax(editor.get_curr_buffer().language)
+
+    # check if any lines are commented.
+    commented = True
+    for y in range(start_y, end_y + 1):
+        line = editor.get_curr_window().get_line(y)
+        if re.match('^\s*$', line): continue # skip empty lines
+        if not re.match(f'^\s*{comment_syntax} .*$', line):
+            commented = False
+            break
+
+    if not commented:
+        # lets comment
+        for y in range(start_y, end_y + 1):
+            line = editor.get_curr_window().get_line(y)
+            if re.match('^\s*$', line): continue # skip empty lines
+            i = _index_of_first_nonspace_char(line)
+            if i == -1:
+                elog(f"i: {i} {line}")
+                continue
+            line = f"{line[:i]}{comment_syntax} {line[i:]}"
+            editor.get_curr_window().set_line(y, line)
+    else:
+        # lets uncomment
+        for y in range(start_y, end_y + 1):
+            line = editor.get_curr_window().get_line(y)
+            if re.match('^\s*$', line): continue # skip empty lines
+            i = _index_of_first_nonspace_char(line)
+            if i == -1:
+                elog(f"i: {i} {line}")
+                continue
+            line = f"{line[:i]}{line[i+len(comment_syntax)+1:]}"
+            editor.get_curr_window().set_line(y, line)
 

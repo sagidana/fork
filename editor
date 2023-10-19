@@ -20,6 +20,7 @@ from events import *
 from hooks import *
 from popup import *
 
+from plugins import comment
 from plugins import ripgrep
 from plugins import fzf
 
@@ -738,6 +739,19 @@ class Editor():
             self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('g')][ord('g')] = gg_map
+        def comment_object_map(scope):
+            start_x, start_y, end_x, end_y = scope
+            self.change_begin()
+
+            try:
+                comment(self, start_y, end_y)
+            except Exception as e:
+                elog(f"Exception: {e}")
+
+            self.change_end()
+            return False
+        self.maps[NORMAL][ord('g')][ord('c')] = {}
+        self._initialize_objects_maps(self.maps[NORMAL][ord('g')][ord('c')], comment_object_map)
         def G_map(self):
             self.get_curr_window().add_jump()
             self.get_curr_window().move_end()
@@ -1205,6 +1219,25 @@ class Editor():
             self.draw()
             return False
         self.maps[VISUAL_LINE][ord('h')] = h_map
+        def gc_map(self):
+            elog("gc_map")
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            self.change_begin()
+
+            start_x, start_y, end_x, end_y = scope
+
+            try:
+                comment(self, start_y, end_y)
+            except Exception as e:
+                elog(f"Exception: {e}")
+
+            self.change_end()
+
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_LINE][ord('g')] = {}
+        self.maps[VISUAL_LINE][ord('g')][ord('c')] = gc_map
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):
