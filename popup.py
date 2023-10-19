@@ -89,3 +89,113 @@ class Completion():
                                     style)
         except Exception as e:
             elog(f"Exception: {e}")
+
+class TreeSitter():
+    def __init__(   self,
+                    screen,
+                    treesitter):
+        self.screen = screen
+        self.treesitter = treesitter
+        self.nodes = [self.treesitter.root_node]
+        self.selected = 0
+
+        # full screen TODO:
+        margin = 5
+        self.position = list([margin, margin])
+        self.width = self.screen.width - (margin * 2)
+        self.height = self.screen.height - (margin * 2)
+
+    def pop(self):
+        try:
+            while True:
+                self.draw()
+
+                key = self.screen.get_key()
+                if key == h_KEY:
+                    if not self.nodes[self.selected].parent:
+                        continue
+                    parent = self.nodes[self.selected].parent
+                    if parent.parent:
+                        siblings = parent.parent.children
+                        self.nodes = siblings
+                        self.selected = siblings.index(parent)
+                    else:
+                        self.nodes = [parent]
+                        self.selected = 0
+                    continue
+                if key == j_KEY:
+                    if self.selected < len(self.nodes) - 1: self.selected += 1
+                    continue
+                if key == k_KEY:
+                    if self.selected > 0: self.selected -= 1
+                    continue
+                if key == l_KEY:
+                    if self.nodes[self.selected].children:
+                        self.nodes = self.nodes[self.selected].children
+                        self.selected = 0
+                    continue
+                if key == CTRL_U_KEY:
+                    half = int(self.screen.height / 2)
+                    if self.selected < half: self.selected = 0
+                    else: self.selected -= half
+                    continue
+                if key == CTRL_D_KEY:
+                    half = int(self.screen.height / 2)
+                    left = len(self.nodes) - self.selected - 1
+                    if left > half: self.selected += half
+                    else: self.selected += left
+                    continue
+
+                else: return None
+        except Exception as e: elog(f"Exception: {e}")
+
+    def draw(self):
+        try:
+            style = {}
+            style['background'] = g_settings['theme']['colors']['menu.background']
+            style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            selected_style = {}
+            selected_style['background'] = g_settings['theme']['colors']['terminal.ansiMagenta']
+            selected_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+
+            for y in range(self.height):
+                self.__draw(0, y, " "*self.width, style)
+
+            if self.selected < self.height:
+                for y, node in enumerate(self.nodes):
+                    option = str(node)
+                    if len(option) < self.width:
+                        option = f"{option}{' '*(self.width - len(option))}"
+                    option = option[:self.width]
+                    if y == self.selected:
+                        self.__draw(0, y, f"{option}", selected_style)
+                    else:
+                        self.__draw(0, y, f"{option}", style)
+            else:
+                index = self.selected
+                for y in reversed(range(self.height)):
+                    option = self.nodes[index]
+                    if index == self.selected:
+                        self.__draw(0, y, f"{option}", selected_style)
+                    else:
+                        self.__draw(0, y, f"{option}", style)
+                    index -= 1
+        except Exception as e: elog(f"Exception: {e}")
+        self.screen.flush()
+
+    def __draw(self, x, y, string, style):
+        try:
+            if x >= self.width: return
+            if y >= self.height: return
+
+            if x + len(string) - 1 >= self.width:
+                space_for = self.width  - x
+                string = string[:space_for]
+
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x,
+                                string,
+                                style,
+                                to_flush=False)
+        except Exception as e:
+            elog(f"Exception: {e}")

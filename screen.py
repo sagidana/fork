@@ -68,6 +68,14 @@ CTRL_BACKSLASH_KEY = 28
 CTRL_CLOSE_BRACKET_KEY = 29
 BACKSPACE_KEY = 127
 
+PGDN_KEY = 10
+PGUP_KEY = 10
+
+h_KEY = 104
+j_KEY = 106
+k_KEY = 107
+l_KEY = 108
+
 
 from functools import lru_cache
 @lru_cache(None)

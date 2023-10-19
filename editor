@@ -1062,6 +1062,7 @@ class Editor():
     def _initialize_leader_maps(self):
         self.maps[NORMAL][ord(' ')] = {}        # leader
         self.maps[NORMAL][ord(' ')][ord('s')] = {}
+        self.maps[NORMAL][ord(' ')][ord('t')] = {}
         def leader_sf_map(self): # search file
             file_path = fzf()
             if file_path:
@@ -1090,6 +1091,25 @@ class Editor():
             except Exception as e: elog(f"Exception: {e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map
+        def leader_ts_map(self): # search content
+            abs_position = [0,0]
+            window_x = self.get_curr_window().position[0]
+            window_y = self.get_curr_window().position[1]
+            window_cursor_x = 0
+            window_cursor_y = 0
+            # window_cursor_x = self.get_curr_window().window_cursor[0]
+            # window_cursor_y = self.get_curr_window().window_cursor[1]
+            abs_position[0] = window_x + window_cursor_x
+            abs_position[1] = window_y + window_cursor_y
+            try:
+                elog(self.get_curr_buffer().treesitter)
+                ts = TreeSitter(self.screen,
+                                treesitter=self.get_curr_buffer().treesitter.tree)
+                result = ts.pop()
+                self.get_curr_tab().draw() # need to redraw after popup
+            except Exception as e: elog(f"Exception: {e}")
+            return False
+        self.maps[NORMAL][ord(' ')][ord('t')][ord('s')] = leader_ts_map
 
     def _initialize_normal_maps(self):
         def colon_map(self):
