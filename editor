@@ -206,15 +206,77 @@ class Editor():
 
         self.maps[NORMAL][CTRL_BACKSLASH_KEY] = {}
         def ctrl_backslash_c_map(self):
-            elog("ctrl_backslash_c_map")
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_buffer().inner_word(x, y)
+            pattern = self.get_curr_buffer().get_scope_text(scope[0],
+                                                            scope[1],
+                                                            scope[2],
+                                                            scope[3])
+            if len(pattern) == 0: return False
+            pattern = f"\\W{pattern[0]}\\("
+            elog(f"pattern: {pattern}")
+
+            task = Task(ripgrep, pattern)
+            self.tasks.append(task)
+            def rg_on_done(results):
+                if not results: return
+                self.get_curr_tab().split(Buffer(data_in_bytes=results))
+
+                # remove the task when done.
+                self.tasks.remove(task)
+
+            task.on_done(rg_on_done)
+            task.start()
             return False
         self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('c')] = ctrl_backslash_c_map
         def ctrl_backslash_s_map(self):
-            elog("ctrl_backslash_s_map")
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_buffer().inner_word(x, y)
+            pattern = self.get_curr_buffer().get_scope_text(scope[0],
+                                                            scope[1],
+                                                            scope[2],
+                                                            scope[3])
+            if len(pattern) == 0: return False
+            pattern = f"\\W{pattern[0]}\\W"
+
+            task = Task(ripgrep, pattern)
+            self.tasks.append(task)
+            def rg_on_done(results):
+                if not results: return
+                self.get_curr_tab().split(Buffer(data_in_bytes=results))
+
+                # remove the task when done.
+                self.tasks.remove(task)
+
+            task.on_done(rg_on_done)
+            task.start()
             return False
         self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('s')] = ctrl_backslash_s_map
         def ctrl_close_bracket_map(self):
-            elog("ctrl_close_bracket_map")
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_buffer().inner_word(x, y)
+            pattern = self.get_curr_buffer().get_scope_text(scope[0],
+                                                            scope[1],
+                                                            scope[2],
+                                                            scope[3])
+            if len(pattern) == 0: return False
+            # TODO: goto definition
+            # pattern = f"\\W{pattern[0]}\\W"
+
+            # task = Task(ripgrep, pattern)
+            # self.tasks.append(task)
+            # def rg_on_done(results):
+                # if not results: return
+                # self.get_curr_tab().split(Buffer(data_in_bytes=results))
+
+                # # remove the task when done.
+                # self.tasks.remove(task)
+
+            # task.on_done(rg_on_done)
+            # task.start()
             return False
         self.maps[NORMAL][CTRL_CLOSE_BRACKET_KEY] = ctrl_close_bracket_map
 
@@ -1002,8 +1064,7 @@ class Editor():
 
                 task = Task(ripgrep, text)
                 self.tasks.append(task)
-                def rg_on_done(future):
-                    results = future.result()
+                def rg_on_done(results):
                     if not results: return
                     self.get_curr_tab().split(Buffer(data_in_bytes=results))
 
@@ -1317,6 +1378,34 @@ class Editor():
             self.draw()
             return False
         self.maps[VISUAL][ord('$')] = dollar_map
+
+        def leader_s_c_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+
+            start_x, start_y, end_x, end_y = scope
+            text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+            if len(text) == 0: return False
+            text = text[0]
+
+            task = Task(ripgrep, text)
+            self.tasks.append(task)
+            def rg_on_done(results):
+                if not results: return
+                self.get_curr_tab().split(Buffer(data_in_bytes=results))
+
+                # remove the task when done.
+                self.tasks.remove(task)
+
+            task.on_done(rg_on_done)
+            task.start()
+
+            self.change_mode(NORMAL)
+            return False
+
+        self.maps[VISUAL][ord(' ')] = {}
+        self.maps[VISUAL][ord(' ')][ord('s')] = {}
+        self.maps[VISUAL][ord(' ')][ord('s')][ord('c')] = leader_s_c_map
 
     def initialize_maps(self):
         self._initialize_normal_maps()

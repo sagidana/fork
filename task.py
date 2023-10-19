@@ -1,39 +1,31 @@
 #!/usr/bin/python
+from threading import Thread
 
-from concurrent.futures import ThreadPoolExecutor
-
+from log import elog
 from idr import *
 
 
 class Task():
     def __init__(self, callback, arg):
         self.id = get_id(TASK_ID)
-        self.callback = callback
-        self.arg = arg
-        self.future = None
         self.on_done_callback = None
+        def wrapper(arg):
+            ret = callback(arg)
+            if self.on_done_callback:
+                self.on_done_callback(ret)
 
-    def __on_done(self, future): pass
+        self.thread = Thread(target=wrapper, args=(arg, ))
 
     def on_done(self, callback):
         self.on_done_callback = callback
 
-    def start(self):
-        pool = ThreadPoolExecutor(max_workers=1)
-        self.future = pool.submit(self.callback, self.arg)
+    def start(self): self.thread.start()
 
-        self.future.add_done_callback(self.__on_done)
-        if self.on_done_callback:
-            self.future.add_done_callback(self.on_done_callback)
+    def wait(self): self.thread.join()
 
-    def abort(self):
-        # TODO
-        pass
+    def kill(self): pass # TODO: to implement
 
-    def done(self):
-        if not self.future: return True
-        return self.future.done()
-
+    def done(self): return not self.thread.is_alive()
 
 import time
 if __name__=='__main__':
@@ -44,11 +36,11 @@ if __name__=='__main__':
         return 100
 
     aaa = "this ia a context.."
-    def on_done(future):
-        print(future.result())
+    def on_done(ret):
+        print(ret)
         print(aaa)
 
-    task = Task(work, 2)
+    task = Task(work, 3)
     task.on_done(on_done)
     task.start()
 
