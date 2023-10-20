@@ -236,6 +236,7 @@ class TreeSitterPopup():
                 to_exit = self.on_key(key)
                 if to_exit: break
         except Exception as e: elog(f"Exception: {e}")
+        return self.nodes[self.selected]
 
     def node_to_string(self, node):
         text = node.text.decode('utf8').splitlines()[0]

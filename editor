@@ -1116,7 +1116,10 @@ class Editor():
                 ts = TreeSitterPopup(   self.screen,
                                         self.get_curr_buffer().treesitter,
                                         self.get_curr_window().buffer_cursor)
-                result = ts.pop()
+                node = ts.pop()
+                y = node.start_point[0]
+                x = node.start_point[1]
+                self.get_curr_window().move_cursor_to_buf_location(x, y)
                 self.get_curr_tab().draw() # need to redraw after popup
             except Exception as e: elog(f"Exception: {e}")
             return False
