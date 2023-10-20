@@ -4,7 +4,7 @@ from settings import g_settings
 from screen import *
 
 
-class Completion():
+class CompletionPopup():
     def __init__(   self,
                     screen,
                     position,
@@ -90,7 +90,7 @@ class Completion():
         except Exception as e:
             elog(f"Exception: {e}")
 
-class TreeSitter():
+class TreeSitterPopup():
     def __init__(   self,
                     screen,
                     treesitter):
