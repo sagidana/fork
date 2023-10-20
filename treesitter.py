@@ -50,18 +50,18 @@ def traverse_tree(tree, cb):
         # yield cursor
         cb(cursor.node, level, nth_child[level])
 
-        if cursor.goto_first_child(): 
+        if cursor.goto_first_child():
             level += 1
             continue
 
-        if cursor.goto_next_sibling(): 
+        if cursor.goto_next_sibling():
             nth_child[level] += 1
             continue
 
         retracing = True
 
         while retracing:
-            if not cursor.goto_parent(): 
+            if not cursor.goto_parent():
                 retracing = False
                 reached_root = True
             level -= 1

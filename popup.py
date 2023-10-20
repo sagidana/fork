@@ -1,5 +1,6 @@
 from log import elog
 
+from treesitter import traverse_tree
 from settings import g_settings
 from screen import *
 
@@ -93,11 +94,75 @@ class CompletionPopup():
 class TreeSitterPopup():
     def __init__(   self,
                     screen,
-                    treesitter):
+                    treesitter,
+                    position):
         self.screen = screen
         self.treesitter = treesitter
-        self.nodes = [self.treesitter.root_node]
-        self.selected = 0
+        self.position = position
+
+        elog(f"position: {position}")
+        x = self.position[0]
+        y = self.position[1]
+
+        closest_node = self.treesitter.tree.root_node
+        closest_level = 0
+
+        def find_closest_node(node, level, nth_child):
+            nonlocal closest_node
+            nonlocal closest_level
+
+            start_y, start_x = node.start_point
+            end_y, end_x = node.end_point
+            if start_y > y: return
+            if end_y < y: return
+
+            # we in lines range
+
+            if start_y == end_y:
+                if start_x > x: return
+                if end_x < x: return
+
+                if level > closest_level:
+                    closest_node = node
+                    closest_level = level
+                return
+
+            if start_y == y:
+                if start_x > x: return
+
+                if level > closest_level:
+                    closest_node = node
+                    closest_level = level
+                return
+
+            if end_y == y:
+                if end_x < x: return
+                if level > closest_level:
+                    closest_node = node
+                    closest_level = level
+                return
+
+            if level > closest_level:
+                closest_node = node
+                closest_level = level
+            return
+        traverse_tree(self.treesitter.tree, find_closest_node)
+
+        elog(f"found node: {closest_node}")
+        elog(f"found node: {closest_level}")
+        self.nodes = []
+        if not closest_node.parent:
+            self.nodes = self.filter_nodes([closest_node])
+            self.selected = 0
+        else:
+            while len(self.nodes) == 0:
+                prev = closest_node
+                closest_node = closest_node.parent
+                self.nodes = self.filter_nodes(closest_node.children)
+                if len(self.nodes) > 0:
+                    self.selected = self.nodes.index(prev)
+
+        if len(self.nodes) == 0: raise Exception('not should happend')
 
         # full screen TODO:
         margin = 5
@@ -105,49 +170,84 @@ class TreeSitterPopup():
         self.width = self.screen.width - (margin * 2)
         self.height = self.screen.height - (margin * 2)
 
+    def filter_nodes(self, nodes):
+        filtered_nodes = []
+        for node in nodes:
+            # if node.type not in [
+                    # "translation_unit",
+                    # "function_definition",
+                    # "class_definition",
+                    # "method_definition",
+                    # "field_definition",
+                    # ]:
+                # continue
+            filtered_nodes.append(node)
+        return filtered_nodes
+
+    def on_key(self, key):
+        if key == h_KEY:
+            if not self.nodes[self.selected].parent:
+                return False
+            parent = self.nodes[self.selected].parent
+            if parent.parent:
+                siblings = parent.parent.children
+                self.nodes = self.filter_nodes(siblings)
+                self.selected = self.nodes.index(parent)
+            else:
+                self.nodes = [parent]
+                self.selected = 0
+            return False
+        if key == j_KEY:
+            if self.selected < len(self.nodes) - 1:
+                self.selected += 1
+            return False
+        if key == k_KEY:
+            if self.selected > 0:
+                self.selected -= 1
+            return False
+        if key == l_KEY:
+            if self.nodes[self.selected].children:
+                new_nodes = self.filter_nodes(self.nodes[self.selected].children)
+                if len(new_nodes) == 0: return False
+                self.nodes = new_nodes
+                self.selected = 0
+            return False
+        if key == CTRL_U_KEY:
+            half = int(self.screen.height / 2)
+            if self.selected < half: self.selected = 0
+            else: self.selected -= half
+            return False
+        if key == CTRL_D_KEY:
+            half = int(self.screen.height / 2)
+            left = len(self.nodes) - self.selected - 1
+            if left > half: self.selected += half
+            else: self.selected += left
+            return False
+
+        # exit popup if unkown key pressed
+        return True
+
     def pop(self):
         try:
             while True:
                 self.draw()
 
                 key = self.screen.get_key()
-                if key == h_KEY:
-                    if not self.nodes[self.selected].parent:
-                        continue
-                    parent = self.nodes[self.selected].parent
-                    if parent.parent:
-                        siblings = parent.parent.children
-                        self.nodes = siblings
-                        self.selected = siblings.index(parent)
-                    else:
-                        self.nodes = [parent]
-                        self.selected = 0
-                    continue
-                if key == j_KEY:
-                    if self.selected < len(self.nodes) - 1: self.selected += 1
-                    continue
-                if key == k_KEY:
-                    if self.selected > 0: self.selected -= 1
-                    continue
-                if key == l_KEY:
-                    if self.nodes[self.selected].children:
-                        self.nodes = self.nodes[self.selected].children
-                        self.selected = 0
-                    continue
-                if key == CTRL_U_KEY:
-                    half = int(self.screen.height / 2)
-                    if self.selected < half: self.selected = 0
-                    else: self.selected -= half
-                    continue
-                if key == CTRL_D_KEY:
-                    half = int(self.screen.height / 2)
-                    left = len(self.nodes) - self.selected - 1
-                    if left > half: self.selected += half
-                    else: self.selected += left
-                    continue
-
-                else: return None
+                to_exit = self.on_key(key)
+                if to_exit: break
         except Exception as e: elog(f"Exception: {e}")
+
+    def node_to_string(self, node):
+        text = node.text.decode('utf8').splitlines()[0]
+        start_y = node.start_point[0]
+        end_y = node.end_point[0]
+        ret = f"{node.type}[{start_y}:{end_y}] => {text}"
+        # if self.treesitter.language == 'c':
+            # pass
+        # if self.treesitter.language == 'python':
+            # pass
+
+        return ret
 
     def draw(self):
         try:
@@ -163,7 +263,7 @@ class TreeSitterPopup():
 
             if self.selected < self.height:
                 for y, node in enumerate(self.nodes):
-                    option = str(node)
+                    option = self.node_to_string(node)
                     if len(option) < self.width:
                         option = f"{option}{' '*(self.width - len(option))}"
                     option = option[:self.width]
@@ -174,7 +274,7 @@ class TreeSitterPopup():
             else:
                 index = self.selected
                 for y in reversed(range(self.height)):
-                    option = self.nodes[index]
+                    option = self.node_to_string(self.nodes[index])
                     if index == self.selected:
                         self.__draw(0, y, f"{option}", selected_style)
                     else:

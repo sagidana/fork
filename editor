@@ -1114,7 +1114,8 @@ class Editor():
             try:
                 elog(self.get_curr_buffer().treesitter)
                 ts = TreeSitterPopup(   self.screen,
-                                        treesitter=self.get_curr_buffer().treesitter.tree)
+                                        self.get_curr_buffer().treesitter,
+                                        self.get_curr_window().buffer_cursor)
                 result = ts.pop()
                 self.get_curr_tab().draw() # need to redraw after popup
             except Exception as e: elog(f"Exception: {e}")
