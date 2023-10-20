@@ -1618,7 +1618,7 @@ class Editor():
 
         if key == TAB_KEY:
             # expand tab to spaces
-            self.get_curr_window().insert_string(g_settings["tab"])
+            self.get_curr_window().insert_string(g_settings["tab_insert"])
             return ret
 
         try: 
