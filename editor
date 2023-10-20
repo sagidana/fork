@@ -2,6 +2,7 @@
 
 from signal import signal, SIGWINCH
 from string import printable
+import traceback
 import argparse
 import time
 import json
@@ -1849,6 +1850,10 @@ def main():
 if __name__ == "__main__":
     # with cProfile.Profile() as profile:
         # ... do something ...
-    main()
+    try:
+        main()
+    except Exception as e:
+        elog(f"Exception: {e}", type="ERROR")
+        elog(f"traceback: {traceback.format_exc()}", type="ERROR")
     # profile.dump_stats("/tmp/stats.csv")
 
