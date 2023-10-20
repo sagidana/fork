@@ -153,6 +153,8 @@ class Buffer():
             return "java"
         elif    self.file_path.endswith('.js'):
             return "javascript"
+        elif    self.file_path.endswith('.smali'):
+            return "smali"
         # elif    self.file_path.endswith('.rb'):
             # return "ruby"
         # elif    self.file_path.endswith('.rs'):
