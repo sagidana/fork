@@ -143,7 +143,7 @@ class Screen():
     def get_key(self):
         try:
             k = ord(stdin.read(1))
-            elog(f"key: {k}")
+            # elog(f"key: {k}")
             return k
         except: return None
 
