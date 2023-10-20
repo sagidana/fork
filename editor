@@ -21,6 +21,7 @@ from events import *
 from hooks import *
 from popup import *
 
+from plugins import clipboard
 from plugins import comment
 from plugins import ripgrep
 from plugins import fzf
@@ -644,6 +645,10 @@ class Editor():
                                                             end_x,
                                                             end_y)
             if len(text) == 0: return False
+
+            # send yanked text to clipboard
+            clipboard(text)
+
             data = {}
             data['meta'] = 'char'
             data['data'] = text
@@ -667,7 +672,12 @@ class Editor():
 
         def yy_map(self):
             data = {}
-            data["data"] = [self.get_curr_window().get_curr_line()]
+            text = [self.get_curr_window().get_curr_line()]
+
+            # send yanked text to clipboard
+            clipboard(text)
+
+            data["data"] = text
             data["meta"] = "line" # to let the paste know the data is entire line.
             self.registers['"'] = data
             return False
@@ -1199,6 +1209,10 @@ class Editor():
             for y in range(start_y, end_y + 1):
                 lines.append(self.get_curr_buffer().lines[y])
             if len(lines) == 0: return False
+
+            # send yanked text to clipboard
+            clipboard(lines)
+
             data = {}
             data['meta'] = 'line'
             data['data'] = lines
@@ -1289,6 +1303,10 @@ class Editor():
             start_x, start_y, end_x, end_y = scope
             text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
             if len(text) == 0: return False
+
+            # send yanked text to clipboard
+            clipboard(text)
+
             data = {}
             data['meta'] = 'char'
             data['data'] = text

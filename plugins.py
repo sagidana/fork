@@ -112,3 +112,9 @@ def comment(editor, start_y, end_y):
             line = f"{line[:i]}{line[i+len(comment_syntax)+1:]}"
             editor.get_curr_window().set_line(y, line)
 
+def clipboard(text):
+    ''' Copy `text` to the clipboard '''
+    text = ''.join(text)
+
+    with Popen(['xclip','-selection', 'clipboard'], stdin=PIPE) as pipe:
+        pipe.communicate(input=text.encode('utf-8'))
