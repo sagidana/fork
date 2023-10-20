@@ -217,7 +217,6 @@ class Editor():
                                                             scope[3])
             if len(pattern) == 0: return False
             pattern = f"\\W{pattern[0]}\\("
-            elog(f"pattern: {pattern}")
 
             task = Task(ripgrep, pattern)
             self.tasks.append(task)
