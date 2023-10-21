@@ -74,6 +74,8 @@ class Editor():
             self.get_curr_window().visual_begin(VISUAL)
         if self.mode == VISUAL and target == NORMAL:
             self.get_curr_window().visual_end()
+        if self.mode == VISUAL and target == INSERT:
+            self.get_curr_window().visual_end()
         if self.mode == VISUAL_LINE and target == NORMAL:
             self.get_curr_window().visual_end()
 
@@ -1302,6 +1304,17 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL][ord('d')] = d_map
+        def c_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            self.change_begin()
+
+            start_x, start_y, end_x, end_y = scope
+            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+
+            self.change_mode(INSERT, effect_change=False)
+            return False
+        self.maps[VISUAL][ord('c')] = c_map
         def y_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
