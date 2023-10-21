@@ -1135,16 +1135,14 @@ class Editor():
         self.maps[NORMAL][ord(':')] = colon_map
 
         def enter_map(self):
-            enter_map.toggle = not enter_map.toggle
-            if enter_map.toggle:
+            if not self.get_curr_window().line_numbers:
                 self.get_curr_window().enable_lines_numbers()
                 details = DetailsPopup(self.screen, self)
                 details.pop()
-                self.get_curr_tab().draw() # need to redraw after popup
+                # self.get_curr_tab().draw() # need to redraw after popup
             else:
                 self.get_curr_window().disable_lines_numbers()
             return False
-        enter_map.toggle = False
         self.maps[NORMAL][ENTER_KEY] = enter_map
 
         self._initialize_legends_maps(NORMAL)

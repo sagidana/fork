@@ -29,16 +29,17 @@ class DetailsPopup():
                 self.details.append(f"{g_settings['tab_representation']}- {task.id}")
 
         margin = 5
-        self.position = list([margin, margin])
-        self.width = self.screen.width - (margin * 2)
-        self.height = self.screen.height - (margin * 2)
+        self.position = list([  window.position[0] + margin,
+                                window.position[1] + margin])
+        self.width = window.width - (margin * 2)
+        self.height = window.height - (margin * 2)
         if self.height - 2 > len(self.details): self.height = len(self.details) + 2
         else: self.details = self.details[:self.height - 2]
 
     def pop(self):
         self.draw()
-        # wait for key to release
-        self.screen.get_key()
+        # # wait for key to release
+        # self.screen.get_key()
 
     def draw(self):
         try:
