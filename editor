@@ -994,6 +994,7 @@ class Editor():
                 elif data['meta'] == 'char':
                     lines = data['data']
                     string = '\n'.join(lines)
+                    self.get_curr_window().move_right()
                     self.get_curr_window().insert_string(string)
                 elif data['meta'] == 'block': pass
             self.change_end()
