@@ -102,6 +102,8 @@ class Window():
         self.buffer_cursor = [0,0]
         self.remember = 0
 
+        self.set_lines_margin()
+
         self.draw()
 
     def enable_lines_numbers(self):
