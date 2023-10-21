@@ -4,6 +4,8 @@ from treesitter import traverse_tree
 from settings import g_settings
 from screen import *
 
+from string import printable
+
 
 class CompletionPopup():
     def __init__(   self,
@@ -99,6 +101,7 @@ class TreeSitterPopup():
         self.screen = screen
         self.treesitter = treesitter
         self.position = position
+        self.ret_node = None
 
         elog(f"position: {position}")
         x = self.position[0]
@@ -148,19 +151,22 @@ class TreeSitterPopup():
             return
         traverse_tree(self.treesitter.tree, find_closest_node)
 
-        elog(f"found node: {closest_node}")
-        elog(f"found node: {closest_level}")
         self.nodes = []
         if not closest_node.parent:
             self.nodes = self.filter_nodes([closest_node])
             self.selected = 0
+            self.level = closest_level
         else:
-            while len(self.nodes) == 0:
+            while True:
                 prev = closest_node
                 closest_node = closest_node.parent
+                if not closest_node: break
+                closest_level -= 1
                 self.nodes = self.filter_nodes(closest_node.children)
                 if len(self.nodes) > 0:
                     self.selected = self.nodes.index(prev)
+                    self.level = closest_level + 1
+                    break
 
         if len(self.nodes) == 0: raise Exception('not should happend')
 
@@ -185,7 +191,10 @@ class TreeSitterPopup():
         return filtered_nodes
 
     def on_key(self, key):
-        if key == h_KEY:
+        if key == ENTER_KEY:
+            self.ret_node = self.nodes[self.selected]
+            return True
+        if key == ord('h'):
             if not self.nodes[self.selected].parent:
                 return False
             parent = self.nodes[self.selected].parent
@@ -196,21 +205,23 @@ class TreeSitterPopup():
             else:
                 self.nodes = [parent]
                 self.selected = 0
+            self.level -= 1
             return False
-        if key == j_KEY:
+        if key == ord('j'):
             if self.selected < len(self.nodes) - 1:
                 self.selected += 1
             return False
-        if key == k_KEY:
+        if key == ord('k'):
             if self.selected > 0:
                 self.selected -= 1
             return False
-        if key == l_KEY:
+        if key == ord('l'):
             if self.nodes[self.selected].children:
                 new_nodes = self.filter_nodes(self.nodes[self.selected].children)
                 if len(new_nodes) == 0: return False
                 self.nodes = new_nodes
                 self.selected = 0
+                self.level += 1
             return False
         if key == CTRL_U_KEY:
             half = int(self.screen.height / 2)
@@ -223,6 +234,65 @@ class TreeSitterPopup():
             if left > half: self.selected += half
             else: self.selected += left
             return False
+        if key == ord('g'):
+            key = self.screen.get_key()
+            if key == ord('g'):
+                self.selected = 0
+                return False
+        if key == ord('G'):
+            self.selected = len(self.nodes) - 1
+            return False
+        if key == ord('/') or key == ord('?'):
+            pattern = ""
+            success = False
+            original_nodes = self.nodes
+            original_selected = self.selected
+            while True:
+                key = self.screen.get_key()
+
+                if key == ENTER_KEY:
+                    if len(pattern) > 0: success = True
+                    break
+                if key == ESC_KEY: break
+                if key == BACKSPACE_KEY:
+                    if len(pattern) > 0: pattern = pattern[:-1]
+                else:
+                    try:
+                        char = chr(key)
+                        if char in printable:
+                            pattern += char
+                        else: break
+                    except: continue
+                filtered_nodes = [node for node in original_nodes if pattern in self.node_to_string(node)]
+                if len(filtered_nodes) > 0:
+                    self.nodes = filtered_nodes
+                    if self.selected >= len(self.nodes):
+                        self.selected = len(self.nodes) - 1
+                    self.draw()
+            if not success:
+                self.nodes = original_nodes
+                self.selected = original_selected
+
+            return False
+        try:
+            if chr(key).isnumeric():
+                target_level = int(chr(key))
+                nodes = []
+                def nodes_at_level(node, level, nth_child):
+                    nonlocal nodes
+                    nonlocal target_level
+                    if level == target_level: nodes.append(node)
+                    return
+                traverse_tree(self.treesitter.tree, nodes_at_level)
+                if len(nodes) > 0:
+                    self.level = target_level
+                    self.nodes = nodes
+                    if self.selected >= len(self.nodes):
+                        self.selected = len(self.nodes) - 1
+                    self.draw()
+
+                return False
+        except Exception as e: elog(f"Exception: {e}")
 
         # exit popup if unkown key pressed
         return True
@@ -236,17 +306,15 @@ class TreeSitterPopup():
                 to_exit = self.on_key(key)
                 if to_exit: break
         except Exception as e: elog(f"Exception: {e}")
-        return self.nodes[self.selected]
+        return self.ret_node
 
     def node_to_string(self, node):
-        text = node.text.decode('utf8').splitlines()[0]
-        start_y = node.start_point[0]
-        end_y = node.end_point[0]
-        ret = f"{node.type}[{start_y}:{end_y}] => {text}"
-        # if self.treesitter.language == 'c':
-            # pass
-        # if self.treesitter.language == 'python':
-            # pass
+        lines = node.text.decode('utf8').splitlines()
+        if len(lines) > 0:
+            text = node.text.decode('utf8').splitlines()[0]
+        else:
+            text = ""
+        ret = f"[{self.level}]{node.type}: {text}"
 
         return ret
 
@@ -298,5 +366,4 @@ class TreeSitterPopup():
                                 string,
                                 style,
                                 to_flush=False)
-        except Exception as e:
-            elog(f"Exception: {e}")
+        except Exception as e: elog(f"Exception: {e}")
