@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE
+from os import environ
 from os import path
 import string
 import random
@@ -17,7 +18,9 @@ def fzf():
     """
     try:
         cmd = ["fzf"]
-        p = Popen(cmd, stdout=PIPE)
+        env = environ.copy()
+        env["FZF_DEFAULT_COMMAND"] = "rg --files"
+        p = Popen(cmd, stdout=PIPE, env=env)
         output, errors = p.communicate()
         file_path = output.decode('utf-8').strip()
         file_path = file_path.replace("\n", "")
