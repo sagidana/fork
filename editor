@@ -118,22 +118,22 @@ class Editor():
         self.maps[NORMAL][CTRL_W_KEY][ord('v')] = ctrl_w_v_map
         self.maps[NORMAL][CTRL_W_KEY][CTRL_V_KEY] = ctrl_w_v_map
         def ctrl_w_h_map(self):
-            self.get_curr_tab().move_left_window()
+            self.get_curr_tab().move_to_left_window()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('h')] = ctrl_w_h_map
         self.maps[NORMAL][CTRL_W_KEY][CTRL_H_KEY] = ctrl_w_h_map
         def ctrl_w_j_map(self):
-            self.get_curr_tab().move_down_window()
+            self.get_curr_tab().move_to_down_window()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('j')] = ctrl_w_j_map
         self.maps[NORMAL][CTRL_W_KEY][CTRL_J_KEY] = ctrl_w_j_map
         def ctrl_w_k_map(self):
-            self.get_curr_tab().move_up_window()
+            self.get_curr_tab().move_to_up_window()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('k')] = ctrl_w_k_map
         self.maps[NORMAL][CTRL_W_KEY][CTRL_K_KEY] = ctrl_w_k_map
         def ctrl_w_l_map(self):
-            self.get_curr_tab().move_right_window()
+            self.get_curr_tab().move_to_right_window()
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('l')] = ctrl_w_l_map
         self.maps[NORMAL][CTRL_W_KEY][CTRL_L_KEY] = ctrl_w_l_map
@@ -147,6 +147,22 @@ class Editor():
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('t')] = ctrl_w_t_map
         self.maps[NORMAL][CTRL_W_KEY][CTRL_T_KEY] = ctrl_w_t_map
+        def ctrl_w_H_map(self):
+            elog("ctrl_w_H_map")
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('H')] = ctrl_w_H_map
+        def ctrl_w_J_map(self):
+            elog("ctrl_w_J_map")
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('J')] = ctrl_w_J_map
+        def ctrl_w_K_map(self):
+            elog("ctrl_w_K_map")
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('K')] = ctrl_w_K_map
+        def ctrl_w_L_map(self):
+            elog("ctrl_w_L_map")
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('L')] = ctrl_w_L_map
 
     def _initialize_normal_ctrl_maps(self):
         def ctrl_u_map(self):

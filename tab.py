@@ -258,7 +258,7 @@ class Tab():
         window.close()
         self.draw()
 
-    def move_left_window(self):
+    def move_to_left_window(self):
         if self.zoom_mode: self.zoom_toggle()
         found = self._find_left_window(self.get_curr_window())
         if not found: return False
@@ -267,7 +267,7 @@ class Tab():
         self.get_curr_window().draw_cursor()
         return True
 
-    def move_right_window(self):
+    def move_to_right_window(self):
         if self.zoom_mode: self.zoom_toggle()
         found = self._find_right_window(self.get_curr_window())
         if not found: return False
@@ -276,7 +276,7 @@ class Tab():
         self.get_curr_window().draw_cursor()
         return True
 
-    def move_up_window(self):
+    def move_to_up_window(self):
         if self.zoom_mode: self.zoom_toggle()
         found = self._find_up_window(self.get_curr_window())
         if not found: return False
@@ -285,7 +285,7 @@ class Tab():
         self.get_curr_window().draw_cursor()
         return True
 
-    def move_down_window(self):
+    def move_to_down_window(self):
         if self.zoom_mode: self.zoom_toggle()
         found = self._find_down_window(self.get_curr_window())
         if not found: return False
