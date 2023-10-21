@@ -218,6 +218,8 @@ class Window():
             start_pos = self.buffer.get_file_pos(node.start_point[1],node.start_point[0])
             end_pos = self.buffer.get_file_pos(node.end_point[1],node.end_point[0])
 
+            if start_pos == end_pos: continue
+
             syntax_map[start_pos:end_pos] = style
         return syntax_map
 

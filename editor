@@ -518,8 +518,8 @@ class Editor():
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_greater_than(x, y)
             if scope: return cb(scope)
-        maps[ord('i')][('<')] = inner_greater_than
-        maps[ord('i')][('>')] = inner_greater_than
+        maps[ord('i')][ord('<')] = inner_greater_than
+        maps[ord('i')][ord('>')] = inner_greater_than
         def inner_quotation(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -1112,7 +1112,6 @@ class Editor():
             abs_position[0] = window_x + window_cursor_x
             abs_position[1] = window_y + window_cursor_y
             try:
-                elog(self.get_curr_buffer().treesitter)
                 ts = TreeSitterPopup(   self.screen,
                                         self.get_curr_buffer().treesitter,
                                         self.get_curr_window().buffer_cursor)
@@ -1121,6 +1120,8 @@ class Editor():
                     y = node.start_point[0]
                     x = node.start_point[1]
                     self.get_curr_window().move_cursor_to_buf_location(x, y)
+                    self.get_curr_window().align_center()
+
                 self.get_curr_tab().draw() # need to redraw after popup
             except Exception as e: elog(f"Exception: {e}")
             return False

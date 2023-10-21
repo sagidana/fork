@@ -103,7 +103,6 @@ class TreeSitterPopup():
         self.position = position
         self.ret_node = None
 
-        elog(f"position: {position}")
         x = self.position[0]
         y = self.position[1]
 

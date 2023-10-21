@@ -199,8 +199,11 @@ class Buffer():
         return ''.join(self.lines)
 
     def get_file_pos(self, x, y):
-        for line in self.lines[:y]: x += len(line)
-        return x
+        try:
+            for line in self.lines[:y]: x += len(line)
+            return x
+        except: pass
+        return -1
 
     def get_file_x_y(self, pos):
         curr = 0
@@ -467,15 +470,7 @@ class Buffer():
         self._raise_event(ON_BUFFER_CHANGE, change)
         return y
 
-    def replace_char(self, x, y, char):
-        self.remove_char(x+1, y)
-        self.insert_char(x, y, char)
-
-    def replace_line(self, y, new_line):
-        self.remove_line(y)
-        self.insert_line(y, new_line)
-
-    def remove_scope(   self,
+    def _remove_scope(   self,
                         start_x,
                         start_y,
                         end_x,
@@ -524,6 +519,41 @@ class Buffer():
                 self.remove_line(start_y)
 
         return start_x, start_y
+
+    # CORE: change
+    def remove_scope(   self,
+                        start_x,
+                        start_y,
+                        end_x,
+                        end_y):
+        start_pos = self.get_file_pos(start_x, start_y)
+        if start_pos == -1: return 0
+        end_pos = self.get_file_pos(end_x, end_y)
+        if end_pos == -1: return 0
+        end_pos += 1
+        stream = self.get_file_stream()
+
+        stream = stream[:start_pos] + stream[end_pos:]
+        self.lines = stream.splitlines(keepends=True)
+
+        change = {}
+        change['start_byte'] = start_pos
+        change['old_end_byte'] = end_pos
+        change['new_end_byte'] = start_pos
+        change['start_point'] = (start_y, start_x)
+        change['old_end_point'] = (end_y, end_x)
+        change['new_end_point'] = (start_y, start_x)
+        self._raise_event(ON_BUFFER_CHANGE, change)
+
+        return start_x, start_y
+
+    def replace_char(self, x, y, char):
+        self.remove_char(x+1, y)
+        self.insert_char(x, y, char)
+
+    def replace_line(self, y, new_line):
+        self.remove_line(y)
+        self.insert_line(y, new_line)
 
     def get_scope_text( self,
                         start_x,
