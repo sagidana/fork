@@ -752,27 +752,48 @@ class Buffer():
     # CORE: movement
     def find_prev_char_regex(self, x, y, char): pass
 
+    def negate_char(self, char):
+        if char == ')': return '('
+        if char == '(': return ')'
+        if char == '>': return '<'
+        if char == '<': return '>'
+        if char == '}': return '{'
+        if char == '{': return '}'
+        if char == '[': return ']'
+        if char == ']': return '['
+        return None
+
     # CORE: movement
-    def find_next_char(self, x, y, char):
+    def find_next_char(self, x, y, char, smart=False):
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
+        count = 1
         found = pos + 1
         for c in stream[pos + 1:]:
+            if smart:
+                if c == self.negate_char(char): count += 1
             if c == char:
-                return self.get_file_x_y(found)
+                count -= 1
+                if count == 0:
+                    return self.get_file_x_y(found)
             found += 1
         return None
 
     # CORE: movement
-    def find_prev_char(self, x, y, char):
+    def find_prev_char(self, x, y, char, smart=False):
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
+        count = 1
         found = pos - 1
         for c in stream[:pos][::-1]:
+            if smart:
+                if c == self.negate_char(char): count += 1
             if c == char:
-                return self.get_file_x_y(found)
+                count -= 1
+                if count == 0:
+                    return self.get_file_x_y(found)
             found -= 1
         return None
 
@@ -935,9 +956,9 @@ class Buffer():
         return start_x, start_y, end_x, end_y
 
     def arround_parentheses(self, x, y):
-        prev = self.find_prev_char(x, y, '(')
+        prev = self.find_prev_char(x, y, '(', smart=True)
         if not prev: return None
-        next = self.find_next_char(x, y, ')')
+        next = self.find_next_char(x, y, ')', smart=True)
         if not next: return None
         return prev[0], prev[1], next[0], next[1]
 
@@ -947,23 +968,23 @@ class Buffer():
         return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
 
     def arround_square_brackets(self, x, y):
-        prev = self.find_prev_char(x, y, '[')
+        prev = self.find_prev_char(x, y, '[', smart=True)
         if not prev: return None
-        next = self.find_next_char(x, y, ']')
+        next = self.find_next_char(x, y, ']', smart=True)
         if not next: return None
         return prev[0], prev[1], next[0], next[1]
 
     def arround_curly_brackets(self, x, y):
-        prev = self.find_prev_char(x, y, '{')
+        prev = self.find_prev_char(x, y, '{', smart=True)
         if not prev: return None
-        next = self.find_next_char(x, y, '}')
+        next = self.find_next_char(x, y, '}', smart=True)
         if not next: return None
         return prev[0], prev[1], next[0], next[1]
 
     def arround_greater_than(self, x, y):
-        prev = self.find_prev_char(x, y, '<')
+        prev = self.find_prev_char(x, y, '<', smart=True)
         if not prev: return None
-        next = self.find_next_char(x, y, '>')
+        next = self.find_next_char(x, y, '>', smart=True)
         if not next: return None
         return prev[0], prev[1], next[0], next[1]
 
