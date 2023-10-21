@@ -7,6 +7,84 @@ from screen import *
 from string import printable
 
 
+class DetailsPopup():
+    def __init__(self, screen, editor):
+        self.screen = screen
+        self.editor = editor
+
+        buffer = self.editor.get_curr_buffer()
+        window = self.editor.get_curr_window()
+
+        buffer_name = buffer.file_path if buffer.file_path else "<in_memory>"
+        buffer_id = buffer.id
+        x = window.buffer_cursor[0]
+        y = window.buffer_cursor[1]
+        status = f"{buffer_name}[{buffer_id}]({x},{y})"
+        pending_tasks = self.editor.tasks
+        self.details = []
+        self.details.append(status)
+        if len(pending_tasks) > 0:
+            self.details.append("tasks")
+            for task in pending_tasks:
+                self.details.append(f"{g_settings['tab_representation']}- {task.id}")
+
+        margin = 5
+        self.position = list([margin, margin])
+        self.width = self.screen.width - (margin * 2)
+        self.height = self.screen.height - (margin * 2)
+        if self.height - 2 > len(self.details): self.height = len(self.details) + 2
+        else: self.details = self.details[:self.height - 2]
+
+    def pop(self):
+        self.draw()
+        # wait for key to release
+        self.screen.get_key()
+
+    def draw(self):
+        try:
+            style = {}
+            style['background'] = g_settings['theme']['colors']['menu.background']
+            style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+
+            self.__draw_frame()
+
+            for y in range(len(self.details)):
+                self.__draw(1, y+1, f"{self.details[y]}", style)
+
+            self.screen.flush()
+        except Exception as e: elog(f"Exception: {e}")
+
+    def __draw_frame(self):
+        style = {}
+        style['background'] = g_settings['theme']['colors']['menu.background']
+        style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+        frame_style = {}
+        frame_style['background'] = g_settings['theme']['colors']['terminal.ansiMagenta']
+        frame_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+
+        self.__draw(0,0," "*self.width, frame_style)
+        for y in range(self.height-2):
+            self.__draw(0, y+1, " ", frame_style)
+            self.__draw(self.width-1, y+1, " ", frame_style)
+            self.__draw(1, y+1, " "*(self.width-2), style)
+        self.__draw(0,self.height-1," "*self.width, frame_style)
+
+    def __draw(self, x, y, string, style):
+        try:
+            if x >= self.width: return
+            if y >= self.height: return
+
+            if x + len(string) - 1 >= self.width:
+                space_for = self.width  - x
+                string = string[:space_for]
+
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x,
+                                string,
+                                style,
+                                to_flush=False)
+        except Exception as e: elog(f"Exception: {e}")
+
 class CompletionPopup():
     def __init__(   self,
                     screen,

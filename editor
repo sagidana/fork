@@ -1138,6 +1138,9 @@ class Editor():
             enter_map.toggle = not enter_map.toggle
             if enter_map.toggle:
                 self.get_curr_window().enable_lines_numbers()
+                details = DetailsPopup(self.screen, self)
+                details.pop()
+                self.get_curr_tab().draw() # need to redraw after popup
             else:
                 self.get_curr_window().disable_lines_numbers()
             return False
