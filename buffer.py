@@ -14,7 +14,7 @@ import json
 import re
 
 WORD_REGEX = '[a-zA-Z0-9\=_-]'
-SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\'\;\:]'
+SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\"\'\;\:]'
 
 class Buffer():
     def on_buffer_change_callback(self, change):
