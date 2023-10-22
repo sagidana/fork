@@ -1694,6 +1694,10 @@ class Editor():
         return False
 
     def draw_command(self, command):
+        style = {}
+        style['background'] = g_settings['status_line_background']
+        style['foreground'] = g_settings['status_line_foreground']
+
         command_position = [0, 0]
 
         command_position[1] = int(self.height - 1)
@@ -1701,7 +1705,8 @@ class Editor():
 
         self.screen.write(  command_position[1],
                             command_position[0],
-                            command.ljust(command_length))
+                            command.ljust(command_length),
+                            style)
         self.screen.move_cursor(    command_position[1],
                                     command_position[0] + len(command))
 
