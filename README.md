@@ -53,7 +53,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [C](https://raw.githubusercontent.com/atom/language-c/master/grammars/tree-sitter-c.cson)
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
-
 ## TODOs
 - ctags
 - \<num\>\<action\>
@@ -62,4 +61,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - add markdown language
 - >> and << operations while in visual_line mode
 - visual block mode
+- make asterisk work as <cword> in vim
+- add '/' to visual mode (search visualized text)
+- add 'G' and 'gg' to visual mode
 

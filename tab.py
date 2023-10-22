@@ -1,3 +1,4 @@
+from settings import g_settings
 from log import elog
 from window import *
 from hooks import *
@@ -371,13 +372,13 @@ class Tab():
             self.screen.write(  y + i,
                                 x,
                                 " ",
-                                {'background': '#000000'})
+                                {'background': g_settings['windows_separator_color']})
 
     def draw_horizontal_seperator(self, y, x, size):
         self.screen.write(  y,
                             x,
                             " "*size,
-                            {'background': '#000000'})
+                            {'background': g_settings['windows_separator_color']})
 
     def draw_seperators(self):
         for index, curr in enumerate(self.windows):
