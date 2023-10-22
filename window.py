@@ -322,8 +322,8 @@ class Window():
 
     def draw_status_line(self):
         style = {}
-        style['background'] = g_settings['theme']['colors']['editor.background']
-        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+        style['background'] = g_settings["status_line_background"]
+        style['foreground'] = g_settings["status_line_foreground"]
 
         buffer_name = path.basename(self.buffer.file_path) if self.buffer.file_path else "<in_memory>"
         buffer_id = self.buffer.id
@@ -349,8 +349,8 @@ class Window():
 
     def draw_line_numbers(self):
         style = {}
-        style['background'] = g_settings['theme']['colors']['editor.background']
-        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+        style['background'] = g_settings["line_numbers_background"]
+        style['foreground'] = g_settings["line_numbers_foreground"]
 
         buf_start_y = self.buffer_cursor[1] - self.window_cursor[1]
 
