@@ -91,6 +91,10 @@ class TreeSitter():
                 with open(query_path.format("c"),"r") as f: query = f.read()
                 self.query = C_LANGUAGE.query(query)
                 self.parser.set_language(C_LANGUAGE)
+            elif language == 'json':
+                with open(query_path.format("json"),"r") as f: query = f.read()
+                self.query = JSON_LANGUAGE.query(query)
+                self.parser.set_language(JSON_LANGUAGE)
             elif language == 'java':
                 with open(query_path.format("java"),"r") as f: query = f.read()
                 self.query = JAVA_LANGUAGE.query(query)

@@ -155,6 +155,8 @@ class Buffer():
             return "javascript"
         elif    self.file_path.endswith('.smali'):
             return "smali"
+        elif    self.file_path.endswith('.json'):
+            return "json"
         # elif    self.file_path.endswith('.rb'):
             # return "ruby"
         # elif    self.file_path.endswith('.rs'):
@@ -164,8 +166,6 @@ class Buffer():
         # elif    self.file_path.endswith('.cpp') or \
                 # self.file_path.endswith('.hpp'):
             # return "cpp"
-        # elif    self.file_path.endswith('.json'):
-            # return "json"
         # elif    self.file_path.endswith('.xml'):
             # # return "xml"  # treesitter not supporting
             # return None

@@ -1,4 +1,5 @@
 {
         "theme_path": "themes/monokai-color-theme.json",
-        "tab": "    "
+        "tab_representation": "    ",
+        "tab_insert": "    "
 }
