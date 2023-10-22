@@ -1145,6 +1145,12 @@ class Editor():
             except Exception as e: elog(f"Exception: {e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('t')][ord('s')] = leader_ts_map
+        def leader_d_map(self):
+            details = DetailsPopup(self)
+            details.pop()
+            self.get_curr_tab().draw() # need to redraw after popup
+
+        self.maps[NORMAL][ord(' ')][ord('d')] = leader_d_map
 
     def _initialize_normal_maps(self):
         def colon_map(self):

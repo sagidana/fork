@@ -216,6 +216,13 @@ class Buffer():
             y += 1
         return None
 
+    def describe(self):
+        ret = f"{self.id}"
+        if self.language: ret = f"{ret} [{self.language}]"
+        if self.file_path: ret = f"{ret} {path.basename(self.file_path)}"
+        else: ret = f"{ret} <in-memory>"
+        return ret
+
     def destroy(self):
         Hooks.execute(ON_BUFFER_DESTROY_BEFORE, self)
         Hooks.execute(ON_BUFFER_DESTROY_AFTER, self)

@@ -9,18 +9,16 @@ from string import printable
 
 
 class DetailsPopup():
-    def __init__(self, screen, editor):
-        self.screen = screen
+    def __init__(self, editor):
         self.editor = editor
+        self.screen = editor.screen
 
         buffer = self.editor.get_curr_buffer()
         window = self.editor.get_curr_window()
 
-        buffer_name = path.basename(buffer.file_path) if buffer.file_path else "<in_memory>"
-        buffer_id = buffer.id
         x = window.buffer_cursor[0]
         y = window.buffer_cursor[1]
-        status = f"[{buffer_id}]{buffer_name} {y}:{x}"
+        status = f"{buffer.describe()} {y}:{x}"
         pending_tasks = self.editor.tasks
         self.details = []
         self.details.append(status)
@@ -28,6 +26,11 @@ class DetailsPopup():
             self.details.append("tasks")
             for task in pending_tasks:
                 self.details.append(f"{g_settings['tab_representation']}- {task.id}")
+        buffers = self.editor.buffers
+        if len(buffers) > 0:
+            self.details.append("buffers")
+            for b in buffers:
+                self.details.append(f"{g_settings['tab_representation']}- {b.describe()}")
 
         margin = 5
         self.position = list([  window.position[0] + margin,
@@ -39,8 +42,8 @@ class DetailsPopup():
 
     def pop(self):
         self.draw()
-        # # wait for key to release
-        # self.screen.get_key()
+        # wait for key to release
+        self.screen.get_key()
 
     def draw(self):
         try:
