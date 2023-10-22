@@ -58,10 +58,10 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - \<num\>\<action\>
 - trailing spaces
 - auto tab on insert mode
-- add markdown language
-- >> and << operations while in visual_line mode
+- `>>` and `<<` operations while in visual_line mode
 - visual block mode
 - make asterisk work as <cword> in vim
-- add '/' to visual mode (search visualized text)
-- add 'G' and 'gg' to visual mode
+- add `/` to visual mode (search visualized text)
+- add `G` and `gg` to visual mode
+- autocomplete - dont require entre.. act like vim
 
