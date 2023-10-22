@@ -55,20 +55,10 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 
 ## TODOs
-- windowing
-- folds
 - ctags
-- cscope
-
-- auto completion
-
-- quickfix lists/location lists
-- fzf
-
-- statusline?
-
-- replace
 - \<num\>\<action\>
+- trailing spaces
+- auto tab on insert mode
+- add markdown language
+- >> and << operations while in visual_line mode
 
-- existing plugins
-- macros
