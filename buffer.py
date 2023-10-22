@@ -139,8 +139,8 @@ class Buffer():
         elif    self.file_path.endswith('.c') or \
                 self.file_path.endswith('.h'):
             return "c"
-        # elif    self.file_path.endswith('.md'):
-            # return "markdown"
+        elif    self.file_path.endswith('.md'):
+            return "markdown"
         # elif    self.file_path.endswith('.php'):
             # return "php"
         # elif    self.file_path.endswith('.go'):

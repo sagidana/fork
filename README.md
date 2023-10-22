@@ -61,4 +61,5 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - auto tab on insert mode
 - add markdown language
 - >> and << operations while in visual_line mode
+- visual block mode
 

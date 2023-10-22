@@ -21,7 +21,7 @@ RUST_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitte
 CSHARP_LANGUAGE = Language(     path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'c_sharp')
 JSON_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'json')
 SMALI_LANGUAGE = Language(      path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'smali')
-# MARKDOWN_LANGUAGE = Language(   path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'markdown')
+MARKDOWN_LANGUAGE = Language(   path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'markdown')
 # MAKE_LANGUAGE = Language(       path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'make')
 # ELISP_LANGUAGE = Language(      path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'elisp')
 # LUA_LANGUAGE = Language(        path.join(EDITOR_HOME_PATH, 'grammars/tree-sitter-lib/my-languages.so'), 'lua')
@@ -107,6 +107,10 @@ class TreeSitter():
                 with open(query_path.format("smali"),"r") as f: query = f.read()
                 self.query = SMALI_LANGUAGE.query(query)
                 self.parser.set_language(SMALI_LANGUAGE)
+            elif language == 'markdown':
+                with open(query_path.format("markdown"),"r") as f: query = f.read()
+                self.query = MARKDOWN_LANGUAGE.query(query)
+                self.parser.set_language(MARKDOWN_LANGUAGE)
             else:
                 raise Exception("treesitter not support that language.. :(")
         except Exception as e: elog(f"Exception: {e}")
@@ -165,6 +169,7 @@ if __name__ == '__main__':
         # git clone https://github.com/tree-sitter/tree-sitter-c-sharp
         # git clone https://github.com/tree-sitter/tree-sitter-json
         # git clone https://github.com/amaanq/tree-sitter-smali.git
+        # git clone https://github.com/MDeiml/tree-sitter-markdown.git
 
         # git clone https://github.com/tree-sitter/tree-sitter-markdown
         # git clone https://github.com/tree-sitter/tree-sitter-make
@@ -191,6 +196,7 @@ if __name__ == '__main__':
             'vendor/tree-sitter-c-sharp',
             'vendor/tree-sitter-json',
             'vendor/tree-sitter-smali',
+            'vendor/tree-sitter-markdown',
             # 'vendor/tree-sitter-markdown',
             # 'vendor/tree-sitter-make',
             # 'vendor/tree-sitter-elisp',
