@@ -106,6 +106,10 @@ class Window():
 
         self.set_lines_margin()
 
+        if self.line_numbers:
+            self.content_position[0] = self.position[0] + self.lines_margin
+            self.content_width = self.width - self.lines_margin
+
         self.draw()
 
     def enable_status_line(self):
@@ -122,15 +126,15 @@ class Window():
 
     def enable_lines_numbers(self):
         if self.line_numbers: return
-        self.content_position[0] += self.lines_margin
-        self.content_width -= self.lines_margin
+        self.content_position[0] = self.position[0] + self.lines_margin
+        self.content_width = self.width - self.lines_margin
         self.line_numbers = True
         self.draw()
 
     def disable_lines_numbers(self):
         if not self.line_numbers: return
-        self.content_position[0] -= self.lines_margin
-        self.content_width += self.lines_margin
+        self.content_position[0] = self.position[0]
+        self.content_width = self.width
         self.line_numbers = False
         self.draw()
 
