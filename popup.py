@@ -3,6 +3,7 @@ from log import elog
 from treesitter import traverse_tree
 from settings import g_settings
 from screen import *
+from os import path
 
 from string import printable
 
@@ -15,11 +16,11 @@ class DetailsPopup():
         buffer = self.editor.get_curr_buffer()
         window = self.editor.get_curr_window()
 
-        buffer_name = buffer.file_path if buffer.file_path else "<in_memory>"
+        buffer_name = path.basename(buffer.file_path) if buffer.file_path else "<in_memory>"
         buffer_id = buffer.id
         x = window.buffer_cursor[0]
         y = window.buffer_cursor[1]
-        status = f"{buffer_name}[{buffer_id}]({x},{y})"
+        status = f"[{buffer_id}]{buffer_name} {y}:{x}"
         pending_tasks = self.editor.tasks
         self.details = []
         self.details.append(status)

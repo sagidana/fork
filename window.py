@@ -9,6 +9,7 @@ from syntax import get_scope_style
 
 from intervaltree import Interval, IntervalTree
 from string import printable
+from os import path
 import time
 import re
 
@@ -73,6 +74,7 @@ class Window():
         self.content_height = self.height
 
         self.line_numbers = False # default
+        self.status_line = False # default
 
         self.window_cursor = window_cursor.copy()
         self.buffer_cursor = buffer_cursor.copy()
@@ -104,6 +106,18 @@ class Window():
 
         self.set_lines_margin()
 
+        self.draw()
+
+    def enable_status_line(self):
+        if self.status_line: return
+        self.content_height -= 1
+        self.status_line = True
+        self.draw()
+
+    def disable_status_line(self):
+        if not self.status_line: return
+        self.content_height += 1
+        self.status_line = False
         self.draw()
 
     def enable_lines_numbers(self):
@@ -154,6 +168,7 @@ class Window():
         cursor[0] = self.window_cursor[0]
         cursor[1] = self.window_cursor[1]
 
+        if self.status_line: self.draw_status_line()
         if self.line_numbers: self.draw_line_numbers()
         self.visualize()
 
@@ -304,6 +319,33 @@ class Window():
             self._visualize_line()
         if self.buffer.visual_mode == 'visual_block':
             self._visualize_block()
+
+    def draw_status_line(self):
+        style = {}
+        style['background'] = g_settings['theme']['colors']['editor.background']
+        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+
+        buffer_name = path.basename(self.buffer.file_path) if self.buffer.file_path else "<in_memory>"
+        buffer_id = self.buffer.id
+        buffer_language = self.buffer.language
+        x = self.buffer_cursor[0]
+        y = self.buffer_cursor[1]
+
+        if buffer_language:
+            status_line = f"{buffer_id} [{buffer_language}] {buffer_name} {y}:{x}"
+        else:
+            status_line = f"{buffer_id} {buffer_name} {y}:{x}"
+
+        if len(status_line) < self.width:
+            status_line = f"{status_line}{' '*(self.width - len(status_line))}"
+        else:
+            status_line = status_line[:self.width]
+
+        self._screen_write_raw( 0,
+                                self.height - 1,
+                                status_line,
+                                style,
+                                to_flush=False)
 
     def draw_line_numbers(self):
         style = {}
