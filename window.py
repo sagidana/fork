@@ -183,7 +183,7 @@ class Window():
         buffer_height = len(self.buffer.lines) - 1
 
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
-        screen_end_y = min(screen_start_y + self.height, buffer_height)
+        screen_end_y = min(screen_start_y + self.content_height, buffer_height)
 
         for start_x, start_y, end_x, end_y, style in self.buffer.highlights:
             if start_y >= screen_end_y: return
@@ -227,7 +227,7 @@ class Window():
         buffer_height = len(self.buffer.lines) - 1
 
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
-        screen_end_y = min(screen_start_y + self.height, buffer_height)
+        screen_end_y = min(screen_start_y + self.content_height, buffer_height)
 
         for node, style in get_syntax_highlights(   self.buffer.treesitter,
                                                     start_point=(screen_start_y, 0),
@@ -247,7 +247,7 @@ class Window():
         orig_end_x += 1
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
-        screen_end_y = min(screen_start_y + self.height, buffer_height)
+        screen_end_y = min(screen_start_y + self.content_height, buffer_height)
 
         if orig_start_y > screen_end_y: return
         if orig_end_y < screen_start_y: return
@@ -295,7 +295,7 @@ class Window():
 
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
-        screen_end_y = min(screen_start_y + self.height, buffer_height)
+        screen_end_y = min(screen_start_y + self.content_height, buffer_height)
 
         if start_y > screen_end_y: return
         if end_y < screen_start_y: return
@@ -548,12 +548,16 @@ class Window():
 
         self.width = width
         self.height = height
-        self.content_height = height
 
         if not self.line_numbers:
             self.content_width = width
         else:
             self.content_width = width - self.lines_margin
+
+        if not self.status_line:
+            self.content_height = height
+        else:
+            self.content_height = height - 1
 
         if self.window_cursor[0] >= self.content_width- 1:
             diff = self.window_cursor[0] - (self.content_width - 1)
@@ -608,7 +612,7 @@ class Window():
         if self.buffer_cursor[1] == len(self.buffer.lines) - 1: return False
 
         # We need to scroll down
-        if self.window_cursor[1] == self.height - 1:
+        if self.window_cursor[1] == self.content_height - 1:
             self._scroll_down()
             scrolled = True
         else: # Simple down action
@@ -656,7 +660,7 @@ class Window():
                                         # self.buffer_cursor[1])
 
     def _align_center(self):
-        center = int(self.height / 2)
+        center = int(self.content_height / 2)
         if self.buffer_cursor[1] < center:
             self.window_cursor[1] = self.buffer_cursor[1]
         # elif self.buffer_cursor[1] :
@@ -668,7 +672,7 @@ class Window():
         self.window_cursor[1] = top
 
     def _align_bottom(self):
-        bottom = self.height - 1
+        bottom = self.content_height - 1
 
         if self.buffer_cursor[1] < bottom:
             self.window_cursor[1] = self.buffer_cursor[1]
@@ -737,7 +741,7 @@ class Window():
             return None
 
     def half_page_down(self):
-        half = int(self.height / 2)
+        half = int(self.content_height / 2)
         x = self.buffer_cursor[0]
         y = self.buffer_cursor[1]
         max_y = len(self.buffer.lines) - 1
@@ -747,7 +751,7 @@ class Window():
         return x, y
 
     def half_page_up(self):
-        half = int(self.height / 2)
+        half = int(self.content_height / 2)
         x = self.buffer_cursor[0]
         y = self.buffer_cursor[1]
 
@@ -756,14 +760,14 @@ class Window():
         return x, y
 
     def scroll_up_half_page(self):
-        half = int(self.height / 2)
+        half = int(self.content_height / 2)
         for i in range(half): self._move_up()
         self._align_center()
 
         self.draw()
 
     def scroll_down_half_page(self):
-        half = int(self.height / 2)
+        half = int(self.content_height / 2)
         for i in range(half): self._move_down()
         self._align_center()
 
@@ -783,8 +787,8 @@ class Window():
         buffer_len = len(self.buffer.lines) - 1
         self.buffer_cursor[1] = buffer_len
 
-        if buffer_len > self.height - 1:
-            self.window_cursor[1] = self.height - 1
+        if buffer_len > self.content_height - 1:
+            self.window_cursor[1] = self.content_height - 1
         else:
             self.window_cursor[1] = buffer_len
         self.draw()
@@ -794,7 +798,7 @@ class Window():
         self.draw_cursor()
 
     def move_middle_visible(self):
-        middle =  int(self.height / 2)
+        middle =  int(self.content_height / 2)
         while self.window_cursor[1] < middle:
             if not self._move_down(): break
         while self.window_cursor[1] > middle:
@@ -802,7 +806,7 @@ class Window():
         self.draw_cursor()
 
     def move_end_visible(self):
-        while self.window_cursor[1] < self.height - 1:
+        while self.window_cursor[1] < self.content_height - 1:
             if not self._move_down(): break
         self.draw_cursor()
 
@@ -1223,7 +1227,7 @@ class Window():
         x_margin = self.content_position[0] - self.position[0]
         y_margin = self.content_position[1] - self.position[1]
         if x >= self.width - x_margin: return
-        if y >= self.height - y_margin: return
+        if y >= self.content_height - y_margin: return
 
         self.screen.move_cursor(    self.content_position[1] + y,
                                     self.content_position[0] + x)
@@ -1235,7 +1239,7 @@ class Window():
 
     def _screen_clear_line(self, y):
         y_margin = self.content_position[1] - self.position[1]
-        if y >= self.height - y_margin: return
+        if y >= self.content_height - y_margin: return
 
         self.screen.clear_line(self.content_position[1] + y)
 
@@ -1243,7 +1247,7 @@ class Window():
         x_margin = self.content_position[0] - self.position[0]
         y_margin = self.content_position[1] - self.position[1]
 
-        if y >= self.height - y_margin: return
+        if y >= self.content_height - y_margin: return
         if start_x >= self.width - x_margin: return
         if end_x > self.width - x_margin:
             end_x = self.width - x_margin
@@ -1310,7 +1314,7 @@ class Window():
             x_margin = self.content_position[0] - self.position[0]
             y_margin = self.content_position[1] - self.position[1]
             if x >= self.width - x_margin: return
-            if y >= self.height - y_margin: return
+            if y >= self.content_height - y_margin: return
 
             self._screen_write_raw( x_margin + x,
                                     y_margin + y,
