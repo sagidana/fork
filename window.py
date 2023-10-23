@@ -25,8 +25,6 @@ class Window():
             event = f"on_window_{func_name}_after"
             if event in self.events:
                 for cb in self.events[event]: cb(self)
-
-
         return event_wrapper
 
     def on_buffer_reload_callback(self, priv):
@@ -186,6 +184,24 @@ class Window():
 
     def set_lines_margin(self):
         self.lines_margin = len(str(len(self.buffer.lines))) + 1
+
+    def tailing_spaces(self):
+        style = {}
+        style['background'] = "#FF00FF"
+
+        buffer_height = len(self.buffer.lines) - 1
+        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+        screen_end_y = min(screen_start_y + self.content_height, buffer_height)
+
+        for scree_y, y in enumerate(range(screen_start_y, screen_end_y)):
+            line = self.get_line(y)
+            trailing_spaces = (len(line) - 1) - len(line.rstrip())
+            if trailing_spaces <= 0: continue
+
+            self._screen_write( self._expanded_x(y, len(line) - 1 - trailing_spaces),
+                                scree_y,
+                                " "*trailing_spaces,
+                                style)
 
     def highlight(self):
         buffer_height = len(self.buffer.lines) - 1
@@ -509,6 +525,7 @@ class Window():
 
             # the rest calls will do implicit flush.
             self.highlight()
+            self.tailing_spaces()
             self.visualize()
             self.draw_cursor()
         except Exception as e: elog(f"Exception: {e}")
