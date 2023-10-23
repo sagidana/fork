@@ -54,7 +54,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- `>>` and `<<` operations while in visual_line mode
 - \<num\>\<action\>
 - move windows (especially in the rg cases)
 - replace mode

@@ -1040,6 +1040,8 @@ class Window():
         if is_right:
             for y in range(start_y, end_y + 1):
                 line = self.get_line(y)
+                if len(line) - 1 <= 0: continue
+                if not re.search('\S', line): continue
                 line = indent_content + line
                 self.buffer.replace_line(y, line)
             curr_y = self.buffer_cursor[1]
@@ -1049,7 +1051,10 @@ class Window():
         else:
             for y in range(start_y, end_y + 1):
                 line = self.get_line(y)
-                num_of_spaces = re.search('\S', line).start()
+                if len(line) - 1 <= 0: continue
+                m = re.search('\S', line)
+                if not m: continue
+                num_of_spaces = m.start()
                 num_to_remove = min(len(indent_content), num_of_spaces)
                 self.buffer.replace_line(y, line[num_to_remove:])
                 if self.buffer_cursor[1] == y:

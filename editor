@@ -1337,6 +1337,24 @@ class Editor():
             self.draw()
             return False
         self.maps[VISUAL_LINE][ord('G')] = G_map
+        self.maps[VISUAL_LINE][ord('>')] = {}
+        self.maps[VISUAL_LINE][ord('<')] = {}
+        def lt_lt_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+            self.change_begin()
+            self.get_curr_window().indent_lines(start_y, end_y, False)
+            self.change_end()
+        self.maps[VISUAL_LINE][ord('<')][ord('<')] = lt_lt_map
+        def gt_gt_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+            self.change_begin()
+            self.get_curr_window().indent_lines(start_y, end_y, True)
+            self.change_end()
+        self.maps[VISUAL_LINE][ord('>')][ord('>')] = gt_gt_map
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):
