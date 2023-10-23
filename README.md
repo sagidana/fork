@@ -55,6 +55,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - `>>` and `<<` operations while in visual_line mode
+- \<num\>\<action\>
 - move windows (especially in the rg cases)
 - replace mode
 - visual block mode
@@ -63,8 +64,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - auto tab on insert mode
 - add `/` to visual mode (search visualized text)
 - autocomplete - dont require enter.. act like vim
-- \<num\>\<action\>
-- add `G` and `gg` to visual mode
 - make asterisk work as <cword> in vim
 - update highlights on buffer change
 

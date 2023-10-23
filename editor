@@ -1321,6 +1321,22 @@ class Editor():
             return False
         self.maps[VISUAL_LINE][ord('g')] = {}
         self.maps[VISUAL_LINE][ord('g')][ord('c')] = gc_map
+        def gg_map(self):
+            self.get_curr_window().move_begin()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_LINE][ord('g')][ord('g')] = gg_map
+        def G_map(self):
+            self.get_curr_window().move_end()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_LINE][ord('G')] = G_map
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):
