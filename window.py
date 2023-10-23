@@ -1339,7 +1339,7 @@ class Window():
 
             string_index += 1
             screen_index += len(g_settings["tab_representation"])
-        if string_index < len(string) - 1:
+        if string_index <= len(string) - 1:
             part = string[string_index:]
             self.screen.write(  self.position[1] + y,
                                 self.position[0] + x + screen_index,

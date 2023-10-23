@@ -54,7 +54,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- trailing spaces
 - replace mode
 - move windows (especially in the rg cases)
 - make `.` operation work for most/all cases
