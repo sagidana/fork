@@ -1036,7 +1036,7 @@ class Window():
                         start_y,
                         end_y,
                         is_right):
-        indent_content = "    "
+        indent_content = g_settings['tab_insert']
         if is_right:
             for y in range(start_y, end_y + 1):
                 line = self.get_line(y)
