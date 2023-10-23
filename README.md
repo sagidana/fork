@@ -64,4 +64,11 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - add `/` to visual mode (search visualized text)
 - add `G` and `gg` to visual mode
 - autocomplete - dont require entre.. act like vim
+- maybe add ast based text object?
+    - `if`/`af` inner/arround if
+    - `ir`/`ar` inner/arround for
+    - `ie`/`ae` inner/arround while
+    - `iy`/`ay` inner/arround try
+    - `im`/`am` inner/arround method/function
+
 

@@ -176,6 +176,16 @@ class CompletionPopup():
         except Exception as e:
             elog(f"Exception: {e}")
 
+class TSNode():
+    def __init__(self, node, level):
+        self.node = node
+        self.level = level
+
+    def __str__(self):
+        lines = self.node.text.decode('utf8').splitlines()
+        text = lines[0] if len(lines) > 0 else ""
+        return f"[{self.level}]{self.node.type}: {text}"
+
 class TreeSitterPopup():
     def __init__(   self,
                     screen,
@@ -235,22 +245,21 @@ class TreeSitterPopup():
 
         self.nodes = []
         if not closest_node.parent:
-            self.nodes = self.filter_nodes([closest_node])
+            self.nodes = [TSNode(closest_node, closest_level)]
             self.selected = 0
-            self.level = closest_level
         else:
             while True:
                 prev = closest_node
                 closest_node = closest_node.parent
                 if not closest_node: break
                 closest_level -= 1
-                self.nodes = self.filter_nodes(closest_node.children)
-                if len(self.nodes) > 0:
-                    self.selected = self.nodes.index(prev)
-                    self.level = closest_level + 1
+                nodes = closest_node.children
+                if len(nodes) > 0:
+                    self.selected = nodes.index(prev)
+                    self.nodes = [TSNode(node, closest_level + 1) for node in nodes]
                     break
 
-        if len(self.nodes) == 0: raise Exception('not should happend')
+        if len(self.nodes) == 0: raise Exception('should not happend')
 
         # full screen TODO:
         margin = 5
@@ -258,36 +267,21 @@ class TreeSitterPopup():
         self.width = self.screen.width - (margin * 2)
         self.height = self.screen.height - (margin * 2)
 
-    def filter_nodes(self, nodes):
-        filtered_nodes = []
-        for node in nodes:
-            # if node.type not in [
-                    # "translation_unit",
-                    # "function_definition",
-                    # "class_definition",
-                    # "method_definition",
-                    # "field_definition",
-                    # ]:
-                # continue
-            filtered_nodes.append(node)
-        return filtered_nodes
-
     def on_key(self, key):
         if key == ENTER_KEY:
-            self.ret_node = self.nodes[self.selected]
+            self.ret_node = self.nodes[self.selected].node
             return True
         if key == ord('h'):
-            if not self.nodes[self.selected].parent:
+            if not self.nodes[self.selected].node.parent:
                 return False
-            parent = self.nodes[self.selected].parent
+            parent = self.nodes[self.selected].node.parent
             if parent.parent:
                 siblings = parent.parent.children
-                self.nodes = self.filter_nodes(siblings)
-                self.selected = self.nodes.index(parent)
+                self.nodes = [TSNode(node, self.nodes[self.selected].level - 1) for node in siblings]
+                self.selected = siblings.index(parent)
             else:
-                self.nodes = [parent]
+                self.nodes = [TSNode(parent, self.nodes[self.selected].level - 1)]
                 self.selected = 0
-            self.level -= 1
             return False
         if key == ord('j'):
             if self.selected < len(self.nodes) - 1:
@@ -298,12 +292,11 @@ class TreeSitterPopup():
                 self.selected -= 1
             return False
         if key == ord('l'):
-            if self.nodes[self.selected].children:
-                new_nodes = self.filter_nodes(self.nodes[self.selected].children)
+            if self.nodes[self.selected].node.children:
+                new_nodes = self.nodes[self.selected].node.children
                 if len(new_nodes) == 0: return False
-                self.nodes = new_nodes
+                self.nodes = [TSNode(node, self.nodes[self.selected].level + 1) for node in new_nodes]
                 self.selected = 0
-                self.level += 1
             return False
         if key == CTRL_U_KEY:
             half = int(self.screen.height / 2)
@@ -324,7 +317,48 @@ class TreeSitterPopup():
         if key == ord('G'):
             self.selected = len(self.nodes) - 1
             return False
-        if key == ord('/') or key == ord('?'):
+        if key == ord('?'):
+            pattern = ""
+            success = False
+            original_nodes = self.nodes
+            original_selected = self.selected
+            while True:
+                filtered_nodes = []
+                def search(node, level, nth_child):
+                    nonlocal filtered_nodes
+                    nonlocal pattern
+                    node = TSNode(node, original_nodes[original_selected].level + level)
+                    if pattern in str(node):
+                        filtered_nodes.append(node)
+                traverse_tree(original_nodes[original_selected].node, search)
+
+                if len(filtered_nodes) > 0:
+                    self.nodes = filtered_nodes
+                    if self.selected >= len(self.nodes):
+                        self.selected = len(self.nodes) - 1
+                    self.draw()
+                key = self.screen.get_key()
+
+                if key == ENTER_KEY:
+                    if len(pattern) > 0: success = True
+                    break
+                if key == ESC_KEY: break
+                if key == BACKSPACE_KEY:
+                    if len(pattern) > 0: pattern = pattern[:-1]
+                else:
+                    try:
+                        char = chr(key)
+                        if char in printable:
+                            pattern += char
+                        else: break
+                    except: continue
+
+            if not success:
+                self.nodes = original_nodes
+                self.selected = original_selected
+
+            return False
+        if key == ord('/'):
             pattern = ""
             success = False
             original_nodes = self.nodes
@@ -345,7 +379,7 @@ class TreeSitterPopup():
                             pattern += char
                         else: break
                     except: continue
-                filtered_nodes = [node for node in original_nodes if pattern in self.node_to_string(node)]
+                filtered_nodes = [node for node in original_nodes if pattern in str(node)]
                 if len(filtered_nodes) > 0:
                     self.nodes = filtered_nodes
                     if self.selected >= len(self.nodes):
@@ -363,11 +397,11 @@ class TreeSitterPopup():
                 def nodes_at_level(node, level, nth_child):
                     nonlocal nodes
                     nonlocal target_level
-                    if level == target_level: nodes.append(node)
+                    if level == target_level:
+                        nodes.append(TSNode(node, level))
                     return
                 traverse_tree(self.treesitter.tree, nodes_at_level)
                 if len(nodes) > 0:
-                    self.level = target_level
                     self.nodes = nodes
                     if self.selected >= len(self.nodes):
                         self.selected = len(self.nodes) - 1
@@ -390,16 +424,6 @@ class TreeSitterPopup():
         except Exception as e: elog(f"Exception: {e}")
         return self.ret_node
 
-    def node_to_string(self, node):
-        lines = node.text.decode('utf8').splitlines()
-        if len(lines) > 0:
-            text = node.text.decode('utf8').splitlines()[0]
-        else:
-            text = ""
-        ret = f"[{self.level}]{node.type}: {text}"
-
-        return ret
-
     def draw(self):
         try:
             style = {}
@@ -414,7 +438,7 @@ class TreeSitterPopup():
 
             if self.selected < self.height:
                 for y, node in enumerate(self.nodes):
-                    option = self.node_to_string(node)
+                    option = str(node)
                     if len(option) < self.width:
                         option = f"{option}{' '*(self.width - len(option))}"
                     option = option[:self.width]
@@ -425,7 +449,7 @@ class TreeSitterPopup():
             else:
                 index = self.selected
                 for y in reversed(range(self.height)):
-                    option = self.node_to_string(self.nodes[index])
+                    option = str(self.nodes[index])
                     if index == self.selected:
                         self.__draw(0, y, f"{option}", selected_style)
                     else:
