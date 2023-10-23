@@ -32,6 +32,12 @@ class DetailsPopup():
             for b in buffers:
                 self.details.append(f"{g_settings['tab_representation']}- {b.describe()}")
 
+        self.details.append("tabs")
+        for tab in self.editor.tabs:
+            self.details.append(f"{g_settings['tab_representation']}- id: {tab.id}")
+            for window in tab.windows:
+                self.details.append(f"{g_settings['tab_representation']*2}- {window.describe()}")
+
         margin = 5
         self.position = list([  window.position[0] + margin,
                                 window.position[1] + margin])

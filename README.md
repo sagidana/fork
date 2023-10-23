@@ -54,16 +54,22 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- ctags
-- \<num\>\<action\>
+- `>>` and `<<` operations while in visual_line mode
+- move windows (especially in the rg cases)
+- replace mode
+- visual block mode
+- adding `curr/total` to search pattern functionality
 - trailing spaces
 - auto tab on insert mode
-- `>>` and `<<` operations while in visual_line mode
-- visual block mode
-- make asterisk work as <cword> in vim
 - add `/` to visual mode (search visualized text)
+- autocomplete - dont require enter.. act like vim
+- \<num\>\<action\>
 - add `G` and `gg` to visual mode
-- autocomplete - dont require entre.. act like vim
+- make asterisk work as <cword> in vim
+- update highlights on buffer change
+
+- make visual prettier
+- ctags
 - maybe add ast based text object?
     - `if`/`af` inner/arround if
     - `ir`/`ar` inner/arround for
@@ -72,8 +78,5 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
     - `im`/`am` inner/arround method/function
 - goto
     - start of function
-- move windows (especially in the rg cases)
-- replace mode
-- adding `curr/total` to search pattern functionality
 
 
