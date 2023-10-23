@@ -70,5 +70,10 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
     - `ie`/`ae` inner/arround while
     - `iy`/`ay` inner/arround try
     - `im`/`am` inner/arround method/function
+- goto
+    - start of function
+- move windows (especially in the rg cases)
+- replace mode
+- adding `curr/total` to search pattern functionality
 
 
