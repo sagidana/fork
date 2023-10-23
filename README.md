@@ -54,20 +54,20 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- \<num\>\<action\>
-- make `.` operation work for most/all cases
-- move windows (especially in the rg cases)
-- replace mode
-- visual block mode
 - trailing spaces
+- replace mode
+- move windows (especially in the rg cases)
+- make `.` operation work for most/all cases
+- visual block mode
 - add `/` to visual mode (search visualized text)
 - auto indent on insert mode
 - make asterisk work as <cword> in vim
 - autocomplete - dont require enter.. act like vim
-- BUG: update highlights on buffer change
 - adding `curr/total` to search pattern functionality
 
+- BUG: update highlights on buffer change
 - BUG: status line dont show if cursor is on last line
+
 - make visual prettier
 - ctags
 - maybe add ast based text object?

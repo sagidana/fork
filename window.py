@@ -1286,20 +1286,21 @@ class Window():
                                 to_flush=to_flush)
             return
 
-        string = string.replace('\t', g_settings["tab_representation"])
-        self.screen.write(  self.position[1] + y,
-                            self.position[0] + x,
-                            string,
-                            style,
-                            to_flush=to_flush)
-        return
+        # string = string.replace('\t', g_settings["tab_representation"])
+        # self.screen.write(  self.position[1] + y,
+                            # self.position[0] + x,
+                            # string,
+                            # style,
+                            # to_flush=to_flush)
+        # return
 
         # tab_style = get_scope_style('meta.embedded')
         tab_style = get_scope_style('comment')
+
         if not tab_style:
             elog(f"failed to find style for tab", type="ERROR")
             return
-        if 'reverse' in style: tab_style['reverse'] = None
+        if 'reverse' in style: tab_style = style
 
         string_index = 0
         screen_index = 0
@@ -1321,6 +1322,13 @@ class Window():
 
             string_index += 1
             screen_index += len(g_settings["tab_representation"])
+        if string_index < len(string) - 1:
+            part = string[string_index:]
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x + screen_index,
+                                part,
+                                style,
+                                to_flush=to_flush)
 
     def _screen_write(self, x, y, string, style, to_flush=True):
         try:
