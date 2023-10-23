@@ -1,4 +1,4 @@
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, DEVNULL
 from os import environ
 from os import path
 import string
@@ -119,5 +119,7 @@ def clipboard(text):
     ''' Copy `text` to the clipboard '''
     text = ''.join(text)
 
-    with Popen(['xclip','-selection', 'clipboard'], stdin=PIPE) as pipe:
+    with Popen(['xclip','-selection', 'clipboard'], stdin=PIPE,
+                                                    stdout=DEVNULL,
+                                                    stderr=DEVNULL) as pipe:
         pipe.communicate(input=text.encode('utf-8'))
