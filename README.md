@@ -55,17 +55,19 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - \<num\>\<action\>
+- make `.` operation work for most/all cases
 - move windows (especially in the rg cases)
 - replace mode
 - visual block mode
-- adding `curr/total` to search pattern functionality
 - trailing spaces
-- auto tab on insert mode
 - add `/` to visual mode (search visualized text)
-- autocomplete - dont require enter.. act like vim
+- auto indent on insert mode
 - make asterisk work as <cword> in vim
-- update highlights on buffer change
+- autocomplete - dont require enter.. act like vim
+- BUG: update highlights on buffer change
+- adding `curr/total` to search pattern functionality
 
+- BUG: status line dont show if cursor is on last line
 - make visual prettier
 - ctags
 - maybe add ast based text object?

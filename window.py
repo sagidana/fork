@@ -365,7 +365,7 @@ class Window():
         for y in range(self.content_height):
             try:
                 if y == self.window_cursor[1]:
-                    lineno = str(buf_start_y + y).ljust(self.lines_margin - 1)
+                    lineno = str(buf_start_y + y + 1).ljust(self.lines_margin - 1)
                 else: # relative numbers
                     lineno = str(abs(self.window_cursor[1] - y)).rjust(self.lines_margin - 1)
                 lineno = lineno.ljust(self.lines_margin)

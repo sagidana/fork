@@ -89,11 +89,21 @@ class Editor():
     def _initialize_legends_maps(self, mode):
         # Legends
         def j_map(self):
-            self.get_curr_window().move_down()
+            num = 1
+            if len(self._number) > 0:
+                num = int(self._number)
+
+            for _ in range(num):
+                self.get_curr_window().move_down()
             return False
         self.maps[mode][ord('j')] = j_map
         def k_map(self):
-            self.get_curr_window().move_up()
+            num = 1
+            if len(self._number) > 0:
+                num = int(self._number)
+
+            for _ in range(num):
+                self.get_curr_window().move_up()
             return False
         self.maps[mode][ord('k')] = k_map
         def l_map(self):
@@ -1629,6 +1639,7 @@ class Editor():
         Hooks.register(ON_RESIZE, self.screen_resize_handler)
 
         self.initialize_registers()
+        self._number = ''
         self._action = 'f' # options are 'f','F','t','T'
         self._char = None
         self._search_forward = True
@@ -1894,6 +1905,14 @@ class Editor():
         return ret
 
     def on_key(self, key):
+        # enter number mode
+        if self.mode == NORMAL:
+            self._number = ''
+            if ord('1') <= key <= ord('9'):
+                while ord('0') <= key <= ord('9'):
+                    self._number += chr(key)
+                    key = self.screen.get_key()
+
         # dot functionality, recording.
         if self.mode == NORMAL:
             # If we on top level, start recording from top.
