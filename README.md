@@ -59,7 +59,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - make asterisk work as <cword> in vim
 - auto indent on insert mode
 - add `gq`
-- add `/` to visual mode (search visualized text)
 - add support for setting config variables at runtime
 - add `e/E` to visual mode
 
