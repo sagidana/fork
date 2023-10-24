@@ -62,6 +62,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - add `gq`
 - add `/` to visual mode (search visualized text)
 
+- OPTIMIZE: while in insert mode update treesitter only on exit from insert mode
 - move windows (especially in the rg cases)
 - make `.` operation work for most/all cases
 - autocomplete - dont require enter.. act like vim

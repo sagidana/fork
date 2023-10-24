@@ -197,10 +197,13 @@ class Window():
             line = self.get_line(y)
             trailing_spaces = (len(line) - 1) - len(line.rstrip())
             if trailing_spaces <= 0: continue
+            trailing_string_index = len(line) - 1 - trailing_spaces
+            trailing_screen_length = self._expanded_x(y, len(line) - 1) - \
+                                     self._expanded_x(y, trailing_string_index)
 
-            self._screen_write( self._expanded_x(y, len(line) - 1 - trailing_spaces),
+            self._screen_write( self._expanded_x(y, trailing_string_index),
                                 scree_y,
-                                " "*trailing_spaces,
+                                " "*trailing_screen_length,
                                 style)
 
     def highlight(self):
