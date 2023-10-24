@@ -57,13 +57,13 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - visual block mode
 - search AND replace
 - replace mode
-- auto indent on insert mode
 - make asterisk work as <cword> in vim
+- auto indent on insert mode
 - add `gq`
+- add `/` to visual mode (search visualized text)
 
 - move windows (especially in the rg cases)
 - make `.` operation work for most/all cases
-- add `/` to visual mode (search visualized text)
 - autocomplete - dont require enter.. act like vim
 - BUG: auto complete dont find options when buffer modified on different window
 - adding `curr/total` to search pattern functionality

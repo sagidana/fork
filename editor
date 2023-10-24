@@ -379,6 +379,9 @@ class Editor():
             ret = self.get_curr_buffer().find_next_word(start_x, start_y)
             if not ret: return False
             end_x, end_y = ret
+            if end_y > start_y:
+                end_y = start_y
+                end_x = len(self.get_curr_window().get_line(end_y)) - 1
             scope = (start_x, start_y, end_x - 1, end_y)
             if scope: return cb(scope)
         maps[ord('w')] = move_w
@@ -388,6 +391,9 @@ class Editor():
             ret = self.get_curr_buffer().find_next_WORD(start_x, start_y)
             if not ret: return False
             end_x, end_y = ret
+            if end_y > start_y:
+                end_y = start_y
+                end_x = len(self.get_curr_window().get_line(end_y)) - 1
             scope = (start_x, start_y, end_x - 1, end_y)
             if scope: return cb(scope)
         maps[ord('W')] = move_W
