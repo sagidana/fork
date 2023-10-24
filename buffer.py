@@ -728,8 +728,6 @@ class Buffer():
         return change_wrapper['end_position']
 
     def change_begin(self, x, y):
-        # if self.file_changed_on_disk():
-            # self.reload()
         self.shadow = self.lines.copy()
         self.change_start_position = (x, y)
         self.redo_stack = [] # reset the redo stack on new edit.
@@ -775,14 +773,6 @@ class Buffer():
         return change
 
     def change_end(self, x, y):
-        # if self.file_changed_on_disk():
-            # self.reload()
-            # # discard changes if file changed underneath us
-            # change = None
-            # self.shadow = None
-            # self.change_start_position = None
-            # return
-
         change = self._analyze_change()
         change_wrapper = {}
         if change:
@@ -793,7 +783,6 @@ class Buffer():
 
         self.shadow = None
         self.change_start_position = None
-        # self.write()
 
     # CORE: movement
     def find_next_char_regex(self, x, y, char_regex): pass
