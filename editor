@@ -1854,6 +1854,17 @@ class Editor():
         return False
 
     def exec_command(self, command):
+        if command == 'e!':
+            self.get_curr_buffer().reload()
+            return False
+        if command == 'w':
+            if not self.get_curr_buffer().write():
+                # TODO: pop an error
+                pass
+            return False
+        if command == 'w!':
+            self.get_curr_buffer().write(force=True)
+            return False
         if command == 'q':
             return self._quit_command()
         if command == 'qa':
@@ -1895,7 +1906,7 @@ class Editor():
             self.get_curr_window().insert_string(g_settings["tab_insert"])
             return ret
 
-        try: 
+        try:
             char = chr(key)
             # elog(f"INSERT: ({key}) -> {char}")
             if char in printable:
@@ -2020,8 +2031,7 @@ class Editor():
                 break
 
             try:
-                char = chr(key)
-                if re.match("[a-zA-Z 0-9-_()]", char): command += char
+                command += chr(key)
             except: pass
             self.draw_command(f":{command}")
 

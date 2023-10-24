@@ -246,14 +246,23 @@ class Buffer():
         self.resync_treesitter()
         self._raise_event(ON_BUFFER_RELOAD, None)
 
-    def write(self):
+    def write(self, force=False):
+        if not force and self.file_changed_on_disk():
+            self.reload()
+            # if file was changed under us,
+            # all our stack are irrelevant as the entire file's content might
+            # be compromised
+            self.undo_stack = []
+            self.redo_stack = []
+            return False
+
         if not self.file_path:
             self.in_memory_data = "\n".join(self.lines).encode('utf-8')
         else:
             with open(self.file_path, 'w+') as f:
                 f.writelines(self.lines)
-
             self.hash = self._hash_file()
+        return True
 
     def update_highlights(self):
         self.highlights = []
@@ -697,48 +706,30 @@ class Buffer():
             self.replace_line(line, lines_for_replacement[line])
 
     def undo(self):
-        if self.file_changed_on_disk():
-            self.reload()
-            # if file was changed under us,
-            # all our stack are irrelevant as the entire file's content might
-            # be compromised
-            self.undo_stack = []
-            self.redo_stack = []
-            return
-
         if len(self.undo_stack) == 0: return
         change_wrapper = self.undo_stack.pop()
         change = change_wrapper['change']
 
         self._change(change)
-        self.write()
+        # self.write()
 
         self.redo_stack.append(change_wrapper)
         return change_wrapper['start_position']
 
     def redo(self):
-        if self.file_changed_on_disk():
-            self.reload()
-            # if file was changed under us,
-            # all our stack are irrelevant as the entire file's content might
-            # be compromised
-            self.undo_stack = []
-            self.redo_stack = []
-            return
-
         if len(self.redo_stack) == 0: return
         change_wrapper = self.redo_stack.pop()
         change = change_wrapper['change']
 
         self._change(change, undo=False)
-        self.write()
+        # self.write()
 
         self.undo_stack.append(change_wrapper)
         return change_wrapper['end_position']
 
     def change_begin(self, x, y):
-        if self.file_changed_on_disk():
-            self.reload()
+        # if self.file_changed_on_disk():
+            # self.reload()
         self.shadow = self.lines.copy()
         self.change_start_position = (x, y)
         self.redo_stack = [] # reset the redo stack on new edit.
@@ -784,13 +775,13 @@ class Buffer():
         return change
 
     def change_end(self, x, y):
-        if self.file_changed_on_disk():
-            self.reload()
-            # discard changes if file changed underneath us
-            change = None
-            self.shadow = None
-            self.change_start_position = None
-            return
+        # if self.file_changed_on_disk():
+            # self.reload()
+            # # discard changes if file changed underneath us
+            # change = None
+            # self.shadow = None
+            # self.change_start_position = None
+            # return
 
         change = self._analyze_change()
         change_wrapper = {}
@@ -802,7 +793,7 @@ class Buffer():
 
         self.shadow = None
         self.change_start_position = None
-        self.write()
+        # self.write()
 
     # CORE: movement
     def find_next_char_regex(self, x, y, char_regex): pass

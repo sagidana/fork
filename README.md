@@ -72,7 +72,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - BUG: auto complete dont find options when buffer modified on different window
 - adding `curr/total` to search pattern functionality
 
-- BUG: update highlights on buffer change
 - BUG: status line dont show if cursor is on last line
 
 - ctags
