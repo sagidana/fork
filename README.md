@@ -54,14 +54,18 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- replace mode
-- move windows (especially in the rg cases)
-- make `.` operation work for most/all cases
 - visual block mode
-- add `/` to visual mode (search visualized text)
+- search AND replace
+- replace mode
 - auto indent on insert mode
 - make asterisk work as <cword> in vim
+- add `gq`
+
+- move windows (especially in the rg cases)
+- make `.` operation work for most/all cases
+- add `/` to visual mode (search visualized text)
 - autocomplete - dont require enter.. act like vim
+- BUG: auto complete dont find options when buffer modified on different window
 - adding `curr/total` to search pattern functionality
 
 - BUG: update highlights on buffer change

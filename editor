@@ -331,6 +331,7 @@ class Editor():
             self.change_begin()
             self.get_curr_window().upper()
             self.change_end()
+            self.get_curr_window().move_right()
             return False
         self.maps[NORMAL][ord('~')] = tilda_map
 
