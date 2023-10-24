@@ -1327,7 +1327,6 @@ class Editor():
             return False
         self.maps[VISUAL_LINE][ord('h')] = h_map
         def gc_map(self):
-            elog("gc_map")
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
             self.change_begin()
