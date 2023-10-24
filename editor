@@ -1886,6 +1886,11 @@ class Editor():
             return self._quit_command()
         if command == 'qa':
             return True
+        try:
+            line_num = int(command)
+            curr_x = self.get_curr_window().buffer_cursor[0]
+            self.get_curr_window().move_cursor_to_buf_location(curr_x, line_num - 1)
+        except: pass
         return False
 
     def draw_command(self, command):
