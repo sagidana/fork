@@ -248,6 +248,7 @@ class Window():
                                 style)
 
     def get_syntax(self):
+        MAX_COLS = 1000
         syntax_map = IntervalTree()
         if not self.buffer.treesitter: return syntax_map
 
@@ -259,8 +260,13 @@ class Window():
         for node, style in get_syntax_highlights(   self.buffer.treesitter,
                                                     start_point=(screen_start_y, 0),
                                                     end_point=(screen_end_y+1, 0)):
-            start_pos = self.buffer.get_file_pos(node.start_point[1],node.start_point[0])
-            end_pos = self.buffer.get_file_pos(node.end_point[1],node.end_point[0])
+            # elog(f"{dir(node)}")
+            # start_pos = self.buffer.get_file_pos(node.start_point[1],node.start_point[0])
+            # end_pos = self.buffer.get_file_pos(node.end_point[1],node.end_point[0])
+            # start_pos = node.start_byte
+            # end_pos = node.end_byte
+            start_pos = (node.start_point[0] * MAX_COLS) + node.start_point[1]
+            end_pos = (node.end_point[0] * MAX_COLS) + node.end_point[1]
 
             if start_pos == end_pos: continue
 
@@ -462,8 +468,9 @@ class Window():
                 line = self.get_line(buffer_y)
                 buffer_end_x = max(0, len(line) - 1) # minus one because of '\n'
 
-                _start_pos = self.buffer.get_file_pos(buffer_start_x, buffer_y)
-                _end_pos = self.buffer.get_file_pos(buffer_end_x, buffer_y)
+                MAX_COLS = 1000
+                _start_pos = (buffer_y * MAX_COLS) + buffer_start_x
+                _end_pos = (buffer_y * MAX_COLS) + buffer_end_x
 
                 syntax = sorted(list(syntax_map[_start_pos:_end_pos]))
 
