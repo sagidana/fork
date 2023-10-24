@@ -1107,8 +1107,9 @@ class Editor():
 
     def _initialize_leader_maps(self):
         self.maps[NORMAL][ord(' ')] = {}        # leader
-        self.maps[NORMAL][ord(' ')][ord('s')] = {}
-        self.maps[NORMAL][ord(' ')][ord('t')] = {}
+        self.maps[NORMAL][ord(' ')][ord('o')] = {} # open
+        self.maps[NORMAL][ord(' ')][ord('s')] = {} # search
+        self.maps[NORMAL][ord(' ')][ord('t')] = {} # treesitter
         def leader_sf_map(self): # search file
             file_path = fzf()
             if file_path:
@@ -1166,8 +1167,14 @@ class Editor():
             details = DetailsPopup(self)
             details.pop()
             self.get_curr_tab().draw() # need to redraw after popup
-
         self.maps[NORMAL][ord(' ')][ord('d')] = leader_d_map
+        def leader_oc_map(self):
+            config_path = os.path.expanduser('~/.config/editor/config.json')
+            buffer = self.get_or_create_buffer(config_path)
+            self.get_curr_tab().vsplit(buffer)
+            pass
+        # open config
+        self.maps[NORMAL][ord(' ')][ord('o')][ord('c')] = leader_oc_map
 
     def _initialize_normal_maps(self):
         def colon_map(self):

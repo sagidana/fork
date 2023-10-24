@@ -61,8 +61,14 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - auto indent on insert mode
 - add `gq`
 - add `/` to visual mode (search visualized text)
+- add support for setting config variables at runtime
 
-- OPTIMIZE: while in insert mode update treesitter only on exit from insert mode
+- OPTIMIZE:
+    - disable auto write on every change, instead only on :w
+    - while in insert mode update treesitter only on exit from insert mode
+    - add support to force write
+    - add reload file in case file changed under us
+
 - move windows (especially in the rg cases)
 - make `.` operation work for most/all cases
 - autocomplete - dont require enter.. act like vim

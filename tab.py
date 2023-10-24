@@ -336,10 +336,19 @@ class Tab():
 
         self.draw()
 
-    def vsplit(self):
+    def vsplit(self, buffer=None):
         if self.zoom_mode: self.zoom_toggle()
         curr_window = self.get_curr_window()
-        curr_buffer = curr_window.buffer
+
+        window_cursor = [0,0]
+        buffer_cursor = [0,0]
+        jumpslist = list()
+
+        if not buffer:
+            buffer = curr_window.buffer
+            window_cursor = curr_window.window_cursor
+            buffer_cursor = curr_window.buffer_cursor
+            jumpslist = curr_window.jumpslist
 
         height = curr_window.height
         width = int(curr_window.width / 2)
@@ -357,10 +366,10 @@ class Tab():
                                 height,
                                 position=(  curr_window.position[0] + width + 1,
                                             curr_window.position[1]),
-                                buffer=curr_buffer,
-                                window_cursor=curr_window.window_cursor,
-                                buffer_cursor=curr_window.buffer_cursor,
-                                jumpslist=curr_window.jumpslist)
+                                buffer=buffer,
+                                window_cursor=window_cursor,
+                                buffer_cursor=buffer_cursor,
+                                jumpslist=jumpslist)
 
         self.add_window(new_window)
         self.focus_window(new_window)
