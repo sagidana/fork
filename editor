@@ -1426,6 +1426,7 @@ class Editor():
                                                         last_pattern,
                                                         text)
             self.change_end()
+            self.change_mode(NORMAL)
             return False
         self.maps[VISUAL_LINE][ord(' ')][ord('r')] = leader_r_map
 
