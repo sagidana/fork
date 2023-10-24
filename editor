@@ -738,8 +738,8 @@ class Editor():
             self.registers['"'] = data
 
             self.get_curr_window().empty_line()
-            self.change_end()
-            self.change_mode(INSERT)
+            # self.change_end()
+            self.change_mode(INSERT, effect_change=False)
             return False
         self.maps[NORMAL][ord('c')][ord('c')] = cc_map
         def gt_gt_map(self):
@@ -1063,8 +1063,8 @@ class Editor():
 
             self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
-            self.change_end()
-            self.change_mode(INSERT)
+            # self.change_end()
+            self.change_mode(INSERT, effect_change=False)
             return False
         self.maps[NORMAL][ord('C')] = C_map
         def D_map(self):
