@@ -1856,12 +1856,18 @@ class Editor():
 
     def _quit_command(self):
         tab = self.get_curr_tab()
+        window = tab.get_curr_window()
 
-        if len(tab.windows) == 1:
+        if len(tab.windows) > 1:
+            tab.close_window(window)
+            return False
+        if len(self.tabs) == 1:
+            tab.close()
             return True
 
-        window = tab.get_curr_window()
-        tab.close_window(window)
+        to_delete = self.tabs.pop(self.curr_tab)
+        self.curr_tab = self.curr_tab % len(self.tabs)
+        to_delete.close()
         return False
 
     def exec_command(self, command):
@@ -1958,7 +1964,6 @@ class Editor():
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
         style['background'] = g_settings['theme']['colors']['selection.background']
 
-        # highlights = [(start_x, start_y, end_x, end_y, style) for start_x, start_y, end_x, end_y in results]
         self.get_curr_buffer().add_highlights("/", pattern, style)
         self.get_curr_window().draw()
 

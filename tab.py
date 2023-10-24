@@ -456,3 +456,7 @@ class Tab():
 
         Hooks.execute(ON_DRAW_TAB, None)
 
+    def close(self):
+        for window in self.windows:
+            window.close()
+
