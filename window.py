@@ -270,6 +270,11 @@ class Window():
     def _visualize_block(self): pass
 
     def _visualize(self):
+        style = {}
+        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+        style['background'] = g_settings['theme']['colors']['selection.background']
+        # style['reverse'] = None
+
         orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
         orig_end_x += 1
         buffer_height = len(self.buffer.lines) - 1
@@ -292,7 +297,7 @@ class Window():
             self._screen_write( self._expanded_x(start_y, start_x),
                                 start_y - screen_start_y,
                                 string,
-                                {'reverse': None})
+                                style)
             return
 
         # first line
@@ -300,7 +305,7 @@ class Window():
         self._screen_write( self._expanded_x(start_y, start_x),
                             start_y - screen_start_y,
                             string,
-                            {'reverse': None})
+                            style)
 
         # lines in between
         for y in range(start_y + 1, end_y):
@@ -308,16 +313,20 @@ class Window():
             self._screen_write( 0,
                                 y - screen_start_y,
                                 string,
-                                {'reverse': None})
+                                style)
 
         # last line
         string = self.get_line(end_y)[:end_x]
         self._screen_write( 0,
                             end_y - screen_start_y,
                             string,
-                            {'reverse': None})
+                            style)
 
     def _visualize_line(self):
+        style = {}
+        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+        style['background'] = g_settings['theme']['colors']['selection.background']
+        # style['reverse'] = None
         start_x, start_y, end_x, end_y = self.buffer.visual_get_scope()
 
         buffer_height = len(self.buffer.lines) - 1
@@ -335,7 +344,7 @@ class Window():
             self._screen_write( 0,
                                 y - screen_start_y,
                                 string[:-1],
-                                {'reverse': None})
+                                style)
 
     def visualize(self):
         if not self.buffer.visual_mode: return
@@ -1106,9 +1115,8 @@ class Window():
                                             end_y,
                                             pattern,
                                             dest)
-        # TODO
-        # self.move_cursor_to_buf_location(x, y, to_draw=False)
 
+        self.move_cursor_to_buf_location(start_x, start_y, to_draw=False)
         self.draw()
 
     def new_line_after(self):

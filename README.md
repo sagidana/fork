@@ -55,7 +55,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - visual block mode
-- search AND replace
 - replace mode
 - make asterisk work as <cword> in vim
 - auto indent on insert mode
@@ -79,7 +78,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - BUG: update highlights on buffer change
 - BUG: status line dont show if cursor is on last line
 
-- make visual prettier
 - ctags
 - maybe add ast based text object?
     - `if`/`af` inner/arround if
