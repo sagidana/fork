@@ -23,6 +23,7 @@ class Buffer():
                 self.treesitter.edit(change, self.get_file_bytes())
             else:
                 self.resync_treesitter()
+        self.update_highlights()
 
     def raise_event(func):
         def event_wrapper(self):
@@ -69,6 +70,7 @@ class Buffer():
         self.undo_stack = []
         self.redo_stack = []
 
+        self.highlights_meta = {}
         self.highlights = []
 
         self.visual_mode = None
@@ -253,13 +255,28 @@ class Buffer():
 
             self.hash = self._hash_file()
 
-    def set_highlights(self, highlights):
-        self.highlights = highlights
+    def update_highlights(self):
+        self.highlights = []
+        for k in self.highlights_meta:
+            pattern, style = self.highlights_meta[k]
+            results = self.search_pattern(pattern)
+            if len(results) == 0: continue
+            for result in results:
+                start_x, start_y, end_x, end_y = result
+                self.highlights.append((start_x, start_y, end_x, end_y, style))
 
     def clear_highlights(self):
         self.highlights = []
+        self.highlights_meta = {}
 
-    def add_highlights(self, highlights): pass
+    def del_highlights(self, name):
+        if name in self.highlights_meta:
+            del self.highlights_meta[name]
+        self.update_highlights()
+
+    def add_highlights(self, name, pattern, style):
+        self.highlights_meta[name] = (pattern, style)
+        self.update_highlights()
 
     def visual_begin(self, mode, x, y):
         self.visual_mode = mode

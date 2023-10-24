@@ -60,7 +60,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - auto indent on insert mode
 - add `gq`
 - add support for setting config variables at runtime
-- add `e/E` to visual mode
 
 - OPTIMIZE:
     - disable auto write on every change, instead only on :w
@@ -69,7 +68,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
     - add reload file in case file changed under us
 
 - move windows (especially in the rg cases)
-- make `.` operation work for most/all cases
 - autocomplete - dont require enter.. act like vim
 - BUG: auto complete dont find options when buffer modified on different window
 - adding `curr/total` to search pattern functionality

@@ -1936,8 +1936,8 @@ class Editor():
         style['foreground'] = g_settings['theme']['colors']['editor.foreground']
         style['background'] = g_settings['theme']['colors']['selection.background']
 
-        highlights = [(start_x, start_y, end_x, end_y, style) for start_x, start_y, end_x, end_y in results]
-        self.get_curr_buffer().set_highlights(highlights)
+        # highlights = [(start_x, start_y, end_x, end_y, style) for start_x, start_y, end_x, end_y in results]
+        self.get_curr_buffer().add_highlights("/", pattern, style)
         self.get_curr_window().draw()
 
     def prompt(self, ask=None):
