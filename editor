@@ -62,11 +62,9 @@ class Editor():
         if self.mode == INSERT and target == NORMAL:
             if effect_change: self.change_end()
             self.get_curr_window().move_left()
-            # TODO: reset cursor shape of normal mode
             self.screen.set_cursor_block_blink()
         if self.mode == NORMAL and target == INSERT:
             if effect_change: self.change_begin()
-            # TODO: set cursor shape of insert mode
             self.screen.set_cursor_i_beam()
         if self.mode == NORMAL and target == VISUAL_LINE:
             self.get_curr_window().visual_begin(VISUAL_LINE)
@@ -1167,14 +1165,41 @@ class Editor():
             details = DetailsPopup(self)
             details.pop()
             self.get_curr_tab().draw() # need to redraw after popup
+            return False
         self.maps[NORMAL][ord(' ')][ord('d')] = leader_d_map
         def leader_oc_map(self):
             config_path = os.path.expanduser('~/.config/editor/config.json')
             buffer = self.get_or_create_buffer(config_path)
             self.get_curr_tab().vsplit(buffer)
-            pass
+            return False
         # open config
         self.maps[NORMAL][ord(' ')][ord('o')][ord('c')] = leader_oc_map
+        def leader_r_map(self):
+            text = self.prompt("replace: ")
+            if len(text) == 0: return False
+            last_pattern = self.registers['/']
+            if not last_pattern or len(last_pattern) == 0: return False
+
+            start = self.get_curr_buffer().get_file_x_y(0)
+            if not start: return False
+            start_x, start_y = start
+
+            end_pos = len(self.get_curr_buffer().get_file_stream()) - 1
+            end = self.get_curr_buffer().get_file_x_y(end_pos)
+            if not end: return False
+            end_x, end_y = end
+
+            self.change_begin()
+            self.get_curr_window().search_replace_scope(start_x,
+                                                        start_y,
+                                                        end_x,
+                                                        end_y,
+                                                        last_pattern,
+                                                        text)
+            self.change_end()
+            return False
+        # replace editor pattern
+        self.maps[NORMAL][ord(' ')][ord('r')] = leader_r_map
 
     def _initialize_normal_maps(self):
         def colon_map(self):
@@ -1246,6 +1271,7 @@ class Editor():
         self._initialize_insert_ctrl_maps()
 
     def _initialize_visual_line_maps(self):
+        self.maps[VISUAL_LINE][ord(' ')] = {} # leader
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
@@ -1377,7 +1403,31 @@ class Editor():
             self.change_begin()
             self.get_curr_window().indent_lines(start_y, end_y, True)
             self.change_end()
+            return False
         self.maps[VISUAL_LINE][ord('>')] = gt_map
+        def leader_r_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+            # Xs are matter in this case, so make them right
+            start_x = 0
+            end_x = len(self.get_curr_window().get_line(end_y)) - 1
+
+            text = self.prompt("replace: ")
+            if len(text) == 0: return False
+            last_pattern = self.registers['/']
+            if not last_pattern or len(last_pattern) == 0: return False
+
+            self.change_begin()
+            self.get_curr_window().search_replace_scope(start_x,
+                                                        start_y,
+                                                        end_x,
+                                                        end_y,
+                                                        last_pattern,
+                                                        text)
+            self.change_end()
+            return False
+        self.maps[VISUAL_LINE][ord(' ')][ord('r')] = leader_r_map
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):
@@ -1833,13 +1883,16 @@ class Editor():
 
     def prompt(self, ask=None):
         text = ""
+        to_return = ""
         while True:
             if ask: self.draw_command(f"{ask}{text}")
             else: self.draw_command(f"{text}")
 
             key = self.screen.get_key()
 
-            if key == ENTER_KEY: break
+            if key == ENTER_KEY:
+                to_return = text
+                break
             if key == ESC_KEY: break
             if key == BACKSPACE_KEY:
                 if len(text) > 0:
@@ -1853,7 +1906,7 @@ class Editor():
 
         self.screen.clear()
         self.get_curr_tab().draw()
-        return text
+        return to_return
 
     def on_search(self, forward):
         origin_x = self.get_curr_window().buffer_cursor[0]

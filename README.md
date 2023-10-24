@@ -62,6 +62,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - add `gq`
 - add `/` to visual mode (search visualized text)
 - add support for setting config variables at runtime
+- add `e/E` to visual mode
 
 - OPTIMIZE:
     - disable auto write on every change, instead only on :w

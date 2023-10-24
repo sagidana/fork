@@ -1093,6 +1093,24 @@ class Window():
         self.move_cursor_to_buf_location(x, y, to_draw=False)
         self.draw()
 
+    def search_replace_scope(   self,
+                                start_x,
+                                start_y,
+                                end_x,
+                                end_y,
+                                pattern,
+                                dest):
+        self.buffer.search_replace_scope(   start_x,
+                                            start_y,
+                                            end_x,
+                                            end_y,
+                                            pattern,
+                                            dest)
+        # TODO
+        # self.move_cursor_to_buf_location(x, y, to_draw=False)
+
+        self.draw()
+
     def new_line_after(self):
         self.buffer.insert_line(self.buffer_cursor[1] + 1, "\n")
         self.move_down()

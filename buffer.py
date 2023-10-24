@@ -18,8 +18,11 @@ SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\"\'\;\:]'
 
 class Buffer():
     def on_buffer_change_callback(self, change):
-        if self.treesitter and change:
-            self.treesitter.edit(change, self.get_file_bytes())
+        if self.treesitter:
+            if change:
+                self.treesitter.edit(change, self.get_file_bytes())
+            else:
+                self.resync_treesitter()
 
     def raise_event(func):
         def event_wrapper(self):
@@ -553,6 +556,36 @@ class Buffer():
         self._raise_event(ON_BUFFER_CHANGE, change)
 
         return start_x, start_y
+
+    # CORE: change
+    def search_replace_scope( self,
+                              start_x,
+                              start_y,
+                              end_x,
+                              end_y,
+                              pattern,
+                              dest):
+        start_pos = self.get_file_pos(start_x, start_y)
+        if start_pos == -1: return 0
+        end_pos = self.get_file_pos(end_x, end_y)
+        if end_pos == -1: return 0
+        end_pos += 1
+
+        stream = self.get_file_stream()
+
+        part = stream[start_pos:end_pos]
+        part = part.replace(pattern, dest)
+
+        stream = stream[:start_pos] +   \
+                 part +                 \
+                 stream[end_pos:]
+
+        self.lines = stream.splitlines(keepends=True)
+        stream = self.get_file_stream()
+
+        self.lines = stream.splitlines(keepends=True)
+
+        self._raise_event(ON_BUFFER_CHANGE, None)
 
     def replace_char(self, x, y, char):
         self.remove_char(x+1, y)
