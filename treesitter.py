@@ -32,7 +32,7 @@ def walk(node, cb, level=0, nth_child=0):
     if cb(node, level, nth_child): return True
     curr_nth_child = 0
     for child in node.children:
-        if walk(child, cb, level + 1, curr_nth_child): 
+        if walk(child, cb, level + 1, curr_nth_child):
             return True
         curr_nth_child += 1
     return False

@@ -481,15 +481,98 @@ class TreeSitterPopup():
                                 to_flush=False)
         except Exception as e: elog(f"Exception: {e}")
 
+class LinesNode():
+    def __init__(   self,
+                    level,
+                    line_num,
+                    line_text,
+                    parent=None,
+                    children=None):
+        self.level = level
+        self.line_num = line_num
+        self.line_text = line_text
+        self.parent = parent
+        if children: self.children = children
+        else: self.children = []
+
+def traverse_lines_tree(node, cb):
+    reached_root = False
+    cursor = node
+    while not reached_root:
+        cb(cursor)
+
+        if len(cursor.children) > 0:
+            cursor = cursor.children[0]
+            continue
+
+        parent = cursor.parent
+        if not parent:
+            reached_root = True
+            continue
+
+        curr_index = parent.children.index(cursor)
+
+        if len(parent.children) - 1 > curr_index:
+            cursor = parent.children[curr_index + 1]
+            continue
+
+        retracing = True
+        while retracing:
+            parent = cursor.parent
+            if not parent:
+                retracing = False
+                reached_root = True
+            else:
+                curr_index = parent.children.index(cursor)
+                if len(parent.children) - 1 > curr_index:
+                    cursor = parent.children[curr_index + 1]
+                    retracing = False
+                else:
+                    cursor = parent
+
 class LinesPopup():
+    def get_line_level(self, line):
+        first_whitespaces = len(line) - len(line.lstrip())
+        level = 0
+        for ws in line[:first_whitespaces]:
+            if ws == '\t': level += 4
+            else: level += 1
+        return int(level / 4)
+
+    def init_tree(self):
+        self.tree = LinesNode(-1, -1, "<root>")
+        curr_node = self.tree
+        for y, line in enumerate(self.original_lines):
+            if len(line) == 1: continue
+            line_level = self.get_line_level(line)
+            new_node = LinesNode(line_level, y, line)
+            if new_node.level > curr_node.level:
+                curr_node.children.append(new_node)
+                new_node.parent = curr_node
+                curr_node = new_node
+            elif new_node.level == curr_node.level:
+                parent = curr_node.parent
+                parent.children.append(new_node)
+                new_node.parent = parent
+                curr_node = new_node
+            elif new_node.level < curr_node.level:
+                while curr_node.level >= new_node.level:
+                    curr_node = curr_node.parent
+                curr_node.children.append(new_node)
+                new_node.parent = curr_node
+                curr_node = new_node
+
     def __init__(   self,
                     screen,
-                    lines):
+                    lines,
+                    y_pos):
         if len(lines) == 0: raise Exception("no lines for LinesPopup().. WTF?")
 
         self.screen = screen
         self.original_lines = lines
         self.lines = lines
+        self.y_pos = y_pos
+        self.y_ret = y_pos
         self.ret_node = None
         self.selected = 0
 
@@ -498,17 +581,51 @@ class LinesPopup():
         self.position = list([width_margin, height_margin])
         self.width = self.screen.width - (width_margin * 2)
         self.height = self.screen.height - (height_margin * 2)
+        self.init_tree()
+
+        found = self.tree
+        def find_node(node):
+            nonlocal found
+            if node.line_num == self.y_pos:
+                found = node
+        traverse_lines_tree(self.tree, find_node)
+        if not found.parent:
+            self.nodes = [found]
+            self.selected = 0
+        else:
+            self.nodes = found.parent.children
+            self.selected = self.nodes.index(found)
 
     def on_key(self, key):
-        if key == ENTER_KEY or key == ESC_KEY or key == ord('q'):
+        if key == ENTER_KEY:
+            self.y_ret = self.nodes[self.selected].line_num
             return True
+        if key == ESC_KEY or key == ord('q'):
+            return True
+        if key == ord('h'):
+            if not self.nodes[self.selected].parent:
+                return False
+            parent = self.nodes[self.selected].parent
+            if parent.parent:
+                siblings = parent.parent.children
+                self.nodes = siblings
+                self.selected = siblings.index(parent)
+            else:
+                self.nodes = [parent]
+                self.selected = 0
+            return False
         if key == ord('j'):
-            if self.selected < len(self.lines) - 1:
+            if self.selected < len(self.nodes) - 1:
                 self.selected += 1
             return False
         if key == ord('k'):
             if self.selected > 0:
                 self.selected -= 1
+            return False
+        if key == ord('l'):
+            if len(self.nodes[self.selected].children) > 0:
+                self.nodes = self.nodes[self.selected].children
+                self.selected = 0
             return False
         if key == CTRL_U_KEY:
             half = int(self.screen.height / 2)
@@ -517,7 +634,7 @@ class LinesPopup():
             return False
         if key == CTRL_D_KEY:
             half = int(self.screen.height / 2)
-            left = len(self.lines) - self.selected - 1
+            left = len(self.nodes) - self.selected - 1
             if left > half: self.selected += half
             else: self.selected += left
             return False
@@ -527,12 +644,12 @@ class LinesPopup():
                 self.selected = 0
                 return False
         if key == ord('G'):
-            self.selected = len(self.lines) - 1
+            self.selected = len(self.nodes) - 1
             return False
         if key == ord('/'):
             pattern = ""
             success = False
-            original_lines = self.lines
+            original_nodes = self.nodes
             original_selected = self.selected
             while True:
                 key = self.screen.get_key()
@@ -550,41 +667,34 @@ class LinesPopup():
                             pattern += char
                         else: break
                     except: continue
-                filtered_lines = [line for line in original_lines if pattern in line]
-                if len(filtered_lines) > 0:
-                    self.lines = filtered_lines
-                    if self.selected >= len(self.lines):
-                        self.selected = len(self.lines) - 1
+                filtered_nodes = [node for node in original_nodes if pattern in node.line_text]
+                if len(filtered_nodes) > 0:
+                    self.nodes = filtered_nodes
+                    if self.selected >= len(self.nodes):
+                        self.selected = len(self.nodes) - 1
                     self.draw()
             if not success:
-                self.lines = original_lines
+                self.nodes = original_nodes
                 self.selected = original_selected
-
             return False
         try:
             if chr(key).isnumeric():
-                indent_level = int(chr(key))
-                lines = []
-
-                for line in self.original_lines:
-                    first_whitespaces = len(line) - len(line.lstrip())
-                    curr_indent = 0
-                    for ws in line[:first_whitespaces]:
-                        if ws == '\t': curr_indent += 4
-                        else: curr_indent += 1
-                    if (curr_indent / 4) == indent_level:
-                        lines.append(line)
-
-                if len(lines) > 0:
-                    self.lines = lines
-                    if self.selected >= len(self.lines):
-                        self.selected = len(self.lines) - 1
+                target_level = int(chr(key))
+                nodes = []
+                def nodes_at_level(node):
+                    nonlocal nodes
+                    nonlocal target_level
+                    if node.level == target_level:
+                        nodes.append(node)
+                traverse_lines_tree(self.tree, nodes_at_level)
+                if len(nodes) > 0:
+                    self.nodes = nodes
+                    if self.selected >= len(self.nodes):
+                        self.selected = len(self.nodes) - 1
                     self.draw()
 
                 return False
         except Exception as e: elog(f"Exception: {e}")
-
-        # unkown key pressed
         return False
 
     def pop(self):
@@ -596,6 +706,7 @@ class LinesPopup():
                 to_exit = self.on_key(key)
                 if to_exit: break
         except Exception as e: elog(f"Exception: {e}")
+        return self.y_ret
 
     def draw(self):
         try:
@@ -610,7 +721,8 @@ class LinesPopup():
                 self.__draw(0, y, " "*self.width, style)
 
             if self.selected < self.height:
-                for y, line in enumerate(self.lines):
+                for y, node in enumerate(self.nodes):
+                    line = node.line_text
                     if len(line) < self.width:
                         option = f"{line}{' '*(self.width - len(line))}"
                     line = line[:self.width]
@@ -621,7 +733,7 @@ class LinesPopup():
             else:
                 index = self.selected
                 for y in reversed(range(self.height)):
-                    line = self.lines[index]
+                    line = self.nodes[index].line_text
                     if index == self.selected:
                         self.__draw(0, y, f"{line}", selected_style)
                     else:
