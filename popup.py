@@ -268,10 +268,11 @@ class TreeSitterPopup():
         if len(self.nodes) == 0: raise Exception('should not happend')
 
         # full screen TODO:
-        margin = 5
-        self.position = list([margin, margin])
-        self.width = self.screen.width - (margin * 2)
-        self.height = self.screen.height - (margin * 2)
+        width_margin = 5
+        height_margin = 3
+        self.position = list([width_margin, height_margin])
+        self.width = self.screen.width - (width_margin * 2)
+        self.height = self.screen.height - (height_margin * 2)
 
     def on_key(self, key):
         if key == ENTER_KEY:
@@ -460,6 +461,171 @@ class TreeSitterPopup():
                         self.__draw(0, y, f"{option}", selected_style)
                     else:
                         self.__draw(0, y, f"{option}", style)
+                    index -= 1
+        except Exception as e: elog(f"Exception: {e}")
+        self.screen.flush()
+
+    def __draw(self, x, y, string, style):
+        try:
+            if x >= self.width: return
+            if y >= self.height: return
+
+            if x + len(string) - 1 >= self.width:
+                space_for = self.width  - x
+                string = string[:space_for]
+
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x,
+                                string,
+                                style,
+                                to_flush=False)
+        except Exception as e: elog(f"Exception: {e}")
+
+class LinesPopup():
+    def __init__(   self,
+                    screen,
+                    lines):
+        if len(lines) == 0: raise Exception("no lines for LinesPopup().. WTF?")
+
+        self.screen = screen
+        self.original_lines = lines
+        self.lines = lines
+        self.ret_node = None
+        self.selected = 0
+
+        width_margin = 5
+        height_margin = 3
+        self.position = list([width_margin, height_margin])
+        self.width = self.screen.width - (width_margin * 2)
+        self.height = self.screen.height - (height_margin * 2)
+
+    def on_key(self, key):
+        if key == ENTER_KEY or key == ESC_KEY or key == ord('q'):
+            return True
+        if key == ord('j'):
+            if self.selected < len(self.lines) - 1:
+                self.selected += 1
+            return False
+        if key == ord('k'):
+            if self.selected > 0:
+                self.selected -= 1
+            return False
+        if key == CTRL_U_KEY:
+            half = int(self.screen.height / 2)
+            if self.selected < half: self.selected = 0
+            else: self.selected -= half
+            return False
+        if key == CTRL_D_KEY:
+            half = int(self.screen.height / 2)
+            left = len(self.lines) - self.selected - 1
+            if left > half: self.selected += half
+            else: self.selected += left
+            return False
+        if key == ord('g'):
+            key = self.screen.get_key()
+            if key == ord('g'):
+                self.selected = 0
+                return False
+        if key == ord('G'):
+            self.selected = len(self.lines) - 1
+            return False
+        if key == ord('/'):
+            pattern = ""
+            success = False
+            original_lines = self.lines
+            original_selected = self.selected
+            while True:
+                key = self.screen.get_key()
+
+                if key == ENTER_KEY:
+                    if len(pattern) > 0: success = True
+                    break
+                if key == ESC_KEY: break
+                if key == BACKSPACE_KEY:
+                    if len(pattern) > 0: pattern = pattern[:-1]
+                else:
+                    try:
+                        char = chr(key)
+                        if char in printable:
+                            pattern += char
+                        else: break
+                    except: continue
+                filtered_lines = [line for line in original_lines if pattern in line]
+                if len(filtered_lines) > 0:
+                    self.lines = filtered_lines
+                    if self.selected >= len(self.lines):
+                        self.selected = len(self.lines) - 1
+                    self.draw()
+            if not success:
+                self.lines = original_lines
+                self.selected = original_selected
+
+            return False
+        try:
+            if chr(key).isnumeric():
+                indent_level = int(chr(key))
+                lines = []
+
+                for line in self.original_lines:
+                    first_whitespaces = len(line) - len(line.lstrip())
+                    curr_indent = 0
+                    for ws in line[:first_whitespaces]:
+                        if ws == '\t': curr_indent += 4
+                        else: curr_indent += 1
+                    if (curr_indent / 4) == indent_level:
+                        lines.append(line)
+
+                if len(lines) > 0:
+                    self.lines = lines
+                    if self.selected >= len(self.lines):
+                        self.selected = len(self.lines) - 1
+                    self.draw()
+
+                return False
+        except Exception as e: elog(f"Exception: {e}")
+
+        # unkown key pressed
+        return False
+
+    def pop(self):
+        try:
+            while True:
+                self.draw()
+
+                key = self.screen.get_key()
+                to_exit = self.on_key(key)
+                if to_exit: break
+        except Exception as e: elog(f"Exception: {e}")
+
+    def draw(self):
+        try:
+            style = {}
+            style['background'] = g_settings['theme']['colors']['menu.background']
+            style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            selected_style = {}
+            selected_style['background'] = g_settings['theme']['colors']['terminal.ansiMagenta']
+            selected_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+
+            for y in range(self.height):
+                self.__draw(0, y, " "*self.width, style)
+
+            if self.selected < self.height:
+                for y, line in enumerate(self.lines):
+                    if len(line) < self.width:
+                        option = f"{line}{' '*(self.width - len(line))}"
+                    line = line[:self.width]
+                    if y == self.selected:
+                        self.__draw(0, y, f"{line}", selected_style)
+                    else:
+                        self.__draw(0, y, f"{line}", style)
+            else:
+                index = self.selected
+                for y in reversed(range(self.height)):
+                    line = self.lines[index]
+                    if index == self.selected:
+                        self.__draw(0, y, f"{line}", selected_style)
+                    else:
+                        self.__draw(0, y, f"{line}", style)
                     index -= 1
         except Exception as e: elog(f"Exception: {e}")
         self.screen.flush()

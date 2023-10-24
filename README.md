@@ -60,19 +60,13 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - auto indent on insert mode
 - add `gq`
 - add support for setting config variables at runtime
-
-- OPTIMIZE:
-    - disable auto write on every change, instead only on :w
-    - while in insert mode update treesitter only on exit from insert mode
-    - add support to force write
-    - add reload file in case file changed under us
+- autocomplete - dont require enter.. act like vim
 
 - move windows (especially in the rg cases)
-- autocomplete - dont require enter.. act like vim
-- BUG: auto complete dont find options when buffer modified on different window
 - adding `curr/total` to search pattern functionality
 
 - BUG: status line dont show if cursor is on last line
+- BUG: fix draw windows draw on change bug..?
 
 - ctags
 - maybe add ast based text object?

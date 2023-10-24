@@ -1200,6 +1200,12 @@ class Editor():
             return False
         # replace editor pattern
         self.maps[NORMAL][ord(' ')][ord('r')] = leader_r_map
+        def leader_l_map(self):
+            lines = LinesPopup(self.screen, self.get_curr_buffer().lines)
+            lines.pop()
+            self.get_curr_tab().draw() # need to redraw after popup
+            return False
+        self.maps[NORMAL][ord(' ')][ord('l')] = leader_l_map
 
     def _initialize_normal_maps(self):
         def colon_map(self):
