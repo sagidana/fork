@@ -804,18 +804,22 @@ class Window():
         x = min(x, len(self.get_line(y)) - 1)
         return x, y
 
-    def scroll_up_half_page(self):
+    def _scroll_up_half_page(self):
         half = int(self.content_height / 2)
         for i in range(half): self._move_up()
         self._align_center()
 
+    def scroll_up_half_page(self):
+        self._scroll_up_half_page()
         self.draw()
 
-    def scroll_down_half_page(self):
+    def _scroll_down_half_page(self):
         half = int(self.content_height / 2)
         for i in range(half): self._move_down()
         self._align_center()
 
+    def scroll_down_half_page(self):
+        self._scroll_down_half_page()
         self.draw()
 
     def move_begin(self):

@@ -1363,6 +1363,22 @@ class Editor():
             self.draw()
             return False
         self.maps[VISUAL_LINE][ord('h')] = h_map
+        def ctrl_u_map(self):
+            self.get_curr_window()._scroll_up_half_page()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_LINE][CTRL_U_KEY] = ctrl_u_map
+        def ctrl_d_map(self):
+            self.get_curr_window()._scroll_down_half_page()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_LINE][CTRL_D_KEY] = ctrl_d_map
         def gc_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
