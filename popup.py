@@ -14,10 +14,10 @@ class DetailsPopup():
         self.screen = editor.screen
 
         buffer = self.editor.get_curr_buffer()
-        window = self.editor.get_curr_window()
+        curr_window = self.editor.get_curr_window()
 
-        x = window.buffer_cursor[0]
-        y = window.buffer_cursor[1]
+        x = curr_window.buffer_cursor[0]
+        y = curr_window.buffer_cursor[1]
         status = f"{buffer.describe()} {y}:{x}"
         pending_tasks = self.editor.tasks
         self.details = []
@@ -39,10 +39,10 @@ class DetailsPopup():
                 self.details.append(f"{g_settings['tab_representation']*2}- {window.describe()}")
 
         margin = 5
-        self.position = list([  window.position[0] + margin,
-                                window.position[1] + margin])
-        self.width = window.width - (margin * 2)
-        self.height = window.height - (margin * 2)
+        self.position = list([  curr_window.position[0] + margin,
+                                curr_window.position[1] + margin])
+        self.width = curr_window.width - (margin * 2)
+        self.height = curr_window.height - (margin * 2)
         if self.height - 2 > len(self.details): self.height = len(self.details) + 2
         else: self.details = self.details[:self.height - 2]
 
