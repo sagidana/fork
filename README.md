@@ -54,6 +54,9 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
+- OMG: fix draw proformance
+- ctrl-d/u in visual line
+- <num>j/k in visual line
 - visual block mode
 - replace mode
 - make asterisk work as <cword> in vim
@@ -61,6 +64,9 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - add `gq`
 - add support for setting config variables at runtime
 - autocomplete - dont require enter.. act like vim
+- add support for language
+    - cpp
+    - rust
 
 - add tabs status line like in vim
     - adding set_position() and resize() methods in Tab class
@@ -70,7 +76,16 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
         - status line on all windows
 - move windows (especially in the rg cases)
 - adding `curr/total` to search pattern functionality
+- `=` operator
+- `%` operator
+- highlight pair of under cursor:
+    - `{`/`}`
+    - `(`/`)`
+    - `[`/`]`
+    - `<`/`>`
 
+- BUG: fix all the annoying w movement that do not act as vim
+- BUG: in visual mode, tabs do not uses the right style
 - BUG: status line dont show if cursor is on last line
 - BUG: fix draw windows draw on change bug..?
 
@@ -83,5 +98,4 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
     - `im`/`am` inner/arround method/function
 - goto
     - start of function
-
 
