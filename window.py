@@ -445,6 +445,7 @@ class Window():
         # for s in traceback.extract_stack():
             # elog(f"    {path.basename(s.filename)}: {s.name}")
         debug = False
+        self.screen.disable_cursor()
         try:
             before = self.window_cursor[1]
             first_line = self.buffer_cursor[1] - before
@@ -556,6 +557,7 @@ class Window():
             self.visualize()
             self.draw_cursor()
         except Exception as e: elog(f"Exception: {e}")
+        self.screen.enable_cursor()
 
     def _expanded_x(self, y, x):
         _x = 0

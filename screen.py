@@ -29,6 +29,8 @@ NO_ECHO = "\x1b[8m"
 WRAP = "\x1b[?7h"
 NO_WRAP = "\x1b[?7l"
 
+CURSOR_DISABLE = "\x1b[?25l"
+CURSOR_ENABLE = "\x1b[?25h"
 CURSOR_I_BEAM = "\x1b[6 q"
 CURSOR_I_BEAM_BLINK = "\x1b[5 q"
 CURSOR_UNDERLINE = "\x1b[4 q"
@@ -188,6 +190,11 @@ class Screen():
     def set_cursor_block_blink(self):
         self._write_to_stdout(CURSOR_BLOCK_BLINK)
 
+    def disable_cursor(self):
+        self._write_to_stdout(CURSOR_DISABLE)
+    def enable_cursor(self):
+        self._write_to_stdout(CURSOR_ENABLE)
+
     def move_cursor(self, y, x, to_flush=True):
         y += 1; x += 1
         escape = MOVE.format(y, x)
@@ -203,7 +210,7 @@ class Screen():
         if fg: self._write_to_stdout(FOREGROUND_TRUE_COLOR.format(convert(fg)), to_flush=False)
         if bg: self._write_to_stdout(BACKGROUND_TRUE_COLOR.format(convert(bg)), to_flush=False)
 
-        if 'reverse' in style: 
+        if 'reverse' in style:
             self._write_to_stdout(REVERSE, to_flush=False)
         if to_flush: stdout.flush()
 
@@ -232,6 +239,11 @@ if __name__ == '__main__':
                 {"foreground": "#F9262E"})
 
     screen.move_cursor(0,0)
+    # screen.set_cursor_block_blink()
+    screen.set_cursor_i_beam()
+    screen.disable_cursor()
+    screen.move_cursor(0,1)
+
 
     # screen._write_to_stdout("\x1b[5m") # set blink
     # screen._write_to_stdout("\x1b[25m") # set blink
@@ -254,3 +266,4 @@ if __name__ == '__main__':
     for i in range(1):
         c = screen.get_key()
         print(f"{c}")
+    screen.enable_cursor()
