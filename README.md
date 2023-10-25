@@ -85,7 +85,10 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 - BUG: difflib is extremely slow or maybe even freezes
     - try to comment/indent all lines of a large file
-- BUG: editor do not redraw on write() [not deterministic]
+- BUG: tab._adjust_sizes() corner case:
+    - vsplit, split, move_left, split
+    - close a window will cause colition of windows
+- BUG: editor do not redraw on write()/close_window() [not deterministic]
 - BUG: fix all the annoying w movement that do not act as vim
 - BUG: in visual mode, tabs do not uses the right style
 - BUG: status line dont show if cursor is on last line

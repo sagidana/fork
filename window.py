@@ -1152,7 +1152,7 @@ class Window():
                                     self.buffer_cursor[1])
         # self.draw()
 
-    def _remove_char(self):
+    def _remove_char(self, propagate=True):
         if self.buffer_cursor[0] == 0:
             if self.buffer_cursor[1] == 0: return
             # we are about to move line up because of our removal. this is our
@@ -1160,18 +1160,21 @@ class Window():
             new_x = len(self.buffer.lines[self.buffer_cursor[1] - 1]) - 1
 
             self.buffer.remove_char(    self.buffer_cursor[0],
-                                        self.buffer_cursor[1])
+                                        self.buffer_cursor[1],
+                                        propagate=propagate)
 
             self._move_up()
             self._move_to_x(new_x)
         else:
             self.buffer.remove_char(    self.buffer_cursor[0],
-                                        self.buffer_cursor[1])
+                                        self.buffer_cursor[1],
+                                        propagate=propagate)
             self._move_left()
 
     def remove_chars(self, num):
         for i in range(num):
-            self._remove_char()
+            self._remove_char(propagate=False)
+        self.buffer.flush_changes()
         # self.draw()
         self.draw_cursor()
 
@@ -1205,17 +1208,25 @@ class Window():
                                             y)
         # self.draw()
 
-    def insert_line_before(self, line):
+    def insert_line_before(self, line, propagate=True):
         self.buffer.insert_line(self.buffer_cursor[1],
-                                line)
-        self.move_line_begin()
+                                line,
+                                propagate=propagate)
+        if propagate: self.move_line_begin()
+        else: self._move_line_begin()
         # self.draw()
 
-    def insert_line_after(self, line):
+    def insert_line_after(self, line, propagate=True):
         self.buffer.insert_line(self.buffer_cursor[1]+1,
-                                line)
-        self.move_down()
-        self.move_line_begin()
+                                line,
+                                propagate=propagate)
+        if propagate:
+            self.move_down()
+            self.move_line_begin()
+        else:
+            self._move_down()
+            self._move_line_begin()
+
         # self.draw()
 
     def join_line(self):

@@ -989,7 +989,8 @@ class Editor():
                 if data['meta'] == 'line':
                     lines = data['data']
                     for line in reversed(lines):
-                        self.get_curr_window().insert_line_before(line)
+                        self.get_curr_window().insert_line_before(line, propagate=False)
+                    self.get_curr_buffer().flush_changes()
                 elif data['meta'] == 'char':
                     lines = data['data']
                     string = '\n'.join(lines)
@@ -1005,7 +1006,8 @@ class Editor():
                 if data['meta'] == 'line':
                     lines = data['data']
                     for line in lines:
-                        self.get_curr_window().insert_line_after(line)
+                        self.get_curr_window().insert_line_after(line, propagate=False)
+                    self.get_curr_buffer().flush_changes()
                 elif data['meta'] == 'char':
                     lines = data['data']
                     string = '\n'.join(lines)
@@ -1494,7 +1496,8 @@ class Editor():
                 if data['meta'] == 'line':
                     lines = data['data']
                     for line in reversed(lines):
-                        self.get_curr_window().insert_line_before(line)
+                        self.get_curr_window().insert_line_before(line, propagate=False)
+                    self.get_curr_buffer().flush_changes()
                 elif data['meta'] == 'char':
                     lines = data['data']
                     string = '\n'.join(lines)
