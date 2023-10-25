@@ -172,19 +172,21 @@ class Window():
                 self.events[event] = []
             self.events[event].append(handlers[event])
 
-    def draw_cursor(self):
+    def _draw_cursor(self):
         cursor = [pos for pos in self.window_cursor]
 
         cursor[0] = self.window_cursor[0]
         cursor[1] = self.window_cursor[1]
 
-        if self.status_line: self.draw_status_line()
-        if self.line_numbers: self.draw_line_numbers()
-        self.visualize()
-
         x = self._expanded_x(self.buffer_cursor[1], self.buffer_cursor[0])
         # self._screen_move(cursor[0], cursor[1])
         self._screen_move(x, cursor[1])
+
+    def draw_cursor(self):
+        if self.status_line: self.draw_status_line()
+        if self.line_numbers: self.draw_line_numbers()
+        self.visualize()
+        self._draw_cursor()
 
     def set_lines_margin(self):
         self.lines_margin = len(str(len(self.buffer.lines))) + 1
@@ -555,9 +557,11 @@ class Window():
             self.highlight()
             self.tailing_spaces()
             self.visualize()
+            if self.status_line: self.draw_status_line()
+            if self.line_numbers: self.draw_line_numbers()
             # is focused?
             if self.tab.get_curr_window().id == self.id:
-                self.draw_cursor()
+                self._draw_cursor()
         except Exception as e: elog(f"Exception: {e}")
         self.screen.enable_cursor()
 
