@@ -97,6 +97,7 @@ class Window():
     def change_buffer(self, buffer):
         handlers = {}
         handlers[ON_BUFFER_RELOAD] = self.on_buffer_reload_callback
+        handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
         self.buffer.unregister_events(handlers)
 
         self.buffer = buffer
