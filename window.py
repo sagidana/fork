@@ -555,19 +555,21 @@ class Window():
             self.highlight()
             self.tailing_spaces()
             self.visualize()
-            self.draw_cursor()
+            # is focused?
+            if self.tab.get_curr_window().id == self.id:
+                self.draw_cursor()
         except Exception as e: elog(f"Exception: {e}")
         self.screen.enable_cursor()
 
-    def _expanded_x(self, y, x):
+    def _expanded_string_len(self, string):
         _x = 0
-        for c in self.get_line(y):
-            if x == 0: break
-            x -= 1
-
+        for c in string:
             if c == '\t': _x += len(g_settings["tab_representation"])
             else: _x += 1
         return _x
+
+    def _expanded_x(self, y, x):
+        return self._expanded_string_len(self.get_line(y)[:x])
 
     def _scroll_up(self):
         self.buffer_cursor[1] -= 1
@@ -1348,9 +1350,10 @@ class Window():
         if x >= self.width: return
         if y >= self.height: return
 
-        if x + len(string) - 1 >= self.width:
+        if x + self._expanded_string_len(string) - 1 >= self.width:
             space_for = self.width - x
-            string  = string[:space_for]
+            while self._expanded_string_len(string) - 1 >= space_for:
+                string  = string[:-1]
 
         tabs = [m.start() for m in re.finditer('\t', string)]
         if len(tabs) == 0:
@@ -1360,14 +1363,6 @@ class Window():
                                 style,
                                 to_flush=to_flush)
             return
-
-        # string = string.replace('\t', g_settings["tab_representation"])
-        # self.screen.write(  self.position[1] + y,
-                            # self.position[0] + x,
-                            # string,
-                            # style,
-                            # to_flush=to_flush)
-        # return
 
         # tab_style = get_scope_style('meta.embedded')
         tab_style = get_scope_style('comment')
