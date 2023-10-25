@@ -27,6 +27,7 @@ class Tab():
         self.screen = screen
         self.width = width
         self.height = height
+        self.visible = True
 
         self.zoom_mode = False
         self.zoom_x = -1
@@ -35,7 +36,8 @@ class Tab():
         self.zoom_width = -1
 
         self.windows = []
-        window = Window(self.screen,
+        window = Window(self,
+                        self.screen,
                         self.width,
                         self.height,
                         position=(0,0),
@@ -43,6 +45,9 @@ class Tab():
         self.add_window(window)
 
         self.events = {}
+
+    def hide(self): self.visible = False
+    def show(self): self.visible = True
 
     def register_events(self, handlers):
         for event in handlers:
@@ -221,6 +226,11 @@ class Tab():
 
         self._adjust_sizes()
 
+    def is_window_visible(self, window_id):
+        if not self.visible: return False
+        if not self.zoom_mode: return True
+        return window_id == self.get_curr_window().id
+
     def set_curr_window(self, index):
         self.curr_window_index = index
 
@@ -322,7 +332,8 @@ class Tab():
 
         curr_window.resize(width, height)
 
-        new_window = Window(    self.screen,
+        new_window = Window(    self,
+                                self.screen,
                                 width,
                                 height,
                                 position=(  curr_window.position[0],
@@ -361,7 +372,8 @@ class Tab():
 
         curr_window.resize(width, height)
 
-        new_window = Window(    self.screen,
+        new_window = Window(    self,
+                                self.screen,
                                 width,
                                 height,
                                 position=(  curr_window.position[0] + width + 1,

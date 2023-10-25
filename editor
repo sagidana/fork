@@ -1250,6 +1250,7 @@ class Editor():
 
             # window.remove_scope(start_x, start_y, end_x, end_y)
             window.remove_scope(end_x, end_y, start_x, start_y)
+            self.get_curr_window().draw_cursor()
             return False
         self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
         def ctrl_n_map(self):
@@ -1832,17 +1833,23 @@ class Editor():
 
     def _create_tab(self, buffer=None):
         self.tabs.append(Tab(self.screen, self.width, self.height, buffer))
+        self.get_curr_tab().hide()
         self.curr_tab = len(self.tabs) - 1
+        self.get_curr_tab().show()
 
         self.get_curr_tab().draw()
         return self.get_curr_tab()
 
     def next_tab(self):
+        self.get_curr_tab().hide()
         self.curr_tab = (self.curr_tab + 1) % len(self.tabs)
+        self.get_curr_tab().show()
         self.get_curr_tab().draw()
 
     def prev_tab(self):
+        self.get_curr_tab().hide()
         self.curr_tab = (self.curr_tab - 1) % len(self.tabs)
+        self.get_curr_tab().show()
         self.get_curr_tab().draw()
 
     def get_curr_tab(self):

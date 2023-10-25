@@ -37,13 +37,15 @@ class Window():
 
     def on_buffer_change_callback(self, priv):
         # TODO: update cursor pos if needed
-        self.draw()
+        if self.tab.is_window_visible(self.id):
+            self.draw()
 
     def describe(self):
         buffer_description = self.buffer.describe()
         return f"{self.id} {buffer_description}"
 
     def __init__(   self,
+                    tab,
                     screen,
                     width,
                     height,
@@ -55,6 +57,7 @@ class Window():
         if not buffer: raise Exception("Not implemented.")
 
         self.id = get_id(WINDOW_ID)
+        self.tab = tab
         self.screen = screen
 
         self.buffer = buffer
