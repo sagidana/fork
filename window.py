@@ -938,7 +938,7 @@ class Window():
         self.buffer.replace_char(   self.buffer_cursor[0],
                                     self.buffer_cursor[1],
                                     char)
-        self.draw()
+        # self.draw()
 
     def replace(self):
         try:
@@ -947,7 +947,7 @@ class Window():
             self.buffer.replace_char(   self.buffer_cursor[0],
                                         self.buffer_cursor[1],
                                         char)
-            self.draw()
+            # self.draw()
 
         except Exception as e: elog(f"Exception: {e}")
 
@@ -1033,7 +1033,7 @@ class Window():
         if x >= len(self.get_line(y)) - 1: x = len(self.get_line(y)) - 1
 
         self.move_cursor_to_buf_location(x, y)
-        self.draw()
+        # self.draw()
 
     def set_line(self, y, new_line, propagate=True):
         _x = self.buffer_cursor[0]
@@ -1045,7 +1045,7 @@ class Window():
             _x = len(self.get_line(_y)) - 1
 
         self.move_cursor_to_buf_location(_x, _y)
-        if propagate: self.draw()
+        # if propagate: self.draw()
 
     def empty_line(self):
         x = self.buffer_cursor[0]
@@ -1055,7 +1055,7 @@ class Window():
         self.buffer.replace_line(y, "\n")
 
         self.move_cursor_to_buf_location(0, y)
-        self.draw()
+        # self.draw()
 
     def remove_line(self):
         self.buffer.remove_line(self.buffer_cursor[1])
@@ -1067,7 +1067,7 @@ class Window():
         if x >= len(self.get_line(y)) - 1: x = len(self.get_line(y)) - 1
 
         self.move_cursor_to_buf_location(x, y)
-        self.draw()
+        # self.draw()
 
     def indent_lines(   self,
                         start_y,
@@ -1108,7 +1108,7 @@ class Window():
         x, y = self.buffer.remove_scope(start_x, start_y, end_x, end_y)
 
         self.move_cursor_to_buf_location(x, y, to_draw=False)
-        self.draw()
+        # self.draw()
 
     def search_replace_scope(   self,
                                 start_x,
@@ -1125,18 +1125,18 @@ class Window():
                                             dest)
 
         self.move_cursor_to_buf_location(start_x, start_y, to_draw=False)
-        self.draw()
+        # self.draw()
 
     def new_line_after(self):
         self.buffer.insert_line(self.buffer_cursor[1] + 1, "\n")
         self.move_down()
         self.move_line_begin()
-        self.draw()
+        # self.draw()
 
     def new_line_before(self):
         self.buffer.insert_line(self.buffer_cursor[1], "\n")
         self.move_line_begin()
-        self.draw()
+        # self.draw()
 
     def remove_char_special(self, x):
         if x > self.get_curr_line_len() - 1: return
@@ -1144,7 +1144,7 @@ class Window():
 
         self.buffer.remove_char(    x,
                                     self.buffer_cursor[1])
-        self.draw()
+        # self.draw()
 
     def _remove_char(self):
         if self.buffer_cursor[0] == 0:
@@ -1166,11 +1166,11 @@ class Window():
     def remove_chars(self, num):
         for i in range(num):
             self._remove_char()
-        self.draw()
+        # self.draw()
 
     def remove_char(self):
         self._remove_char()
-        self.draw()
+        # self.draw()
 
     def _insert_char(self, char, to_draw=True):
         self.buffer.insert_char(    self.buffer_cursor[0],
@@ -1186,7 +1186,7 @@ class Window():
 
     def insert_char(self, char):
         self._insert_char(char)
-        self.draw()
+        self.draw_cursor()
 
     def insert_string(self, string):
         x, y = self.buffer.insert_string(   self.buffer_cursor[0],
@@ -1195,20 +1195,20 @@ class Window():
 
         self.move_cursor_to_buf_location(   x,
                                             y)
-        self.draw()
+        # self.draw()
 
     def insert_line_before(self, line):
         self.buffer.insert_line(self.buffer_cursor[1],
                                 line)
         self.move_line_begin()
-        self.draw()
+        # self.draw()
 
     def insert_line_after(self, line):
         self.buffer.insert_line(self.buffer_cursor[1]+1,
                                 line)
         self.move_down()
         self.move_line_begin()
-        self.draw()
+        # self.draw()
 
     def join_line(self):
         curr_line = self.buffer_cursor[1]
@@ -1224,14 +1224,14 @@ class Window():
 
         self.buffer.remove_char(0, curr_line + 1) # to trigger join
 
-        self.draw()
+        # self.draw()
 
     def undo(self):
         position = self.buffer.undo()
         if not position: return
         self.move_cursor_to_buf_location(   position[0],
                                             position[1])
-        self.draw()
+        # self.draw()
 
     def redo(self):
         position = self.buffer.redo()
@@ -1240,17 +1240,17 @@ class Window():
         # in vim the redo does not return cursor location.. wonder why?
         self.move_cursor_to_buf_location(   position[0],
                                             position[1])
-        self.draw()
+        # self.draw()
 
     def visual_begin(self, mode):
         self.buffer.visual_begin(   mode,
                                     self.buffer_cursor[0],
                                     self.buffer_cursor[1])
-        self.draw()
+        # self.draw()
 
     def visual_end(self):
         self.buffer.visual_end()
-        self.draw()
+        # self.draw()
 
     @raise_event
     def change_begin(self):

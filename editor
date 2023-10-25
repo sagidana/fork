@@ -2161,9 +2161,9 @@ def main():
     screen.clear()
     screen.move_cursor(0,0)
 
-# import cProfile
 
 if __name__ == "__main__":
+    # import cProfile
     # with cProfile.Profile() as profile:
         # ... do something ...
     try:
