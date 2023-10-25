@@ -767,12 +767,7 @@ class Window():
             if scrolled:
                 if to_draw: self.draw()
             else:
-                self.draw_cursor()
-            # self.window_cursor[0] = buf_x
-            # self.window_cursor[1] = buf_y
-
-            # self.buffer_cursor[0] = buf_x
-            # self.buffer_cursor[1] = buf_y
+                if to_draw: self.draw_cursor()
         else:
             pass
 
@@ -1040,7 +1035,7 @@ class Window():
         if y >= len(self.buffer.lines) - 1: y = len(self.buffer.lines) - 1
         if x >= len(self.get_line(y)) - 1: x = len(self.get_line(y)) - 1
 
-        self.move_cursor_to_buf_location(x, y)
+        self.move_cursor_to_buf_location(x, y, to_draw=propagate)
         # self.draw()
 
     def set_line(self, y, new_line, propagate=True):
@@ -1052,7 +1047,7 @@ class Window():
         if _y == y and _x >= len(self.get_line(_y)) - 1:
             _x = len(self.get_line(_y)) - 1
 
-        self.move_cursor_to_buf_location(_x, _y)
+        self.move_cursor_to_buf_location(_x, _y, to_draw=propagate)
         # if propagate: self.draw()
 
     def empty_line(self):
