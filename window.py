@@ -437,6 +437,10 @@ class Window():
         return text
 
     def draw(self):
+        # elog(f"drawing window: {self.id}")
+        # import traceback
+        # for s in traceback.extract_stack():
+            # elog(f"    {path.basename(s.filename)}: {s.name}")
         debug = False
         try:
             before = self.window_cursor[1]
@@ -1029,8 +1033,8 @@ class Window():
             return char
         except: pass
 
-    def remove_line_at(self, y):
-        y = self.buffer.remove_line(y)
+    def remove_line_at(self, y, propagate=True):
+        y = self.buffer.remove_line(y, propagate=propagate)
         x = self.buffer_cursor[0]
 
         if y >= len(self.buffer.lines) - 1: y = len(self.buffer.lines) - 1

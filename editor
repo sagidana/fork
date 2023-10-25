@@ -1294,7 +1294,8 @@ class Editor():
 
             self.change_begin()
             for y in reversed(range(start_y, end_y + 1)):
-                self.get_curr_window().remove_line_at(y)
+                self.get_curr_window().remove_line_at(y, propagate=False)
+            self.get_curr_buffer().flush_changes()
             # self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
 
             self.change_end()
