@@ -102,7 +102,7 @@ def comment(editor, start_y, end_y):
                 elog(f"i: {i} {line}")
                 continue
             line = f"{line[:i]}{comment_syntax} {line[i:]}"
-            editor.get_curr_window().set_line(y, line)
+            editor.get_curr_window().set_line(y, line, propagate=False)
     else:
         # lets uncomment
         for y in range(start_y, end_y + 1):
@@ -113,7 +113,8 @@ def comment(editor, start_y, end_y):
                 elog(f"i: {i} {line}")
                 continue
             line = f"{line[:i]}{line[i+len(comment_syntax)+1:]}"
-            editor.get_curr_window().set_line(y, line)
+            editor.get_curr_window().set_line(y, line, propagate=False)
+    editor.get_curr_buffer().flush_changes()
 
 def clipboard(text):
     ''' Copy `text` to the clipboard '''

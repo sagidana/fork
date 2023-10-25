@@ -41,6 +41,9 @@ class Buffer():
         if event in self.events:
             for cb in self.events[event]: cb(args)
 
+    def flush_changes(self, change=None):
+        self._raise_event(ON_BUFFER_CHANGE, change)
+
     def register_events(self, handlers):
         for event in handlers:
             if event not in self.events:
@@ -365,7 +368,7 @@ class Buffer():
         self.lines[y] = joined
 
     # CORE: change
-    def remove_char(self, x, y):
+    def remove_char(self, x, y, propagate=True):
         start_byte = self.get_file_pos(x, y)
         if x == 0:
             if y == 0: return
@@ -392,11 +395,11 @@ class Buffer():
                     'old_end_point': (y, x),
                     'new_end_point': (y, x - 1),
                     }
-
-        self._raise_event(ON_BUFFER_CHANGE, change)
+        # self.on_buffer_change_callback(change)
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
     # CORE: change
-    def insert_string(self, x, y, string):
+    def insert_string(self, x, y, string, propagate=True):
         start_byte = self.get_file_pos(x, y)
         end_byte = start_byte + len(string)
 
@@ -438,11 +441,12 @@ class Buffer():
                     'new_end_point': (end_y, end_x),
                     }
 
-        self._raise_event(ON_BUFFER_CHANGE, change)
+        # self.on_buffer_change_callback(change)
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
         return end_x, end_y
 
     # CORE: change
-    def insert_char(self, x, y, char):
+    def insert_char(self, x, y, char, propagate=True):
         start_byte = self.get_file_pos(x, y)
         if char == '\n' or char == '\r':
             self._split_line(x, y)
@@ -465,10 +469,11 @@ class Buffer():
                     'new_end_point': (y, x + 1),
                     }
 
-        self._raise_event(ON_BUFFER_CHANGE, change)
+        # self.on_buffer_change_callback(change)
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
     # CORE: change
-    def insert_line(self, y, new_line):
+    def insert_line(self, y, new_line, propagate=True):
         change = {}
         start_byte = self.get_file_pos(0, y)
         change['start_byte'] = start_byte
@@ -481,10 +486,11 @@ class Buffer():
 
         self.lines.insert(y, new_line)
 
-        self._raise_event(ON_BUFFER_CHANGE, change)
+        # self.on_buffer_change_callback(change)
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
     # CORE: change
-    def remove_line(self, y):
+    def remove_line(self, y, propagate=True):
         if y >= len(self.lines): return y
 
         change = {}
@@ -503,65 +509,17 @@ class Buffer():
 
         self.lines.pop(y)
 
-        self._raise_event(ON_BUFFER_CHANGE, change)
+        # self.on_buffer_change_callback(change)
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
         return y
-
-    def _remove_scope(   self,
-                        start_x,
-                        start_y,
-                        end_x,
-                        end_y):
-        if start_y > len(self.lines) - 1: return 0, 0
-        if end_y > len(self.lines) - 1: return 0, 0
-
-        # switch
-        if  (start_y > end_y) or \
-            (start_y == end_y and start_x > end_x):
-            tmp_y, tmp_x, = start_y, start_x
-            start_y, start_x = end_y, end_x
-            end_y, end_x = tmp_y, tmp_x
-
-        if start_y == end_y:
-            if start_x > end_x: return  0, 0
-
-            line_len = len(self.lines[start_y]) - 1
-            line = self.lines[start_y]
-            if start_x - end_x < line_len:
-                line = line[:start_x] + line[end_x + 1:]
-                self.replace_line(start_y, line)
-            else:
-                self.remove_line(start_y)
-        else:
-            start_line = self.lines[start_y]
-            # adjust start_x
-            if start_x >= len(start_line): start_x = len(start_line) - 1
-
-            end_line = self.lines[end_y]
-            # adjust end_x
-            if end_x + 1 >= len(end_line): end_x = len(end_line) - 2
-
-            start_line = start_line[:start_x]
-            end_line = end_line[end_x + 1:]
-
-            # remove lines from top to bottom
-            for i in range(end_y - start_y):
-                self.remove_line(end_y - i)
-
-            new_line = start_line + end_line
-
-            if len(new_line) > 1:
-                self.replace_line(start_y, new_line)
-            else:
-                self.remove_line(start_y)
-
-        return start_x, start_y
 
     # CORE: change
     def remove_scope(   self,
                         start_x,
                         start_y,
                         end_x,
-                        end_y):
+                        end_y,
+                        propagate=True):
         start_pos = self.get_file_pos(start_x, start_y)
         if start_pos == -1: return 0
         end_pos = self.get_file_pos(end_x, end_y)
@@ -579,7 +537,9 @@ class Buffer():
         change['start_point'] = (start_y, start_x)
         change['old_end_point'] = (end_y, end_x)
         change['new_end_point'] = (start_y, start_x)
-        self._raise_event(ON_BUFFER_CHANGE, change)
+
+        # self.on_buffer_change_callback(change)
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
         return start_x, start_y
 
@@ -590,7 +550,8 @@ class Buffer():
                               end_x,
                               end_y,
                               pattern,
-                              dest):
+                              dest,
+                              propagate=True):
         start_pos = self.get_file_pos(start_x, start_y)
         if start_pos == -1: return 0
         end_pos = self.get_file_pos(end_x, end_y)
@@ -611,15 +572,16 @@ class Buffer():
 
         self.lines = stream.splitlines(keepends=True)
 
-        self._raise_event(ON_BUFFER_CHANGE, None)
+        # self.on_buffer_change_callback(change)
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
     def replace_char(self, x, y, char):
         self.remove_char(x+1, y)
         self.insert_char(x, y, char)
 
-    def replace_line(self, y, new_line):
-        self.remove_line(y)
-        self.insert_line(y, new_line)
+    def replace_line(self, y, new_line, propagate=True):
+        self.remove_line(y, propagate=propagate)
+        self.insert_line(y, new_line, propagate=propagate)
 
     def get_scope_text( self,
                         start_x,
@@ -694,16 +656,18 @@ class Buffer():
         # lines removals must be in decreasing order to no mess up with the
         # line numbers
         for line in reversed(sorted(lines_for_deletion)):
-            self.remove_line(line)
+            self.remove_line(line, propagate=False)
 
         # lines insertions must be in increasing order to no mess up with the
         # line numbers
         for line in sorted(lines_for_insertion):
-            self.insert_line(line, lines_for_insertion[line])
+            self.insert_line(line, lines_for_insertion[line], propagate=False)
 
         # for line replacements order is not important.
         for line in lines_for_replacement:
-            self.replace_line(line, lines_for_replacement[line])
+            self.replace_line(line, lines_for_replacement[line], propagate=False)
+
+        self.flush_changes()
 
     def undo(self):
         if len(self.undo_stack) == 0: return

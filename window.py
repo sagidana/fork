@@ -1035,17 +1035,17 @@ class Window():
         self.move_cursor_to_buf_location(x, y)
         self.draw()
 
-    def set_line(self, y, new_line):
+    def set_line(self, y, new_line, propagate=True):
         _x = self.buffer_cursor[0]
         _y = self.buffer_cursor[1]
 
-        self.buffer.replace_line(y, new_line)
+        self.buffer.replace_line(y, new_line, propagate=propagate)
 
         if _y == y and _x >= len(self.get_line(_y)) - 1:
             _x = len(self.get_line(_y)) - 1
 
         self.move_cursor_to_buf_location(_x, _y)
-        self.draw()
+        if propagate: self.draw()
 
     def empty_line(self):
         x = self.buffer_cursor[0]
@@ -1080,7 +1080,7 @@ class Window():
                 if len(line) - 1 <= 0: continue
                 if not re.search('\S', line): continue
                 line = indent_content + line
-                self.buffer.replace_line(y, line)
+                self.buffer.replace_line(y, line, propagate=False)
             curr_y = self.buffer_cursor[1]
             if start_y <= self.buffer_cursor[1] < end_y + 1:
                 for i in range(len(indent_content)):
@@ -1093,12 +1093,12 @@ class Window():
                 if not m: continue
                 num_of_spaces = m.start()
                 num_to_remove = min(len(indent_content), num_of_spaces)
-                self.buffer.replace_line(y, line[num_to_remove:])
+                self.buffer.replace_line(y, line[num_to_remove:], propagate=False)
                 if self.buffer_cursor[1] == y:
                     for i in range(num_to_remove):
                         self.move_left()
-
-        self.draw()
+        self.buffer.flush_changes()
+        # self.draw() # the event will draw it.
 
     def remove_scope(   self,
                         start_x,
