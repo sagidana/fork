@@ -151,8 +151,8 @@ class Buffer():
             return "markdown"
         # elif    self.file_path.endswith('.php'):
             # return "php"
-        # elif    self.file_path.endswith('.go'):
-            # return "go"
+        elif    self.file_path.endswith('.go'):
+            return "go"
         # elif    self.file_path.endswith('.html'):
             # return "html"
         # elif    self.file_path.endswith('.css'):
@@ -167,13 +167,13 @@ class Buffer():
             return "json"
         # elif    self.file_path.endswith('.rb'):
             # return "ruby"
-        # elif    self.file_path.endswith('.rs'):
-            # return "rust"
+        elif    self.file_path.endswith('.rs'):
+            return "rust"
         # elif    self.file_path.endswith('.sh'):
             # return "sh"
-        # elif    self.file_path.endswith('.cpp') or \
-                # self.file_path.endswith('.hpp'):
-            # return "cpp"
+        elif    self.file_path.endswith('.cpp') or \
+                self.file_path.endswith('.hpp'):
+            return "cpp"
         # elif    self.file_path.endswith('.xml'):
             # # return "xml"  # treesitter not supporting
             # return None

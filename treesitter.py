@@ -111,6 +111,18 @@ class TreeSitter():
                 with open(query_path.format("markdown"),"r") as f: query = f.read()
                 self.query = MARKDOWN_LANGUAGE.query(query)
                 self.parser.set_language(MARKDOWN_LANGUAGE)
+            elif language == 'cpp':
+                with open(query_path.format("cpp"),"r") as f: query = f.read()
+                self.query = CPP_LANGUAGE.query(query)
+                self.parser.set_language(CPP_LANGUAGE)
+            elif language == 'rust':
+                with open(query_path.format("rust"),"r") as f: query = f.read()
+                self.query = RUST_LANGUAGE.query(query)
+                self.parser.set_language(RUST_LANGUAGE)
+            elif language == 'go':
+                with open(query_path.format("go"),"r") as f: query = f.read()
+                self.query = GO_LANGUAGE.query(query)
+                self.parser.set_language(GO_LANGUAGE)
             else:
                 raise Exception("treesitter not support that language.. :(")
         except Exception as e: elog(f"Exception: {e}")
