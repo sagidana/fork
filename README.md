@@ -55,7 +55,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - OMG: fix draw proformance
-- ctrl-d/u in visual line
 - <num>j/k in visual line
 - visual block mode
 - replace mode
@@ -84,6 +83,8 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
     - `[`/`]`
     - `<`/`>`
 
+- BUG: difflib is extremely slow or maybe even freezes
+    - try to comment/indent all lines of a large file
 - BUG: fix all the annoying w movement that do not act as vim
 - BUG: in visual mode, tabs do not uses the right style
 - BUG: status line dont show if cursor is on last line

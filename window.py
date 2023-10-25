@@ -1171,10 +1171,12 @@ class Window():
         for i in range(num):
             self._remove_char()
         # self.draw()
+        self.draw_cursor()
 
     def remove_char(self):
         self._remove_char()
         # self.draw()
+        self.draw_cursor()
 
     def _insert_char(self, char, to_draw=True):
         self.buffer.insert_char(    self.buffer_cursor[0],
