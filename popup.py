@@ -15,34 +15,36 @@ class DetailsPopup():
 
         buffer = self.editor.get_curr_buffer()
         curr_window = self.editor.get_curr_window()
+        curr_tab = self.editor.get_curr_tab()
 
         x = curr_window.buffer_cursor[0]
         y = curr_window.buffer_cursor[1]
-        status = f"{buffer.describe()} {y}:{x}"
+        status = f"current: [tab {curr_tab.id}] {curr_window.describe()} {y}:{x}"
         pending_tasks = self.editor.tasks
         self.details = []
         self.details.append(status)
         if len(pending_tasks) > 0:
             self.details.append("tasks")
             for task in pending_tasks:
-                self.details.append(f"{g_settings['tab_representation']}- {task.id}")
+                self.details.append(f"{g_settings['tab_insert']}- {task.id}")
         buffers = self.editor.buffers
         if len(buffers) > 0:
             self.details.append("buffers")
             for b in buffers:
-                self.details.append(f"{g_settings['tab_representation']}- {b.describe()}")
+                self.details.append(f"{g_settings['tab_insert']}- {b.describe()}")
 
         self.details.append("tabs")
         for tab in self.editor.tabs:
-            self.details.append(f"{g_settings['tab_representation']}- id: {tab.id}")
+            self.details.append(f"{g_settings['tab_insert']}- [tab {tab.id}]")
             for window in tab.windows:
-                self.details.append(f"{g_settings['tab_representation']*2}- {window.describe()}")
+                self.details.append(f"{g_settings['tab_insert']*2}- {window.describe()}")
 
-        margin = 5
-        self.position = list([  curr_window.position[0] + margin,
-                                curr_window.position[1] + margin])
-        self.width = curr_window.width - (margin * 2)
-        self.height = curr_window.height - (margin * 2)
+        width_margin = 5
+        height_margin = 3
+        self.position = list([width_margin, height_margin])
+        self.width = self.screen.width - (width_margin * 2)
+        self.height = self.screen.height - (height_margin * 2)
+
         if self.height - 2 > len(self.details): self.height = len(self.details) + 2
         else: self.details = self.details[:self.height - 2]
 
@@ -194,9 +196,11 @@ class TSNode():
 
 class TreeSitterPopup():
     def __init__(   self,
+                    editor,
                     screen,
                     treesitter,
                     position):
+        self.editor = editor
         self.screen = screen
         self.treesitter = treesitter
         self.position = position
@@ -267,12 +271,13 @@ class TreeSitterPopup():
 
         if len(self.nodes) == 0: raise Exception('should not happend')
 
-        # full screen TODO:
+        curr_window = self.editor.get_curr_window()
         width_margin = 5
         height_margin = 3
-        self.position = list([width_margin, height_margin])
-        self.width = self.screen.width - (width_margin * 2)
-        self.height = self.screen.height - (height_margin * 2)
+        self.position = list([  curr_window.position[0] + width_margin,
+                                curr_window.position[1] + height_margin])
+        self.width = curr_window.width - (width_margin * 2)
+        self.height = curr_window.height - (height_margin * 2)
 
     def on_key(self, key):
         if key == ENTER_KEY:

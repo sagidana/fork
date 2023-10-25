@@ -42,7 +42,7 @@ class Window():
 
     def describe(self):
         buffer_description = self.buffer.describe()
-        return f"{self.id} {buffer_description}"
+        return f"[window {self.id}] {buffer_description}"
 
     def __init__(   self,
                     tab,
