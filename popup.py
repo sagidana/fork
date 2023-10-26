@@ -118,13 +118,18 @@ class CompletionPopup():
     def _calculate_dimentions_and_orientation(self):
         height = len(self.options)
         size_on_screen_down = self.screen.height - self.position[1]
-        if len(self.options) > size_on_screen_down:
-            size_on_screen_up = self.position[1]
-            if size_on_screen_up > size_on_screen_down:
-                height = size_on_screen_up
-                self.orientation = "up"
-            else:
-                height = size_on_screen_down
+        size_on_screen_up = self.position[1]
+
+        if len(self.options) <= size_on_screen_down:
+            height = len(self.options)
+        elif len(self.options) <= size_on_screen_up:
+            height = len(self.options)
+            self.orientation = "up"
+        elif size_on_screen_up > size_on_screen_down:
+            height = size_on_screen_up
+            self.orientation = "up"
+        else:
+            height = size_on_screen_down
 
         option_max_len = 0
         for option in self.options:
