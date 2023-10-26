@@ -78,8 +78,8 @@ class Window():
         self.content_width = self.width
         self.content_height = self.height
 
-        self.line_numbers = False # default
-        self.status_line = False # default
+        self.line_numbers = True # default
+        self.status_line = True # default
 
         self.window_cursor = window_cursor.copy()
         self.buffer_cursor = buffer_cursor.copy()

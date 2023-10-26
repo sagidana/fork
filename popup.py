@@ -49,9 +49,11 @@ class DetailsPopup():
         else: self.details = self.details[:self.height - 2]
 
     def pop(self):
+        self.screen.disable_cursor()
         self.draw()
         # wait for key to release
         self.screen.get_key()
+        self.screen.enable_cursor()
 
     def draw(self):
         try:
@@ -72,8 +74,8 @@ class DetailsPopup():
         style['background'] = g_settings['theme']['colors']['menu.background']
         style['foreground'] = g_settings['theme']['colors']['menu.foreground']
         frame_style = {}
-        frame_style['background'] = g_settings['theme']['colors']['terminal.ansiMagenta']
-        frame_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+        frame_style['background'] = g_settings['status_line_background']
+        # frame_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
 
         self.__draw(0,0," "*self.width, frame_style)
         for y in range(self.height-2):
@@ -129,19 +131,22 @@ class CompletionPopup():
         return height, width
 
     def pop(self):
+        self.screen.disable_cursor()
         try:
             while True:
                 self.draw()
                 key = self.screen.get_key()
                 if key == ENTER_KEY:
-                    return self.options[self.selected]
+                    break
                 elif key == CTRL_N_KEY:
                     self.selected = (self.selected + 1) % len(self.options)
                 elif key == CTRL_P_KEY:
                     self.selected = (self.selected - 1) % len(self.options)
                 else:
-                    return None
+                    break
         except Exception as e: elog(f"Exception: {e}")
+        self.screen.enable_cursor()
+        return self.options[self.selected]
 
     def draw(self):
         try:
@@ -426,6 +431,7 @@ class TreeSitterPopup():
         return True
 
     def pop(self):
+        self.screen.disable_cursor()
         try:
             while True:
                 self.draw()
@@ -434,6 +440,7 @@ class TreeSitterPopup():
                 to_exit = self.on_key(key)
                 if to_exit: break
         except Exception as e: elog(f"Exception: {e}")
+        self.screen.enable_cursor()
         return self.ret_node
 
     def draw(self):
@@ -703,6 +710,7 @@ class LinesPopup():
         return False
 
     def pop(self):
+        self.screen.disable_cursor()
         try:
             while True:
                 self.draw()
@@ -711,6 +719,7 @@ class LinesPopup():
                 to_exit = self.on_key(key)
                 if to_exit: break
         except Exception as e: elog(f"Exception: {e}")
+        self.screen.enable_cursor()
         return self.y_ret
 
     def draw(self):
