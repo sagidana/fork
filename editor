@@ -2025,7 +2025,7 @@ class Editor():
         origin_y = self.get_curr_window().buffer_cursor[1]
         def on_change(pattern):
             self._on_search(origin_x, origin_y, pattern, forward)
-        pattern = self.prompt("/", on_change)
+        pattern = self.prompt("/" if forward else "?", on_change)
 
         if len(pattern) > 0:
             self.registers['/'] = pattern
