@@ -471,7 +471,7 @@ class Window():
                 # we at the end of the buffer, draw background.
                 if buffer_y > buffer_height:
                     self._screen_write( x, y,
-                                        " "*(self.content_width - 1),
+                                        " "*self.content_width,
                                         default_style,
                                         to_flush=debug)
                     continue
