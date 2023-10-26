@@ -1252,8 +1252,8 @@ class Editor():
         self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
         def ctrl_n_map(self):
             abs_position = [0,0]
-            window_x = self.get_curr_window().position[0]
-            window_y = self.get_curr_window().position[1]
+            window_x = self.get_curr_window().content_position[0]
+            window_y = self.get_curr_window().content_position[1]
             window_cursor_x = self.get_curr_window().window_cursor[0]
             window_cursor_y = self.get_curr_window().window_cursor[1]
             abs_position[0] = window_x + window_cursor_x
