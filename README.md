@@ -54,7 +54,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- OMG: fix draw proformance
 - <num>j/k in visual line
 - visual block mode
 - replace mode

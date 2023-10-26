@@ -1993,7 +1993,7 @@ class Editor():
         self.get_curr_buffer().add_highlights("/", pattern, style)
         self.get_curr_window().draw()
 
-    def prompt(self, ask=None):
+    def prompt(self, ask=None, on_change=None):
         text = ""
         to_return = ""
         while True:
@@ -2009,11 +2009,13 @@ class Editor():
             if key == BACKSPACE_KEY:
                 if len(text) > 0:
                     text = text[:-1]
+                    if on_change: on_change(text)
             else:
                 try:
                     char = chr(key)
                     if char in printable:
                         text += char
+                        if on_change: on_change(text)
                 except: continue
         self.get_curr_tab().draw()
         return to_return
@@ -2021,34 +2023,11 @@ class Editor():
     def on_search(self, forward):
         origin_x = self.get_curr_window().buffer_cursor[0]
         origin_y = self.get_curr_window().buffer_cursor[1]
-
-        pattern = ""
-        success = False
-        while True:
-            key = self.screen.get_key()
-
-            if key == ENTER_KEY:
-                if len(pattern) > 0: success = True
-                break
-            if key == ESC_KEY: break
-            if key == BACKSPACE_KEY:
-                if len(pattern) > 0:
-                    pattern = pattern[:-1]
-                    self.get_curr_window().move_cursor_to_buf_location( origin_x,
-                                                                        origin_y)
-                    self.get_curr_buffer().clear_highlights()
-                    self.get_curr_window().draw()
-            else:
-                try:
-                    char = chr(key)
-                    if char in printable:
-                        pattern += char
-                    else: break
-                except: continue
-
+        def on_change(pattern):
             self._on_search(origin_x, origin_y, pattern, forward)
+        pattern = self.prompt("/", on_change)
 
-        if success:
+        if len(pattern) > 0:
             self.registers['/'] = pattern
             self._search_forward = forward
         else:
