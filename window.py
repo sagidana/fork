@@ -1072,15 +1072,24 @@ class Window():
         self.move_cursor_to_buf_location(0, y)
 
     def remove_line(self):
-        self.buffer.remove_line(self.buffer_cursor[1])
+        to_remove = self.buffer_cursor[1]
 
         x = self.buffer_cursor[0]
         y = self.buffer_cursor[1]
 
-        if y >= len(self.buffer.lines) - 1: y = len(self.buffer.lines) - 1
-        if x >= len(self.get_line(y)) - 1: x = len(self.get_line(y)) - 1
+        last_line = y == len(self.buffer.lines) - 1
+
+        y = min(y, len(self.buffer.lines) - 2)
+        if last_line:
+            dest_line = self.get_line(y)
+            x = min(x, len(dest_line) - 1)
+        else:
+            dest_line = self.get_line(y+1)
+            x = min(x, len(dest_line) - 1)
 
         self.move_cursor_to_buf_location(x, y)
+
+        self.buffer.remove_line(to_remove)
 
     def indent_lines(   self,
                         start_y,
