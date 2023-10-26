@@ -575,11 +575,13 @@ class LinesPopup():
                 curr_node = new_node
 
     def __init__(   self,
+                    editor,
                     screen,
                     lines,
                     y_pos):
         if len(lines) == 0: raise Exception("no lines for LinesPopup().. WTF?")
 
+        self.editor = editor
         self.screen = screen
         self.original_lines = lines
         self.lines = lines
@@ -588,11 +590,18 @@ class LinesPopup():
         self.ret_node = None
         self.selected = 0
 
+
+        curr_window = self.editor.get_curr_window()
         width_margin = 5
         height_margin = 3
-        self.position = list([width_margin, height_margin])
-        self.width = self.screen.width - (width_margin * 2)
-        self.height = self.screen.height - (height_margin * 2)
+        self.position = list([  curr_window.position[0] + width_margin,
+                                curr_window.position[1] + height_margin])
+        self.width = curr_window.width - (width_margin * 2)
+        self.height = curr_window.height - (height_margin * 2)
+
+        # self.position = list([width_margin, height_margin])
+        # self.width = self.screen.width - (width_margin * 2)
+        # self.height = self.screen.height - (height_margin * 2)
         self.init_tree()
 
         found = self.tree
