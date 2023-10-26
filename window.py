@@ -887,7 +887,7 @@ class Window():
 
         if ignore_spaces:
             line = self.get_line(self.buffer_cursor[1])
-            while self.buffer_cursor[0] < self.width - 1:
+            while self.buffer_cursor[0] < len(line) - 1:
                 if not re.match("\s", line[self.buffer_cursor[0]]): break
                 self._move_right()
 
