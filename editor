@@ -2102,7 +2102,9 @@ class Editor():
             y = self.get_curr_window().buffer_cursor[1]
             start_x = x
 
-            words = re.findall('\w+', self.get_curr_buffer().get_file_stream())
+            words = []
+            for buf in self.buffers:
+                words.extend(re.findall('\w+', buf.get_file_stream()))
             if len(words) == 0: return None
 
             line = self.get_curr_window().get_curr_line()
