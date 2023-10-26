@@ -2059,26 +2059,9 @@ class Editor():
             self.get_curr_window().draw()
 
     def on_command(self):
-        ret = False
-        command = ""
-        self.draw_command(command)
-        while True:
-            key = self.screen.get_key()
-
-            if key == ESC_KEY: break
-            if key == BACKSPACE_KEY: command = command[:-1]
-            if key == ENTER_KEY: # enter
-                ret = self.exec_command(command)
-                break
-
-            try:
-                command += chr(key)
-            except: pass
-            self.draw_command(f":{command}")
-
-        self.screen.clear()
-        self.get_curr_tab().draw()
-        return ret
+        command = self.prompt(":")
+        if len(command) == 0: return False
+        return self.exec_command(command)
 
     def on_key(self, key):
         # enter number mode
