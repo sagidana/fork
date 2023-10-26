@@ -1147,6 +1147,7 @@ class Window():
     def new_line_after(self):
         line = self.get_curr_line()
         num_of_spaces_at_start = len(line) - len(line.lstrip())
+        num_of_spaces_at_start = min(num_of_spaces_at_start, len(line) - 1)
         prefix_new_line = line[:num_of_spaces_at_start]
 
         self.buffer.insert_line(self.buffer_cursor[1] + 1, f"{prefix_new_line}\n")
@@ -1156,6 +1157,7 @@ class Window():
     def new_line_before(self):
         line = self.get_curr_line()
         num_of_spaces_at_start = len(line) - len(line.lstrip())
+        num_of_spaces_at_start = min(num_of_spaces_at_start, len(line) - 1)
         prefix_new_line = line[:num_of_spaces_at_start]
 
         self.buffer.insert_line(self.buffer_cursor[1], f"{prefix_new_line}\n")
