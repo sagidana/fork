@@ -2014,8 +2014,6 @@ class Editor():
                     if char in printable:
                         text += char
                 except: continue
-
-        self.screen.clear()
         self.get_curr_tab().draw()
         return to_return
 
