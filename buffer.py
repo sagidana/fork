@@ -583,8 +583,7 @@ class Buffer():
 
         self.lines = stream.splitlines(keepends=True)
 
-        # self.on_buffer_change_callback(change)
-        if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
 
     def replace_char(self, x, y, char):
         self.remove_char(x+1, y)
