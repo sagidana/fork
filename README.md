@@ -62,9 +62,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - add `gq`
 - add support for setting config variables at runtime
 - autocomplete - dont require enter.. act like vim
-- add support for language
-    - cpp
-    - rust
 
 - add tabs status line like in vim
     - adding set_position() and resize() methods in Tab class

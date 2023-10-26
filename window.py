@@ -1145,13 +1145,21 @@ class Window():
                                             dest)
 
     def new_line_after(self):
-        self.buffer.insert_line(self.buffer_cursor[1] + 1, "\n")
+        line = self.get_curr_line()
+        num_of_spaces_at_start = len(line) - len(line.lstrip())
+        prefix_new_line = line[:num_of_spaces_at_start]
+
+        self.buffer.insert_line(self.buffer_cursor[1] + 1, f"{prefix_new_line}\n")
         self.move_down()
-        self.move_line_begin()
+        self.move_line_end()
 
     def new_line_before(self):
-        self.buffer.insert_line(self.buffer_cursor[1], "\n")
-        self.move_line_begin()
+        line = self.get_curr_line()
+        num_of_spaces_at_start = len(line) - len(line.lstrip())
+        prefix_new_line = line[:num_of_spaces_at_start]
+
+        self.buffer.insert_line(self.buffer_cursor[1], f"{prefix_new_line}\n")
+        self.move_line_end()
 
     def remove_char_special(self, x):
         if x > self.get_curr_line_len() - 1: return
