@@ -896,6 +896,7 @@ class Window():
         self.draw_cursor()
 
     def move_line_end(self):
+        self.buffer_cursor[0] = min(self.buffer_cursor[0], len(self.get_curr_line()) - 1)
         while self.buffer_cursor[0] < len(self.get_curr_line()) - 1:
             self._move_right()
         self.draw_cursor()
