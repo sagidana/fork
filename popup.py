@@ -811,7 +811,7 @@ class LinesPopup():
                 self.__draw(0, y, " "*self.width, style)
 
             if self.selected < self.height:
-                for y in range(self.height):
+                for y in range(min(self.height, len(self.nodes))):
                     node = self.nodes[y]
                     line = node.line_text
                     if len(line) < self.width:

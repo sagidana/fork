@@ -1064,13 +1064,13 @@ class Window():
         self.move_cursor_to_buf_location(_x, _y, to_draw=propagate)
 
     def empty_line(self):
-        x = self.buffer_cursor[0]
         y = self.buffer_cursor[1]
 
-        # replace with empty line (including the newline char)
-        self.buffer.replace_line(y, "\n")
-
         self.move_cursor_to_buf_location(0, y)
+
+        # replace with empty line (including the newline char)
+        self.buffer.replace_line(y, "\n", propagate=False)
+        self.buffer.flush_changes()
 
     def remove_line(self):
         to_remove = self.buffer_cursor[1]
