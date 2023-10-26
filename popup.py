@@ -102,13 +102,16 @@ class DetailsPopup():
 
 class CompletionPopup():
     def __init__(   self,
+                    editor,
                     screen,
                     position,
                     options):
+        self.editor = editor
         self.screen = screen
         self.position = list(position)
         self.options = options
         self.selected = 0
+        self.ret = None
         self.orientation = "down"
         self.height, self.width = self._calculate_dimentions_and_orientation()
 
@@ -120,33 +123,76 @@ class CompletionPopup():
             if size_on_screen_up > size_on_screen_down:
                 height = size_on_screen_up
                 self.orientation = "up"
+            else:
+                height = size_on_screen_down
 
         option_max_len = 0
         for option in self.options:
-            if len(option) > option_max_len:
-                option_max_len = len(option)
+            if len(option[0]) > option_max_len:
+                option_max_len = len(option[0])
         size_on_screen_right = self.screen.width - self.position[0]
         width = min(option_max_len + 1, size_on_screen_right)
 
         return height, width
 
+    def on_key(self, key):
+        if key == ESC_KEY: return True
+        if key == ENTER_KEY:
+            self.ret = self.options[self.selected]
+            return True
+        if key == CTRL_N_KEY:
+            self.selected = (self.selected + 1) % len(self.options)
+            return False
+        if key == CTRL_P_KEY:
+            self.selected = (self.selected - 1) % len(self.options)
+            return False
+        try:
+            success = False
+            if chr(key) not in printable: return False
+            pattern = chr(key)
+            original_options = self.options
+            self.selected = 0
+            while True:
+                options = [option for option in original_options if pattern in option[0]]
+                if len(options) > 0:
+                    self.options = options
+                    self.draw()
+
+                key = self.screen.get_key()
+
+                if key == ENTER_KEY:
+                    if len(pattern) > 0: success = True
+                    self.ret = self.options[self.selected]
+                    return True
+                if key == ESC_KEY: break
+                if key == CTRL_N_KEY:
+                    self.selected = (self.selected + 1) % len(self.options)
+                    return False
+                if key == CTRL_P_KEY:
+                    self.selected = (self.selected - 1) % len(self.options)
+                    return False
+                if key == BACKSPACE_KEY:
+                    if len(pattern) > 0: pattern = pattern[:-1]
+                    continue
+
+                try:
+                    char = chr(key)
+                    if char in printable:
+                        pattern += char
+                    else: break
+                except: continue
+        except: pass
+        return False
+
     def pop(self):
         self.screen.disable_cursor()
-        try:
-            while True:
-                self.draw()
-                key = self.screen.get_key()
-                if key == ENTER_KEY:
-                    break
-                elif key == CTRL_N_KEY:
-                    self.selected = (self.selected + 1) % len(self.options)
-                elif key == CTRL_P_KEY:
-                    self.selected = (self.selected - 1) % len(self.options)
-                else:
-                    break
-        except Exception as e: elog(f"Exception: {e}")
+        while True:
+            self.draw()
+            key = self.screen.get_key()
+            to_exit = self.on_key(key)
+            if to_exit: break
         self.screen.enable_cursor()
-        return self.options[self.selected]
+        return self.ret
 
     def draw(self):
         try:
@@ -157,15 +203,34 @@ class CompletionPopup():
             selected_style['background'] = g_settings['theme']['colors']['terminal.ansiMagenta']
             selected_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
 
-            for y, option in enumerate(self.options):
-                if len(option) < self.width:
-                    option = f"{option}{' '*(self.width - len(option))}"
-                option = option[:self.width]
-                if y == self.selected:
-                    self.__draw(0, y, f"{option}", selected_style)
-                else:
-                    self.__draw(0, y, f"{option}", style)
-        except Exception as e: elog(f"Exception: {e}")
+            for y in range(self.height):
+                self.__draw(0, y, " "*self.width, style)
+
+            if self.selected < self.height:
+                for y in range(min(self.height, len(self.options))):
+                    option = self.options[y][0]
+                    if len(option) < self.width:
+                        option = f"{option}{' '*(self.width - len(option))}"
+                    option = option[:self.width]
+                    if y == self.selected:
+                        self.__draw(0, y, f"{option}", selected_style)
+                    else:
+                        self.__draw(0, y, f"{option}", style)
+            else:
+                index = self.selected
+                for y in reversed(range(self.height)):
+                    option = self.options[index][0]
+                    if len(option) < self.width:
+                        option = f"{option}{' '*(self.width - len(option))}"
+                    option = option[:self.width]
+                    if index == self.selected:
+                        self.__draw(0, y, f"{option}", selected_style)
+                    else:
+                        self.__draw(0, y, f"{option}", style)
+                    index -= 1
+
+        except Exception as e: elog(f"Exception: here {e}")
+        self.screen.flush()
 
     def __draw(self, x, y, string, style):
         try:
@@ -180,12 +245,14 @@ class CompletionPopup():
                 self.screen.write(  self.position[1] + y,
                                     self.position[0] + x,
                                     string,
-                                    style)
+                                    style,
+                                    to_flush=False)
             else: # up
                 self.screen.write(  self.position[1] - y,
                                     self.position[0] + x,
                                     string,
-                                    style)
+                                    style,
+                                    to_flush=False)
         except Exception as e:
             elog(f"Exception: {e}")
 
@@ -744,7 +811,8 @@ class LinesPopup():
                 self.__draw(0, y, " "*self.width, style)
 
             if self.selected < self.height:
-                for y, node in enumerate(self.nodes):
+                for y in range(self.height):
+                    node = self.nodes[y]
                     line = node.line_text
                     if len(line) < self.width:
                         option = f"{line}{' '*(self.width - len(line))}"

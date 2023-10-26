@@ -1251,28 +1251,29 @@ class Editor():
             return False
         self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
         def ctrl_n_map(self):
-            abs_position = [0,0]
-            window_x = self.get_curr_window().content_position[0]
-            window_y = self.get_curr_window().content_position[1]
-            window_cursor_x = self.get_curr_window().window_cursor[0]
-            window_cursor_y = self.get_curr_window().window_cursor[1]
-            abs_position[0] = window_x + window_cursor_x
-            abs_position[1] = window_y + window_cursor_y
-
-            options = self.generate_completion_options()
+            ret = self.generate_completion_options()
+            if not ret: return False
+            x, options = ret
             if len(options) == 0: return False
             if len(options) == 1:
-                self.get_curr_window().insert_string(options[0])
+                self.get_curr_window().insert_string(options[0][1])
                 return False
 
-            completion = CompletionPopup(   self.screen,
+            window_x = self.get_curr_window().content_position[0]
+            window_y = self.get_curr_window().content_position[1]
+            abs_position = [0,0]
+            abs_position[0] = window_x + x
+            abs_position[1] = window_y + self.get_curr_window().window_cursor[1]
+
+            completion = CompletionPopup(   self,
+                                            self.screen,
                                             position=abs_position,
                                             options=options)
             choise = completion.pop()
             self.get_curr_tab().draw() # need to redraw after completion
 
             if choise:
-                self.get_curr_window().insert_string(choise)
+                self.get_curr_window().insert_string(choise[1])
             return False
         self.maps[INSERT][CTRL_N_KEY] = ctrl_n_map
 
@@ -2097,27 +2098,29 @@ class Editor():
         options = []
 
         try:
-            end_x = self.get_curr_window().buffer_cursor[0]
-            end_y = self.get_curr_window().buffer_cursor[1]
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            start_x = x
 
             words = re.findall('\w+', self.get_curr_buffer().get_file_stream())
             if len(words) == 0: return None
 
             line = self.get_curr_window().get_curr_line()
-            if re.match('\s', line[end_x - 1]):
-                options = words
+            if re.match('\s', line[x - 1]):
+                options = [(option, option) for option in words]
+                start_x = x
             else:
-                ret = self.get_curr_buffer().find_prev_word(end_x, end_y)
+                ret = self.get_curr_buffer().find_prev_word(x, y)
                 if not ret: return None
 
                 start_x, start_y = ret
-                curr_word = line[start_x:end_x]
+                curr_word = line[start_x:x]
                 for word in words:
                     if word.startswith(curr_word) and word != curr_word:
-                        options.append(word[len(curr_word):])
+                        options.append((word, word[len(curr_word):]))
+            return (start_x, list(set(options)))
         except Exception as e: elog(f"Exception: {e}")
-
-        return list(set(options))
+        return None
 
 
 def main():
