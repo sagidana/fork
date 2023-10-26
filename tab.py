@@ -463,7 +463,9 @@ class Tab():
         else:
             for window in self.windows:
                 window.draw()
+            self.screen.disable_cursor()
             self.draw_seperators()
+            self.screen.enable_cursor()
         self.get_curr_window().draw_cursor()
 
         Hooks.execute(ON_DRAW_TAB, None)
