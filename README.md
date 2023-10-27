@@ -54,14 +54,13 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- horizontal scrolling
 - visual block mode
 - replace mode
 - make asterisk work as <cword> in vim
-- add `gq`
 - add support for setting config variables at runtime
 - record jumps in all the right places
 
+- horizontal scrolling
 - add tabs status line like in vim
     - adding set_position() and resize() methods in Tab class
     - on ENTER, toggle

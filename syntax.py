@@ -2,7 +2,7 @@
 import json
 
 from treesitter import TreeSitter
-from settings import g_settings
+from settings import get_settings
 from log import elog
 
 from functools import lru_cache
@@ -33,7 +33,7 @@ def _get_scope_style(theme, scope):
 
 @lru_cache(None)
 def get_scope_style(scope):
-    theme = g_settings['theme_opt']
+    theme = get_settings()['theme_opt']
     if scope in theme: return theme[scope]
     target_scopes = scope.split('.')
     for i in range(len(target_scopes) - 1, 0, -1):

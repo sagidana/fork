@@ -1,7 +1,7 @@
 from log import elog
 
 from treesitter import traverse_tree
-from settings import g_settings
+from settings import get_settings
 from screen import *
 from os import path
 
@@ -26,18 +26,18 @@ class DetailsPopup():
         if len(pending_tasks) > 0:
             self.details.append("tasks")
             for task in pending_tasks:
-                self.details.append(f"{g_settings['tab_insert']}- {task.id}")
+                self.details.append(f"{get_settings()['tab_insert']}- {task.id}")
         buffers = self.editor.buffers
         if len(buffers) > 0:
             self.details.append("buffers")
             for b in buffers:
-                self.details.append(f"{g_settings['tab_insert']}- {b.describe()}")
+                self.details.append(f"{get_settings()['tab_insert']}- {b.describe()}")
 
         self.details.append("tabs")
         for tab in self.editor.tabs:
-            self.details.append(f"{g_settings['tab_insert']}- [tab {tab.id}]")
+            self.details.append(f"{get_settings()['tab_insert']}- [tab {tab.id}]")
             for window in tab.windows:
-                self.details.append(f"{g_settings['tab_insert']*2}- {window.describe()}")
+                self.details.append(f"{get_settings()['tab_insert']*2}- {window.describe()}")
 
         width_margin = 5
         height_margin = 3
@@ -58,8 +58,8 @@ class DetailsPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = g_settings['theme']['colors']['menu.background']
-            style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            style['background'] = get_settings()['theme']['colors']['menu.background']
+            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
 
             self.__draw_frame()
 
@@ -71,11 +71,11 @@ class DetailsPopup():
 
     def __draw_frame(self):
         style = {}
-        style['background'] = g_settings['theme']['colors']['menu.background']
-        style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+        style['background'] = get_settings()['theme']['colors']['menu.background']
+        style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
         frame_style = {}
-        frame_style['background'] = g_settings['status_line_background']
-        # frame_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+        frame_style['background'] = get_settings()['status_line_background']
+        # frame_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
 
         self.__draw(0,0," "*self.width, frame_style)
         for y in range(self.height-2):
@@ -202,11 +202,11 @@ class CompletionPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = g_settings['theme']['colors']['menu.background']
-            style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            style['background'] = get_settings()['theme']['colors']['menu.background']
+            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
             selected_style = {}
-            selected_style['background'] = g_settings['theme']['colors']['terminal.ansiMagenta']
-            selected_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
+            selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
 
             for y in range(self.height):
                 self.__draw(0, y, " "*self.width, style)
@@ -518,11 +518,11 @@ class TreeSitterPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = g_settings['theme']['colors']['menu.background']
-            style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            style['background'] = get_settings()['theme']['colors']['menu.background']
+            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
             selected_style = {}
-            selected_style['background'] = g_settings['theme']['colors']['terminal.ansiMagenta']
-            selected_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
+            selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
 
             for y in range(self.height):
                 self.__draw(0, y, " "*self.width, style)
@@ -806,11 +806,11 @@ class LinesPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = g_settings['theme']['colors']['menu.background']
-            style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            style['background'] = get_settings()['theme']['colors']['menu.background']
+            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
             selected_style = {}
-            selected_style['background'] = g_settings['theme']['colors']['terminal.ansiMagenta']
-            selected_style['foreground'] = g_settings['theme']['colors']['menu.foreground']
+            selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
+            selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
 
             for y in range(self.height):
                 self.__draw(0, y, " "*self.width, style)

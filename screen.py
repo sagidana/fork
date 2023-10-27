@@ -3,7 +3,7 @@
 # VT100 escape codes:
 # https://www.csie.ntu.edu.tw/~r92094/c++/VT100.html
 
-from settings import g_settings
+from settings import get_settings
 from log import elog
 from events import *
 from hooks import *
@@ -203,9 +203,9 @@ class Screen():
     def _set_style(self, style, to_flush=True):
         if not style: style = {}
         fg =    style['foreground'] if 'foreground' in style else  \
-                g_settings['theme']['colors']['editor.foreground']
+                get_settings()['theme']['colors']['editor.foreground']
         bg =    style['background'] if 'background' in style else  \
-                g_settings['theme']['colors']['editor.background']
+                get_settings()['theme']['colors']['editor.background']
 
         if fg: self._write_to_stdout(FOREGROUND_TRUE_COLOR.format(convert(fg)), to_flush=False)
         if bg: self._write_to_stdout(BACKGROUND_TRUE_COLOR.format(convert(bg)), to_flush=False)

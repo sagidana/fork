@@ -9,7 +9,7 @@ import json
 import re
 import os
 
-from settings import g_settings
+from settings import get_settings, load_settings
 from buffer import Buffer
 from window import Window
 from task import Task
@@ -1114,6 +1114,7 @@ class Editor():
     def _initialize_leader_maps(self):
         self.maps[NORMAL][ord(' ')] = {}        # leader
         self.maps[NORMAL][ord(' ')][ord('o')] = {} # open
+        self.maps[NORMAL][ord(' ')][ord('e')] = {} # execute
         self.maps[NORMAL][ord(' ')][ord('s')] = {} # search
         self.maps[NORMAL][ord(' ')][ord('t')] = {} # treesitter
         def leader_sf_map(self): # search file
@@ -1219,6 +1220,11 @@ class Editor():
             self.get_curr_tab().draw() # need to redraw after popup
             return False
         self.maps[NORMAL][ord(' ')][ord('l')] = leader_l_map
+        def leader_ec_map(self):
+            load_settings()
+            return False
+        # reload settings of editor ([e]xecute [c]onfig (legacy))
+        self.maps[NORMAL][ord(' ')][ord('e')][ord('c')] = leader_ec_map
 
     def _initialize_normal_maps(self):
         def colon_map(self):
@@ -1949,8 +1955,8 @@ class Editor():
 
     def draw_command(self, command):
         style = {}
-        style['background'] = g_settings['status_line_background']
-        style['foreground'] = g_settings['status_line_foreground']
+        style['background'] = get_settings()['status_line_background']
+        style['foreground'] = get_settings()['status_line_foreground']
 
         command_position = [0, 0]
 
@@ -1979,7 +1985,7 @@ class Editor():
 
         if key == TAB_KEY:
             # expand tab to spaces
-            self.get_curr_window().insert_string(g_settings["tab_insert"])
+            self.get_curr_window().insert_string(get_settings()["tab_insert"])
             return ret
 
         try:
@@ -2020,8 +2026,8 @@ class Editor():
 
         # reverse the colors for highlights
         style = {}
-        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
-        style['background'] = g_settings['theme']['colors']['selection.background']
+        style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
+        style['background'] = get_settings()['theme']['colors']['selection.background']
 
         self.get_curr_buffer().add_highlights("/", pattern, style)
         self.get_curr_window().draw()

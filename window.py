@@ -1,6 +1,6 @@
 from log import elog
 
-from settings import g_settings
+from settings import get_settings
 from idr import *
 from buffer import *
 from hooks import *
@@ -336,8 +336,8 @@ class Window():
 
     def _visualize(self):
         style = {}
-        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
-        style['background'] = g_settings['theme']['colors']['selection.background']
+        style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
+        style['background'] = get_settings()['theme']['colors']['selection.background']
         # style['reverse'] = None
 
         orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
@@ -389,8 +389,8 @@ class Window():
 
     def _visualize_line(self):
         style = {}
-        style['foreground'] = g_settings['theme']['colors']['editor.foreground']
-        style['background'] = g_settings['theme']['colors']['selection.background']
+        style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
+        style['background'] = get_settings()['theme']['colors']['selection.background']
         # style['reverse'] = None
         start_x, start_y, end_x, end_y = self.buffer.visual_get_scope()
 
@@ -440,8 +440,8 @@ class Window():
 
     def draw_status_line(self):
         style = {}
-        style['background'] = g_settings["status_line_background"]
-        style['foreground'] = g_settings["status_line_foreground"]
+        style['background'] = get_settings()["status_line_background"]
+        style['foreground'] = get_settings()["status_line_foreground"]
 
         buffer_name = path.basename(self.buffer.file_path) if self.buffer.file_path else "<in_memory>"
         buffer_id = self.buffer.id
@@ -469,8 +469,8 @@ class Window():
 
     def draw_line_numbers(self):
         style = {}
-        style['background'] = g_settings["line_numbers_background"]
-        style['foreground'] = g_settings["line_numbers_foreground"]
+        style['background'] = get_settings()["line_numbers_background"]
+        style['foreground'] = get_settings()["line_numbers_foreground"]
 
         buf_start_y = self.buffer_cursor[1] - self.window_cursor[1]
 
@@ -526,8 +526,8 @@ class Window():
             buffer_height = len(self.buffer.lines) - 1
 
             default_style = {}
-            default_style['background'] = g_settings['theme']['colors']['editor.background']
-            default_style['foreground'] = g_settings['theme']['colors']['editor.foreground']
+            default_style['background'] = get_settings()['theme']['colors']['editor.background']
+            default_style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
 
             syntax_map = self.get_syntax()
 
@@ -640,7 +640,7 @@ class Window():
     def _expanded_string_len(self, string):
         _x = 0
         for c in string:
-            if c == '\t': _x += len(g_settings["tab_representation"])
+            if c == '\t': _x += len(get_settings()["tab_representation"])
             else: _x += 1
         return _x
 
@@ -1168,7 +1168,7 @@ class Window():
                         start_y,
                         end_y,
                         is_right):
-        indent_content = g_settings['tab_insert']
+        indent_content = get_settings()['tab_insert']
         if is_right:
             for y in range(start_y, end_y + 1):
                 line = self.get_line(y)
@@ -1464,12 +1464,12 @@ class Window():
 
             self.screen.write(  self.position[1] + y,
                                 self.position[0] + x + screen_index,
-                                g_settings["tab_representation"],
+                                get_settings()["tab_representation"],
                                 tab_style,
                                 to_flush=to_flush)
 
             string_index += 1
-            screen_index += len(g_settings["tab_representation"])
+            screen_index += len(get_settings()["tab_representation"])
         if string_index <= len(string) - 1:
             part = string[string_index:]
             self.screen.write(  self.position[1] + y,
