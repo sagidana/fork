@@ -664,6 +664,8 @@ class Editor():
             self.change_mode(INSERT, effect_change=False)
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
+        # in the case of change, thw word movement is acting like the end movement.
+        self.maps[NORMAL][ord('c')][ord('w')] = self.maps[NORMAL][ord('c')][ord('e')]
         def delete_object_map(scope):
             start_x, start_y, end_x, end_y = scope
             self.change_begin()
