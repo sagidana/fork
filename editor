@@ -837,7 +837,7 @@ class Editor():
         self.maps[NORMAL][ord('t')] = t_map
         def T_map(self):
             char = self.get_curr_window().till_back()
-            self._action = 'T'
+            self._dir = 'backward'
             self._char = char
             return False
         self.maps[NORMAL][ord('T')] = T_map
@@ -863,12 +863,6 @@ class Editor():
                 self.get_curr_window()._till(self._char)
             return False
         self.maps[NORMAL][ord(',')] = comma_map
-        def T_map(self):
-            char = self.get_curr_window().till_back()
-            self._dir = 'backward'
-            self._char = char
-            return False
-        self.maps[NORMAL][ord('T')] = T_map
         def hash_map(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -899,6 +893,25 @@ class Editor():
             self._on_search(x, y, pattern, self._search_forward)
             return False
         self.maps[NORMAL][ord('*')] = asterisk_map
+        def precent_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            char = self.get_curr_window().get_curr_line()[x]
+            dst_char = self.get_curr_buffer().negate_char(char)
+            if not dst_char: return False
+            x_dst = x
+            y_dst = y
+            if char in "(<{[":
+                ret = self.get_curr_buffer().find_next_char(x, y, dst_char, smart=True)
+                if not ret: return False
+                x_dst, y_dst = ret
+            else:
+                ret = self.get_curr_buffer().find_prev_char(x, y, dst_char, smart=True)
+                if not ret: return False
+                x_dst, y_dst = ret
+            self.get_curr_window().move_cursor_to_buf_location(x_dst, y_dst)
+            return False
+        self.maps[NORMAL][ord('%')] = precent_map
         def H_map(self):
             self.get_curr_window().add_jump()
             self.get_curr_window().move_begin_visible()
