@@ -673,6 +673,9 @@ class Editor():
             self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
+        # in the case of delete, the j/k movements are acting like VISUAL_LINE
+        # TODO: self.maps[NORMAL][ord('d')][ord('j')] =
+        # TODO: self.maps[NORMAL][ord('d')][ord('k')] =
         def yank_object_map(scope):
             start_x, start_y, end_x, end_y = scope
             text = self.get_curr_buffer().get_scope_text(   start_x,

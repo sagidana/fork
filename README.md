@@ -69,6 +69,13 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
         - line numbers for all windows
         - status line on all windows
 - move windows (especially in the rg cases)
+- add command auto complete at tab
+- add commands:
+    - e <file_path>
+    - q!
+    - wq
+    - qa!
+
 - adding `curr/total` to search pattern functionality
 - `=` operator
 - `%` operator

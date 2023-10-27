@@ -63,7 +63,6 @@ class Window():
         self.buffer = buffer
         handlers = {}
         handlers[ON_BUFFER_RELOAD] = self.on_buffer_reload_callback
-        self.buffer.register_events(handlers)
         handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
         self.buffer.register_events(handlers)
 
