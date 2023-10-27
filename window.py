@@ -367,10 +367,21 @@ class Window():
         if self.buffer.visual_mode == 'visual_block':
             self._visualize_block()
 
+    def _get_curr_highlight(self):
+        buf_x = self.buffer_cursor[0]
+        buf_y = self.buffer_cursor[1]
+        index = "?"
+        for i, (start_x, start_y, end_x, end_y, style) in enumerate(self.buffer.highlights):
+            if start_x <= buf_x <= end_x and \
+               start_y <= buf_y <= end_y:
+                index = str(i+1)
+                break
+        return index
+
     def _get_highlights_status(self):
         total = len(self.buffer.highlights)
         if total == 0: return ""
-        curr = "?" # TODO
+        curr = self._get_curr_highlight()
         return f"[{curr}/{total}]"
 
     def draw_status_line(self):
