@@ -77,6 +77,8 @@ class Window():
         self.content_width = self.width
         self.content_height = self.height
 
+        self._need_to_clear_pairs = False
+
         self.line_numbers = False # default
         self.status_line = False # default
 
@@ -196,11 +198,10 @@ class Window():
 
         return x, ret_y
 
-    def _clear_pairs(self):
-        pass # TODO:
-
     def _draw_pairs(self):
-        self._clear_pairs()
+        if self._need_to_clear_pairs:
+            self.draw()
+            self._need_to_clear_pairs = False
 
         x_1 = self.buffer_cursor[0]
         y_1 = self.buffer_cursor[1]
@@ -228,15 +229,15 @@ class Window():
 
         style = {}
         style['background'] = "#FF00FF"
-        elog(f"({x_1}, {y_1}) | ({x_2}, {y_2})")
         self._screen_write(x_1, y_1, char_1, style)
         self._screen_write(x_2, y_2, char_2, style)
+        self._need_to_clear_pairs = True
 
     def draw_cursor(self):
         if self.status_line: self.draw_status_line()
         if self.line_numbers: self.draw_line_numbers()
         self.visualize()
-        # self._draw_pairs()
+        self._draw_pairs()
         self._draw_cursor()
 
     def set_lines_margin(self):
