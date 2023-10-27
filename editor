@@ -77,6 +77,8 @@ class Editor():
             self.get_curr_window().visual_end()
         if self.mode == VISUAL_LINE and target == NORMAL:
             self.get_curr_window().visual_end()
+        if self.mode == NORMAL and target == REPLACE:
+            pass
 
         self.mode = target
         self.curr_maps = self.maps[self.mode]
@@ -985,7 +987,7 @@ class Editor():
             return False
         self.maps[NORMAL][ord('r')] = r_map
         def R_map(self):
-            # TODO
+            self.change_mode(REPLACE)
             return False
         self.maps[NORMAL][ord('R')] = R_map
         def P_map(self):
@@ -1794,11 +1796,15 @@ class Editor():
             return False
         self.maps[VISUAL][ord('?')] = question_map
 
+    def _initialize_replace_maps(self):
+        pass
+
     def initialize_maps(self):
         self._initialize_normal_maps()
         self._initialize_insert_maps()
         self._initialize_visual_maps()
         self._initialize_visual_line_maps()
+        self._initialize_replace_maps()
 
     def initialize_registers(self):
         # we dont add all of vim's registers for now..
@@ -1971,6 +1977,10 @@ class Editor():
         self.screen.move_cursor(    command_position[1],
                                     command_position[0] + len(command))
 
+    def on_replace(self, key):
+        elog(f"on replace: {key}")
+        pass
+
     def on_insert(self, key):
         ret = False
 
@@ -2130,6 +2140,8 @@ class Editor():
         # where we free to input free text.
         elif self.mode == INSERT:
             return self.on_insert(key)
+        elif self.mode == REPLACE:
+            return self.on_replace(key)
 
         # We reached a dead-end. start from the top again in normal
         # mode.
