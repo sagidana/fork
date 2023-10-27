@@ -367,6 +367,12 @@ class Window():
         if self.buffer.visual_mode == 'visual_block':
             self._visualize_block()
 
+    def _get_highlights_status(self):
+        total = len(self.buffer.highlights)
+        if total == 0: return ""
+        curr = "?" # TODO
+        return f"[{curr}/{total}]"
+
     def draw_status_line(self):
         style = {}
         style['background'] = g_settings["status_line_background"]
@@ -383,11 +389,13 @@ class Window():
         else:
             status_line = f"{buffer_id} {buffer_name} {y}:{x}"
 
+        highlights_status = self._get_highlights_status()
+        if len(highlights_status) > 0: status_line += f" {highlights_status}"
+
         if len(status_line) < self.width:
             status_line = f"{status_line}{' '*(self.width - len(status_line))}"
         else:
             status_line = status_line[:self.width]
-
         self._screen_write_raw( 0,
                                 self.height - 1,
                                 status_line,

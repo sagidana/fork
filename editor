@@ -1975,10 +1975,10 @@ class Editor():
 
     def _on_search(self, x, y, pattern, forward):
         results = self.get_curr_buffer().search_pattern(pattern)
-        if len(results) == 0: return
+        if len(results) == 0: return False
 
         pos = self._find_closest_match(x, y, results, forward)
-        if not pos: return
+        if not pos: return False
 
         self.get_curr_window().move_cursor_to_buf_location( pos[0],
                                                             pos[1])
@@ -1990,6 +1990,7 @@ class Editor():
 
         self.get_curr_buffer().add_highlights("/", pattern, style)
         self.get_curr_window().draw()
+        return True
 
     def prompt(self, ask=None, on_change=None):
         text = ""
@@ -2021,11 +2022,13 @@ class Editor():
     def on_search(self, forward):
         origin_x = self.get_curr_window().buffer_cursor[0]
         origin_y = self.get_curr_window().buffer_cursor[1]
+        success = False
         def on_change(pattern):
-            self._on_search(origin_x, origin_y, pattern, forward)
+            nonlocal success
+            success = self._on_search(origin_x, origin_y, pattern, forward)
         pattern = self.prompt("/" if forward else "?", on_change)
 
-        if len(pattern) > 0:
+        if len(pattern) > 0 and success:
             self.registers['/'] = pattern
             self._search_forward = forward
         else:

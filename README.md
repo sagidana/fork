@@ -55,7 +55,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - horizontal scrolling
-- <num>j/k in visual line
 - visual block mode
 - replace mode
 - make asterisk work as <cword> in vim
