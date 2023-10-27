@@ -1771,6 +1771,27 @@ class Editor():
         self.maps[VISUAL][ord(' ')] = {}
         self.maps[VISUAL][ord(' ')][ord('s')] = {}
         self.maps[VISUAL][ord(' ')][ord('s')][ord('c')] = leader_s_c_map
+        def leader_r_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+
+            text = self.prompt("replace: ")
+            if len(text) == 0: return False
+            last_pattern = self.registers['/']
+            if not last_pattern or len(last_pattern) == 0: return False
+
+            self.change_begin()
+            self.get_curr_window().search_replace_scope(start_x,
+                                                        start_y,
+                                                        end_x,
+                                                        end_y,
+                                                        last_pattern,
+                                                        text)
+            self.change_end()
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL][ord(' ')][ord('r')] = leader_r_map
         def slash_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False

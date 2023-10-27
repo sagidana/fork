@@ -55,7 +55,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - visual block mode
-- replace mode
 - make asterisk work as <cword> in vim
 - record jumps in all the right places
 
