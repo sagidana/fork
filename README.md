@@ -77,11 +77,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
     - qa!
 
 - `=` operator
-- highlight pair of under cursor:
-    - `{`/`}`
-    - `(`/`)`
-    - `[`/`]`
-    - `<`/`>`
 
 - BUG: difflib is extremely slow or maybe even freezes
     - try to comment/indent all lines of a large file

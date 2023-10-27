@@ -196,7 +196,8 @@ class Window():
         if y > win_end_buf_y: return None
         ret_y = y - win_start_buf_y
 
-        return x, ret_y
+        ret_x = self._expanded_x(y, x)
+        return ret_x, ret_y
 
     def _draw_pairs(self):
         if self._need_to_clear_pairs:
