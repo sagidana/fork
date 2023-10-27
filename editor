@@ -1928,6 +1928,7 @@ class Editor():
         to_delete = self.tabs.pop(self.curr_tab)
         self.curr_tab = self.curr_tab % len(self.tabs)
         to_delete.close()
+        self.get_curr_tab().draw()
         return False
 
     def exec_command(self, command):
