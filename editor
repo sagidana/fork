@@ -24,6 +24,7 @@ from popup import *
 from plugins import clipboard
 from plugins import comment
 from plugins import ripgrep
+from plugins import format
 from plugins import fzf
 
 from utils import *
@@ -1391,12 +1392,31 @@ class Editor():
             self.draw()
             return False
         self.maps[VISUAL_LINE][CTRL_D_KEY] = ctrl_d_map
+        self.maps[VISUAL_LINE][ord('g')] = {}
+        def gq_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+
+            start_x = 0
+            end_x = len(self.get_curr_window().get_line(end_y)) - 2
+
+            self.get_curr_window().move_cursor_to_buf_location(start_x, start_y)
+            self.change_begin()
+            try:
+                format(self, start_x, start_y, end_x, end_y)
+            except Exception as e:
+                elog(f"Exception: {e}")
+            self.change_end()
+
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_LINE][ord('g')][ord('q')] = gq_map
         def gc_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            self.change_begin()
-
             start_x, start_y, end_x, end_y = scope
+            self.change_begin()
 
             try:
                 comment(self, start_y, end_y)
@@ -1407,7 +1427,6 @@ class Editor():
 
             self.change_mode(NORMAL)
             return False
-        self.maps[VISUAL_LINE][ord('g')] = {}
         self.maps[VISUAL_LINE][ord('g')][ord('c')] = gc_map
         def gg_map(self):
             self.get_curr_window().move_begin()

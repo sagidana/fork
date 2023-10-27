@@ -558,6 +558,33 @@ class Buffer():
         return start_x, start_y
 
     # CORE: change
+    def replace_scope(  self,
+                        start_x,
+                        start_y,
+                        end_x,
+                        end_y,
+                        dest,
+                        propagate=True):
+        start_pos = self.get_file_pos(start_x, start_y)
+        if start_pos == -1: return 0
+        end_pos = self.get_file_pos(end_x, end_y)
+        if end_pos == -1: return 0
+        end_pos += 1
+
+        stream = self.get_file_stream()
+
+        stream = stream[:start_pos] +   \
+                 dest +                 \
+                 stream[end_pos:]
+
+        self.lines = stream.splitlines(keepends=True)
+        stream = self.get_file_stream()
+
+        self.lines = stream.splitlines(keepends=True)
+
+        if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
+
+    # CORE: change
     def search_replace_scope( self,
                               start_x,
                               start_y,
