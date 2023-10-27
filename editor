@@ -1324,7 +1324,9 @@ class Editor():
             return False
         self.maps[VISUAL_LINE][ord('y')] = y_map
         def j_map(self):
-            self.get_curr_window()._move_down()
+            num = 1
+            if len(self._number) > 0: num = int(self._number)
+            for _ in range(num): self.get_curr_window()._move_down()
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             self.get_curr_buffer().visual_set_current(x, y)
@@ -1332,7 +1334,9 @@ class Editor():
             return False
         self.maps[VISUAL_LINE][ord('j')] = j_map
         def k_map(self):
-            self.get_curr_window()._move_up()
+            num = 1
+            if len(self._number) > 0: num = int(self._number)
+            for _ in range(num): self.get_curr_window()._move_up()
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             self.get_curr_buffer().visual_set_current(x, y)
@@ -2037,7 +2041,7 @@ class Editor():
 
     def on_key(self, key):
         # enter number mode
-        if self.mode == NORMAL:
+        if self.mode == NORMAL or self.mode == VISUAL_LINE:
             self._number = ''
             if ord('1') <= key <= ord('9'):
                 while ord('0') <= key <= ord('9'):
