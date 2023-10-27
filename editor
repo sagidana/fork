@@ -292,19 +292,6 @@ class Editor():
                                                             scope[3])
             if len(pattern) == 0: return False
             # TODO: goto definition
-            # pattern = f"\\W{pattern[0]}\\W"
-
-            # task = Task(ripgrep, pattern)
-            # self.tasks.append(task)
-            # def rg_on_done(results):
-                # if not results: return
-                # self.get_curr_tab().split(Buffer(data_in_bytes=results))
-
-                # # remove the task when done.
-                # self.tasks.remove(task)
-
-            # task.on_done(rg_on_done)
-            # task.start()
             return False
         self.maps[NORMAL][CTRL_CLOSE_BRACKET_KEY] = ctrl_close_bracket_map
 
@@ -336,24 +323,25 @@ class Editor():
     def __initialize_movement_objects_maps(self, maps, cb):
         def move_(self): pass
         def move_j(self):
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            # TODO: check boundries
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
 
-            scope = (   0,
-                        y,
-                        len(self.get_curr_buffer().lines[y+1]) - 2,
-                        y + 1)
+            start_x = 0
+            end_y = min(start_y + 1, len(self.get_curr_buffer().lines) - 1)
+            end_x = len(self.get_curr_buffer().lines[end_y]) - 2
+
+            scope = (start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[ord('j')] = move_j
         def move_k(self):
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            # TODO: check boundries
-            scope = (   0,
-                        y - 1,
-                        len(self.get_curr_buffer().lines[y]) - 2,
-                        y)
+            end_x = self.get_curr_window().buffer_cursor[0]
+            end_y = self.get_curr_window().buffer_cursor[1]
+
+            end_x = len(self.get_curr_buffer().lines[end_y]) - 2
+            start_y = max(0, end_y - 1)
+            start_x = 0
+
+            scope = (start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[ord('k')] = move_k
         def move_h(self):
