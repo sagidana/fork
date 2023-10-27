@@ -1730,7 +1730,7 @@ class Editor():
             start_x, start_y, end_x, end_y = scope
             text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
             if len(text) == 0: return False
-            text = text[0]
+            text = re.escape(text[0])
 
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
