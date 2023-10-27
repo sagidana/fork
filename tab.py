@@ -6,7 +6,7 @@ from events import *
 from idr import *
 
 class Tab():
-    def raise_event(func):
+    def raise_event(self, func):
         def event_wrapper(*args):
             self = args[0]
             func_name = func.__name__

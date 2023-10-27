@@ -25,7 +25,7 @@ class Buffer():
                 self.resync_treesitter()
         self.update_highlights()
 
-    def raise_event(func):
+    def raise_event(self, func):
         def event_wrapper(self):
             func_name = func.__name__
             event = f"on_buffer_{func_name}_before"

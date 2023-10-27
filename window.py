@@ -14,7 +14,7 @@ import time
 import re
 
 class Window():
-    def raise_event(func):
+    def raise_event(self, func):
         def event_wrapper(self):
             # self = args[0]
             func_name = func.__name__
@@ -500,7 +500,7 @@ class Window():
             return self.buffer.lines[start_y][start_x:end_x]
 
         # first line
-        text = self.buffers.lines[start_y][start_x:]
+        text = self.buffer.lines[start_y][start_x:]
 
         # middle
         curr_line_number = start_y + 1
@@ -509,7 +509,7 @@ class Window():
             curr_line_number += 1
 
         # last line
-        text += self.buffers.lines[end_y][:end_x]
+        text += self.buffer.lines[end_y][:end_x]
 
         return text
 

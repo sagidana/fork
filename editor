@@ -476,7 +476,7 @@ class Editor():
                                                             char)
                 if not loc: return
                 end_x, end_y = loc[0], loc[1]
-                end_x = end_x - 1 if end_x > 0 else x
+                end_x = end_x - 1 if end_x > 0 else end_x
 
                 scope = (start_x, start_y, end_x, end_y)
                 if scope: return cb(scope)
