@@ -58,9 +58,9 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - visual block mode
 - replace mode
 - make asterisk work as <cword> in vim
-- auto indent on insert mode
 - add `gq`
 - add support for setting config variables at runtime
+- record jumps in all the right places
 
 - add tabs status line like in vim
     - adding set_position() and resize() methods in Tab class

@@ -92,13 +92,21 @@ class Tab():
             width = self.width - num_of_horizontal_windows + 1
             height = self.height - num_of_vertical_windows + 1
 
-            width = int(width / num_of_horizontal_windows)
-            height = int(height / num_of_vertical_windows)
+            width_per_window = int(width / num_of_horizontal_windows)
+            width_left = width - (width_per_window * num_of_horizontal_windows)
+            height_per_window = int(height / num_of_vertical_windows)
+            height_left = height - (height_per_window * num_of_vertical_windows)
 
-            x = (width + 1) * num_of_left_windows
-            y = (height + 1) * num_of_up_windows
+            x = (width_per_window + 1) * num_of_left_windows
+            y = (height_per_window + 1) * num_of_up_windows
 
-            item = (curr, x, y, width, height)
+            curr_width = width_per_window
+            curr_height = height_per_window
+            if width_left and num_of_right_windows == 0:
+                curr_width += width_left
+            if height_left and num_of_down_windows == 0:
+                curr_height += height_left
+            item = (curr, x, y, curr_width, curr_height)
             todo.append(item)
 
         for curr, x, y, width, height in todo:
