@@ -13,7 +13,7 @@ import hashlib
 import json
 import re
 
-WORD_REGEX = '[a-zA-Z0-9_-]'
+WORD_REGEX = '[a-zA-Z0-9_]'
 SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
 
 class Buffer():
@@ -900,7 +900,6 @@ class Buffer():
 
     # CORE: movement
     def find_word_end(self, x, y, skip_current=True):
-        WORD_REGEX = '[a-zA-Z0-9_-]'
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
 
