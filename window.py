@@ -207,12 +207,12 @@ class Window():
         x_1 = self.buffer_cursor[0]
         y_1 = self.buffer_cursor[1]
         char_1 = self.get_curr_line()[x_1]
-        if char_1 not in "()<>{}[]": return
+        if char_1 not in "(){}[]": return
 
         char_2 = self.buffer.negate_char(char_1)
         x_2 = x_1
         x_2 = y_1
-        if char_1 in "(<{[":
+        if char_1 in "({[":
             ret = self.buffer.find_next_char(x_1, y_1, char_2, smart=True)
             if not ret: return
             x_2, y_2 = ret
