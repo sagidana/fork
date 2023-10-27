@@ -1916,7 +1916,7 @@ class Editor():
         command_position = [0, 0]
 
         command_position[1] = int(self.height - 1)
-        command_length = self.width - 1
+        command_length = self.width
 
         self.screen.write(  command_position[1],
                             command_position[0],
