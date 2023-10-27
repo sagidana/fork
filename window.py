@@ -14,7 +14,7 @@ import time
 import re
 
 class Window():
-    def raise_event(self, func):
+    def raise_event(func):
         def event_wrapper(self):
             # self = args[0]
             func_name = func.__name__
