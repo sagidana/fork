@@ -78,7 +78,17 @@ class Editor():
         if self.mode == VISUAL_LINE and target == NORMAL:
             self.get_curr_window().visual_end()
         if self.mode == NORMAL and target == REPLACE:
-            pass
+            self.screen.set_cursor_underline()
+            self.change_begin()
+            self._replace_line = self.get_curr_window().get_curr_line()
+            self._replace_x = self.get_curr_window().buffer_cursor[0]
+            self._replace_y = self.get_curr_window().buffer_cursor[1]
+        if self.mode == REPLACE and target == NORMAL:
+            self.change_end()
+            self.screen.set_cursor_block_blink()
+            self._replace_line = ""
+            self._replace_x = -1
+            self._replace_y = -1
 
         self.mode = target
         self.curr_maps = self.maps[self.mode]
@@ -1837,6 +1847,10 @@ class Editor():
         self._char = None
         self._search_forward = True
 
+        self._replace_line = ""
+        self._replace_x = -1
+        self._replace_y = -1
+
         self.maps = {}
         self.maps[NORMAL] = {}
         self.maps[INSERT] = {}
@@ -1978,8 +1992,37 @@ class Editor():
                                     command_position[0] + len(command))
 
     def on_replace(self, key):
-        elog(f"on replace: {key}")
-        pass
+        # elog(f"on replace: {key}")
+        cur_x = self.get_curr_window().buffer_cursor[0]
+        cur_y = self.get_curr_window().buffer_cursor[1]
+        if key == BACKSPACE_KEY:
+            if cur_y == self._replace_y and cur_x == self._replace_x:
+                return False
+            if cur_y > self._replace_y:
+                self.get_curr_window().remove_char()
+                return False
+            if cur_x > len(self._replace_line) - 1:
+                self.get_curr_window().remove_char()
+                return False
+            prev_char = self._replace_line[cur_x - 1]
+            self.get_curr_window().replace_char_backward(prev_char)
+            return False
+
+        if key == TAB_KEY:
+            tab = get_settings()["tab_insert"]
+            return False
+
+        try:
+            char = chr(key)
+            if char in printable:
+                if cur_x == len(self.get_curr_window().get_curr_line()) - 1:
+                    self.get_curr_window().insert_char(char)
+                else:
+                    self.get_curr_window().replace_char_forward(char)
+            else:
+                elog(f"REPLACE: ({key}) not printable.")
+        except Exception as e: elog(f"Exception: {e}")
+        return False
 
     def on_insert(self, key):
         ret = False

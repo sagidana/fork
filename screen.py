@@ -187,6 +187,9 @@ class Screen():
     def set_cursor_i_beam(self):
         self._write_to_stdout(CURSOR_I_BEAM)
 
+    def set_cursor_underline(self):
+        self._write_to_stdout(CURSOR_UNDERLINE)
+
     def set_cursor_block_blink(self):
         self._write_to_stdout(CURSOR_BLOCK_BLINK)
 
@@ -240,8 +243,8 @@ if __name__ == '__main__':
 
     screen.move_cursor(0,0)
     # screen.set_cursor_block_blink()
-    screen.set_cursor_i_beam()
-    screen.disable_cursor()
+    screen.set_cursor_underline()
+    # screen.disable_cursor()
     screen.move_cursor(0,1)
 
 
@@ -266,4 +269,4 @@ if __name__ == '__main__':
     for i in range(1):
         c = screen.get_key()
         print(f"{c}")
-    screen.enable_cursor()
+    # screen.enable_cursor()

@@ -615,9 +615,9 @@ class Buffer():
 
         if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
 
-    def replace_char(self, x, y, char):
-        self.remove_char(x+1, y)
-        self.insert_char(x, y, char)
+    def replace_char(self, x, y, char, propagate=True):
+        self.remove_char(x+1, y, propagate=propagate)
+        self.insert_char(x, y, char, propagate=propagate)
 
     def replace_line(self, y, new_line, propagate=True):
         self.remove_line(y, propagate=propagate)

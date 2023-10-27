@@ -1286,6 +1286,28 @@ class Window():
         else:
             self._move_right()
 
+    def replace_char_backward(self, char, to_draw=True):
+        self._move_left()
+        self.buffer.replace_char(   self.buffer_cursor[0],
+                                    self.buffer_cursor[1],
+                                    char, propagate=False)
+        self.buffer.flush_changes()
+        self.draw_cursor()
+
+    def replace_char_forward(self, char, to_draw=True):
+        self.buffer.replace_char(   self.buffer_cursor[0],
+                                    self.buffer_cursor[1],
+                                    char, propagate=False)
+        self.buffer.flush_changes()
+        if char == '\n' or char == '\r':
+            ret = self._move_down()
+            if ret and ret[1]:
+                if to_draw: self.draw() # scrolled
+            self._move_line_begin()
+        else:
+            self._move_right()
+        self.draw_cursor()
+
     def insert_char(self, char):
         self._insert_char(char)
         self.draw_cursor()
