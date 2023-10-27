@@ -1267,8 +1267,11 @@ class Editor():
 
             window_x = self.get_curr_window().content_position[0]
             window_y = self.get_curr_window().content_position[1]
+            buf_y = self.get_curr_window().buffer_cursor[1]
+
             abs_position = [0,0]
-            abs_position[0] = window_x + x
+            expanded_x = self.get_curr_window()._expanded_x(buf_y, x)
+            abs_position[0] = window_x + expanded_x
             abs_position[1] = window_y + self.get_curr_window().window_cursor[1]
 
             completion = CompletionPopup(   self,
