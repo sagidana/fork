@@ -126,27 +126,16 @@ def clipboard(text):
         pipe.communicate(input=text.encode('utf-8'))
 
 def trim_lines(text, max_chars=80):
-    return text
-    # new = []
-
-    # text = text.replace('\n', '') # remove new lines to start with
-
-    # index = min(max_chars, len(text) - 1)
-    # while len(text) > 0:
-        # # find closest whitespace to truncate from
-        # while len(text) > max_chars and \
-              # text[index] not in string.whitespace and \
-              # index >= 0:
-            # index -= 1
-        # if index == -1: index = min(max_chars, len(text) - 1)
-        # new.append(f"{text[:index]}\n")
-
-        # text = text[index+1:]
-        # index = min(max_chars, len(text) - 1)
-
-    # if len(new) == 0: new.append('\n')
-
-    # return ''.join(new)
+    words = iter(text.split())
+    lines, current = [], next(words)
+    for word in words:
+        if len(current) + 1 + len(word) > max_chars:
+            lines.append(current)
+            current = word
+        else:
+            current += " " + word
+    lines.append(current)
+    return '\n'.join(lines)
 
 def format(editor, start_x, start_y, end_x, end_y):
     start_x = 0
