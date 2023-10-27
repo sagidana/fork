@@ -99,6 +99,10 @@ class Buffer():
 
             with open(file_path, 'r') as f:
                 self.lines = f.readlines()
+                # in the case where last char of file is not new line we add an
+                # artificial new line to it.
+                if self.lines[-1][-1] != '\n':
+                    self.lines[-1] += '\n'
 
             self.hash = self._hash_file()
             if not self.hash:
@@ -107,8 +111,7 @@ class Buffer():
         self.language = self.detect_language()
         self.treesitter = None
         if self.language:
-            with open(file_path, "rb") as f: _bytes = f.read()
-            self.treesitter = TreeSitter(_bytes, self.language)
+            self.treesitter = TreeSitter(self.get_file_bytes(), self.language)
 
         handlers = {}
         handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
