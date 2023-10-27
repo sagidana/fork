@@ -76,7 +76,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
     - wq
     - qa!
 
-- adding `curr/total` to search pattern functionality
 - `=` operator
 - `%` operator
 - highlight pair of under cursor:
@@ -90,10 +89,10 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - BUG: tab._adjust_sizes() corner case:
     - vsplit, split, move_left, split
     - close a window will cause colition of windows
-- BUG: editor do not redraw on write()/close_window() [not deterministic]
-- BUG: fix all the annoying w movement that do not act as vim
 - BUG: in visual mode, tabs do not uses the right style
 - BUG: status line dont show if cursor is on last line
+
+- LEGACY?: BUG: editor do not redraw on write()/close_window() [not deterministic]
 
 - ctags
 - maybe add ast based text object?

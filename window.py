@@ -181,10 +181,62 @@ class Window():
         # self._screen_move(cursor[0], cursor[1])
         self._screen_move(x, cursor[1])
 
+    def _translate_buf_x_y_to_win_x_y(self, x, y):
+        # maybe is_visible
+        buf_x = self.buffer_cursor[0]
+        buf_y = self.buffer_cursor[1]
+        win_x = self.window_cursor[0]
+        win_y = self.window_cursor[1]
+
+        win_start_buf_y = buf_y - win_y
+        win_end_buf_y = buf_y + (self.content_height - 1 - win_y)
+        if y < win_start_buf_y: return None
+        if y > win_end_buf_y: return None
+        ret_y = y - win_start_buf_y
+
+        return x, ret_y
+
+    def _clear_pairs(self):
+        pass # TODO:
+
+    def _draw_pairs(self):
+        self._clear_pairs()
+
+        x_1 = self.buffer_cursor[0]
+        y_1 = self.buffer_cursor[1]
+        char_1 = self.get_curr_line()[x_1]
+        if char_1 not in "()<>{}[]": return
+
+        char_2 = self.buffer.negate_char(char_1)
+        x_2 = x_1
+        x_2 = y_1
+        if char_1 in "(<{[":
+            ret = self.buffer.find_next_char(x_1, y_1, char_2, smart=True)
+            if not ret: return
+            x_2, y_2 = ret
+        else:
+            ret = self.buffer.find_prev_char(x_1, y_1, char_2, smart=True)
+            if not ret: return
+            x_2, y_2 = ret
+
+        ret = self._translate_buf_x_y_to_win_x_y(x_1, y_1)
+        if not ret: return
+        x_1, y_1 = ret
+        ret = self._translate_buf_x_y_to_win_x_y(x_2, y_2)
+        if not ret: return
+        x_2, y_2 = ret
+
+        style = {}
+        style['background'] = "#FF00FF"
+        elog(f"({x_1}, {y_1}) | ({x_2}, {y_2})")
+        self._screen_write(x_1, y_1, char_1, style)
+        self._screen_write(x_2, y_2, char_2, style)
+
     def draw_cursor(self):
         if self.status_line: self.draw_status_line()
         if self.line_numbers: self.draw_line_numbers()
         self.visualize()
+        # self._draw_pairs()
         self._draw_cursor()
 
     def set_lines_margin(self):
