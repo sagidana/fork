@@ -79,8 +79,8 @@ class Window():
 
         self._need_to_clear_pairs = False
 
-        self.line_numbers = False # default
-        self.status_line = False # default
+        self.line_numbers = get_settings().get('line_numbers', False)
+        self.status_line = get_settings().get('status_line', False)
 
         self.window_cursor = window_cursor.copy()
         self.buffer_cursor = buffer_cursor.copy()

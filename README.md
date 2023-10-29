@@ -54,6 +54,9 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
+- take influence from helix/kakoun
+    - mutli lines selection
+    - server/client architecture
 - visual block mode
 - make asterisk work as <cword> in vim
 - record jumps in all the right places

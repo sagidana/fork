@@ -6,5 +6,7 @@
         "line_numbers_background": "#2D2D2A",
         "line_numbers_foreground": "#4C4C47",
         "tab_representation": ">\u00b7\u00b7\u00b7",
+        "line_numbers": true,
+        "status_line": true,
         "tab_insert": "    "
 }
