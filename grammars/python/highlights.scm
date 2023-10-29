@@ -89,6 +89,11 @@
 ] @operator
 
 [
+  "not"
+  "or"
+  "and"
+  "in"
+  "is"
   "as"
   "assert"
   "async"

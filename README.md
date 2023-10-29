@@ -67,8 +67,11 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
         - status line on all windows
 - move windows (especially in the rg cases)
 - add command auto complete at tab
+- support ./editor <file_path> even if file not exist and create the file on :w
+- add support for bash scripts
 - add commands:
     - e <file_path>
+        - even if not exist - create on write
     - q!
     - wq
     - qa!
