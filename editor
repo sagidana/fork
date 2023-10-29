@@ -1973,20 +1973,29 @@ class Editor():
         return False
 
     def exec_command(self, command):
-        if command == 'e!':
-            self.get_curr_buffer().reload()
+        cmd = command.split()[0]
+        args = command.split()[1:] if len(command.split()) > 1 else None
+        force = cmd.endswith('!')
+
+        if "e" in cmd:
+            if not args:
+                if not self.get_curr_buffer().reload(force=force):
+                    elog("file changed on disk!", type="ERROR")
+                    pass
+                else:
+                    # TODO:
+                    pass
             return False
-        if command == 'w':
-            if not self.get_curr_buffer().write():
-                # TODO: pop an error
+        if "w" in cmd:
+            if not self.get_curr_buffer().write(force=force):
+                elog("file changed on disk!", type="ERROR")
                 pass
-            return False
-        if command == 'w!':
-            self.get_curr_buffer().write(force=True)
-            return False
-        if command == 'q':
+        if "q" in cmd:
+            if not force and self.get_curr_buffer().file_changed_on_disk():
+                elog("file changed on disk!", type="ERROR")
+                return False
             return self._quit_command()
-        if command == 'qa':
+        if 'qa' in cmd:
             return True
         try:
             line_num = int(command)

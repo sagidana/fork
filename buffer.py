@@ -239,7 +239,10 @@ class Buffer():
         Hooks.execute(ON_BUFFER_DESTROY_BEFORE, self)
         Hooks.execute(ON_BUFFER_DESTROY_AFTER, self)
 
-    def reload(self):
+    def reload(self, force=False):
+        if not force and self.file_changed_on_disk():
+            return False
+
         if self.file_path:
             with open(self.file_path, 'r') as f:
                 self.lines = f.readlines()
@@ -252,6 +255,7 @@ class Buffer():
 
         self.resync_treesitter()
         self._raise_event(ON_BUFFER_RELOAD, None)
+        return True
 
     def write(self, force=False):
         if not force and self.file_changed_on_disk():
