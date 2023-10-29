@@ -57,6 +57,9 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - visual block mode
 - make asterisk work as <cword> in vim
 - record jumps in all the right places
+- make ALL delete operations to also yank the text...
+    - never thought this is something I used so much, I actually useless without it.
+- make gq take into account the indent level..
 
 - horizontal scrolling
 - add tabs status line like in vim
@@ -69,12 +72,16 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - add command auto complete at tab
 - support ./editor <file_path> even if file not exist and create the file on :w
 - add support for bash scripts
+- add support to <ctrl><x><f> in insert mode: auto complete filesystem paths
+- add support for `cat large_file | ed`
 - add commands:
     - e <file_path>
         - even if not exist - create on write
     - q!
-    - wq
     - qa!
+    - wq
+    - wqa
+    - wqa!
 
 - `=` operator
 
