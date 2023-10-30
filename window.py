@@ -1179,7 +1179,7 @@ class Window():
             curr_y = self.buffer_cursor[1]
             if start_y <= self.buffer_cursor[1] < end_y + 1:
                 for i in range(len(indent_content)):
-                    self.move_right()
+                    self._move_right()
         else:
             for y in range(start_y, end_y + 1):
                 line = self.get_line(y)
@@ -1191,8 +1191,9 @@ class Window():
                 self.buffer.replace_line(y, line[num_to_remove:], propagate=False)
                 if self.buffer_cursor[1] == y:
                     for i in range(num_to_remove):
-                        self.move_left()
+                        self._move_left()
         self.buffer.flush_changes()
+        self.draw_cursor()
 
     def remove_scope(   self,
                         start_x,
