@@ -2265,8 +2265,13 @@ def main():
 
     k = 0
     while True:
-        to_exit = editor.on_key(k)
-        if to_exit: break
+        try:
+            to_exit = editor.on_key(k)
+            if to_exit: break
+        except Exception as e:
+            # TODO: pop error!
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
         k = screen.get_key()
         # elog(f"key {k}")
@@ -2278,11 +2283,6 @@ def main():
 if __name__ == "__main__":
     # import cProfile
     # with cProfile.Profile() as profile:
-        # ... do something ...
-    try:
         main()
-    except Exception as e:
-        elog(f"Exception: {e}", type="ERROR")
-        elog(f"traceback: {traceback.format_exc()}", type="ERROR")
     # profile.dump_stats("/tmp/stats.csv")
 
