@@ -54,6 +54,9 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
+- FIX: on search, the prompt isn't draw smoothly as we write more and more characters
+- in visual line mode, when highlights are one and we change the selected lines,
+  the highlight do not drawing smoothly
 - take influence from helix/kakoun
     - mutli lines selection
     - server/client architecture
