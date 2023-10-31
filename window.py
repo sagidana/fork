@@ -1451,6 +1451,9 @@ class Window():
         if x >= self.width: return
         if y >= self.height: return
 
+        # optimize in casa of a very long lines..
+        if x + len(string) - 1 >= self.width: string = string[:self.width]
+
         if x + self._expanded_string_len(string) - 1 >= self.width:
             space_for = self.width - x
             while self._expanded_string_len(string) - 1 >= space_for:

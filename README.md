@@ -79,7 +79,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - support ./editor <file_path> even if file not exist and create the file on :w
 - add support for bash scripts
 - add support to <ctrl><x><f> in insert mode: auto complete filesystem paths
-- add support for `cat large_file | ed`
+- searching in large files is extremely slow
 - add commands:
     - e <file_path>
         - even if not exist - create on write
