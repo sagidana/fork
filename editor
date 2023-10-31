@@ -1942,8 +1942,6 @@ class Editor():
         if not args.filename:
             buffer = Buffer()
             self._create_tab(buffer)
-        elif not os.path.isfile(args.filename[0]):
-            raise Exception("No files provided.")
         else:
             file = args.filename[0]
 
