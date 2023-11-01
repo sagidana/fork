@@ -11,8 +11,9 @@ from hooks import *
 from signal import signal, SIGWINCH
 
 from termios import tcgetattr, tcsetattr, TCSADRAIN
-from sys import stdout, stdin
 from tty import setraw
+import sys
+import os
 
 
 BACKGROUND_TRUE_COLOR = "\x1b[48;2;{}m"
@@ -91,7 +92,9 @@ def get_terminal_size():
         except:
             return
         return cr
-    cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
+    cr = ioctl_GWINSZ(sys.stdin.fileno()) or \
+         ioctl_GWINSZ(sys.stdout.fileno()) or \
+         ioctl_GWINSZ(sys.stderr.fileno())
 
     if not cr:
         try:
@@ -117,32 +120,49 @@ class Screen():
         Hooks.execute(ON_RESIZE, size)
 
     def __init__(self):
+        import os
+        if not os.isatty(sys.stdin.fileno()):
+            self.stdout = open(os.ctermid(), 'w')
+            self.stdin = open(os.ctermid(), 'rb')
+            # sys.__stdin__ = self.stdin.fileno()
+            # sys.__stdout__ = self.stdout.fileno()
+            # sys.__stderr__ = self.stdout.fileno()
+            # self.stdin = os.open(os.ctermid(), os.O_RDONLY)
+            # self.stdout = os.open(os.ctermid(), os.O_WRONLY)
+            # stdin = self.stdin
+            # stdout = self.stdout
+        else:
+            self.stdin = sys.stdin
+            self.stdout = sys.stdout
+
         size = get_terminal_size()
         self.width, self.height = size
 
         signal(SIGWINCH, self.screen_resize_handler)
         self._disable_wrap()
 
-        self.fd = stdin.fileno()
-        self.old_stdin_settings = tcgetattr(self.fd)
-        setraw(self.fd)
+        self.old_stdin_settings = tcgetattr(self.stdin)
+        r = setraw(self.stdin.fileno())
 
     def __del__(self):
-        tcsetattr(  self.fd,
+        tcsetattr(  self.stdin,
                     TCSADRAIN,
                     self.old_stdin_settings)
         self._enable_wrap()
 
     def _write_to_stdout(self, to_write, to_flush=True):
-        stdout.write(to_write)
-        if to_flush: stdout.flush()
+        # os.write(self.stdout, to_write.encode())
+        self.stdout.write(to_write)
+        if to_flush: self.flush()
 
     def get_key(self):
         try:
-            k = ord(stdin.read(1))
-            # elog(f"key: {k}")
+            k = ord(self.stdin.read(1))
+            # elog(f"{k} != {ENTER_KEY}")
             return k
-        except: return None
+        except Exception as e:
+            elog(f"get_key: {e}", type="ERROR")
+            return None
 
     def get_height(self):
         return self.height
@@ -175,7 +195,7 @@ class Screen():
         self._write_to_stdout(CLEAR_LINE, to_flush=False)
 
         self._restore_cursor(to_flush=False)
-        stdout.flush()
+        self.flush()
 
     def clear_line_partial(self, y, start_x, end_x):
         empty = " " * (end_x - start_x)
@@ -215,10 +235,11 @@ class Screen():
 
         if 'reverse' in style:
             self._write_to_stdout(REVERSE, to_flush=False)
-        if to_flush: stdout.flush()
+        if to_flush: self.flush()
 
     def flush(self):
-        stdout.flush()
+        self.stdout.flush()
+        # pass
 
     def write(self, y, x, string, style=None, to_flush=True):
         self._save_cursor(to_flush=False)
@@ -228,7 +249,7 @@ class Screen():
         self._write_to_stdout(string, to_flush=False)
 
         self._restore_cursor(to_flush=False)
-        if to_flush: stdout.flush()
+        if to_flush: self.flush()
 
 
 if __name__ == '__main__':

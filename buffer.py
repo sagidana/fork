@@ -90,7 +90,7 @@ class Buffer():
                 self.in_memory_data = bytes()
             else:
                 self.in_memory_data = data_in_bytes
-            self.lines = self.in_memory_data.decode('utf-8').splitlines()
+            self.lines = self.in_memory_data.decode('utf-8').splitlines(keepends=True)
         else:
             self.file_path = path.abspath(file_path)
             if not path.isfile(self.file_path):

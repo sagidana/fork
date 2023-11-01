@@ -30,6 +30,7 @@ from plugins import fzf
 from utils import *
 
 args = None
+pending_buffer = b''
 
 NORMAL = 'normal'
 INSERT = 'insert'
@@ -1938,9 +1939,10 @@ class Editor():
 
     def bootstrap(self):
         global args
+        global pending_buffer
 
         if not args.filename:
-            buffer = Buffer()
+            buffer = Buffer(data_in_bytes=pending_buffer)
             self._create_tab(buffer)
         else:
             file = args.filename[0]
@@ -2249,6 +2251,20 @@ class Editor():
         except Exception as e: elog(f"Exception: {e}")
         return None
 
+def stdin_pending():
+    import termios
+    import fcntl
+    import array
+    import os
+
+    global pending_buffer
+
+    stdin = 0
+    size = array.array('i', [0])
+    fcntl.ioctl(stdin, termios.FIONREAD, size)
+    size = size[0]
+    if size > 0:
+        pending_buffer = os.read(stdin, size)
 
 def main():
     global args
@@ -2257,9 +2273,16 @@ def main():
     parser.add_argument('filename', nargs='*')
     args = parser.parse_args()
 
-    screen = Screen()
-    editor = Editor(screen)
-    editor.bootstrap()
+    stdin_pending()
+
+    try:
+        screen = Screen()
+        editor = Editor(screen)
+        editor.bootstrap()
+        elog("here")
+    except Exception as e:
+        elog(f"Exception: {e}", type="ERROR")
+        elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
     k = 0
     while True:
