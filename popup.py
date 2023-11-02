@@ -853,3 +853,77 @@ class LinesPopup():
                                 style,
                                 to_flush=False)
         except Exception as e: elog(f"Exception: {e}")
+
+
+class ErrorPopup():
+    def __init__(self, editor, error):
+        self.editor = editor
+        self.screen = editor.screen
+
+        buffer = self.editor.get_curr_buffer()
+        curr_window = self.editor.get_curr_window()
+        curr_tab = self.editor.get_curr_tab()
+
+        self.details = []
+        self.details = error.splitlines()
+
+        width_margin = 5
+        height_margin = 3
+        self.position = list([width_margin, height_margin])
+        self.width = self.screen.width - (width_margin * 2)
+        self.height = self.screen.height - (height_margin * 2)
+
+        if self.height - 2 > len(self.details): self.height = len(self.details) + 2
+        else: self.details = self.details[:self.height - 2]
+
+    def pop(self):
+        self.screen.disable_cursor()
+        self.draw()
+        # wait for key to release
+        self.screen.get_key()
+        self.screen.enable_cursor()
+
+    def draw(self):
+        try:
+            style = {}
+            style['background'] = get_settings()['theme']['colors']['menu.background']
+            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+
+            self.__draw_frame()
+
+            for y in range(len(self.details)):
+                self.__draw(1, y+1, f"{self.details[y]}", style)
+
+            self.screen.flush()
+        except Exception as e: elog(f"Exception: {e}")
+
+    def __draw_frame(self):
+        style = {}
+        style['background'] = get_settings()['theme']['colors']['menu.background']
+        style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+        frame_style = {}
+        frame_style['background'] = get_settings()['status_line_background']
+        # frame_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+
+        self.__draw(0,0," "*self.width, frame_style)
+        for y in range(self.height-2):
+            self.__draw(0, y+1, " ", frame_style)
+            self.__draw(self.width-1, y+1, " ", frame_style)
+            self.__draw(1, y+1, " "*(self.width-2), style)
+        self.__draw(0,self.height-1," "*self.width, frame_style)
+
+    def __draw(self, x, y, string, style):
+        try:
+            if x >= self.width: return
+            if y >= self.height: return
+
+            if x + len(string) - 1 >= self.width:
+                space_for = self.width  - x
+                string = string[:space_for]
+
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x,
+                                string,
+                                style,
+                                to_flush=False)
+        except Exception as e: elog(f"Exception: {e}")
