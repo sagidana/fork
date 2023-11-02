@@ -1131,7 +1131,7 @@ class Editor():
         self.maps[NORMAL][ord(' ')][ord('s')] = {} # search
         self.maps[NORMAL][ord(' ')][ord('t')] = {} # treesitter
         def leader_sf_map(self): # search file
-            file_path = fzf()
+            file_path = fzf(self)
             if file_path:
                 buffer = self.get_or_create_buffer(file_path)
                 self.get_curr_window().add_jump()

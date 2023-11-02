@@ -8,7 +8,7 @@ import re
 
 from log import elog
 
-def fzf():
+def fzf(editor):
     """
     This is so cool, fzf print out to stderr the fuzzing options,
     and only the chosen result spit to the stdout.. this enables scripts like
@@ -17,10 +17,17 @@ def fzf():
     FZF - good job :)
     """
     try:
+        stdin = editor.screen.stdin
+        stderr = editor.screen.stdout
+
         cmd = ["fzf"]
         env = environ.copy()
         env["FZF_DEFAULT_COMMAND"] = "rg --files"
-        p = Popen(cmd, stdout=PIPE, env=env)
+        p = Popen(cmd,
+                  stdin=stdin,
+                  stdout=PIPE,
+                  stderr=stderr,
+                  env=env)
         output, errors = p.communicate()
         file_path = output.decode('utf-8').strip()
         file_path = file_path.replace("\n", "")
