@@ -166,57 +166,70 @@ def format(editor, start_x, start_y, end_x, end_y):
                                             end_y,
                                             stream)
 
+def _blog_code(editor):
+    time = datetime.now().strftime("%H:%M:%S")
+    y = editor.get_curr_window().buffer_cursor[1] + 1
+    file_path = editor.get_curr_buffer().file_path
+    if not file_path: return None
+
+    scope = editor.get_curr_buffer().visual_get_scope()
+    if not scope: return None
+    start_x, start_y, end_x, end_y = scope
+    start_x = 0
+    end_x = len(editor.get_curr_window().get_line(end_y)) - 1
+    text = editor.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+    if len(text) == 0: return None
+    text = ''.join(text)
+
+    to_write = f"[{time}] `{file_path}:{y}`\n"
+    to_write += "```\n"
+    to_write += f"{text}\n"
+    to_write += "```\n"
+    return to_write
+
+def _blog_text(editor):
+    time = datetime.now().strftime("%H:%M:%S")
+    file_path = editor.get_curr_buffer().file_path
+    if not file_path: file_path = ""
+
+    scope = editor.get_curr_buffer().visual_get_scope()
+    if not scope: return
+    start_x, start_y, end_x, end_y = scope
+    start_x = 0
+    end_x = len(editor.get_curr_window().get_line(end_y)) - 1
+    text = editor.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+    if len(text) == 0: return
+    text = ''.join(text)
+
+    to_write = f"[{time}] {file_path}:\n"
+    to_write += f"{text}\n"
+    return to_write
+
+def _blog_location(editor): pass
+
 def blog(mode, editor):
     # create blog folder if not exist
     default_blog_path = path.expanduser('~/.blog/')
     blog_path = get_setting("blog_path", default=default_blog_path)
     if not path.exists(blog_path): os.makedirs(blog_path)
-
     file_name = f"{date.today()}.md"
     blog_path = path.join(blog_path, file_name)
-    time = datetime.now().strftime("%H:%M:%S")
 
     if mode == 'text':
-        file_path = editor.get_curr_buffer().file_path
-        if not file_path: file_path = ""
-
-        scope = editor.get_curr_buffer().visual_get_scope()
-        if not scope: return
-        start_x, start_y, end_x, end_y = scope
-        start_x = 0
-        end_x = len(editor.get_curr_window().get_line(end_y)) - 1
-        text = editor.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
-        if len(text) == 0: return
-        text = ''.join(text)
-
-        to_write = f"[{time}] {file_path}:\n"
-        to_write += f"{text}\n"
-        blog_file = open(blog_path, 'a+')
-        blog_file.write(to_write)
-        blog_file.close()
+        to_write = _blog_text(editor)
+        if not to_write: return
+        with open(blog_path, 'a+') as blog_file:
+            blog_file.write(to_write)
         return
     if mode == 'location':
+        to_write = _blog_location(editor)
+        if not to_write: return
+        with open(blog_path, 'a+') as blog_file:
+            blog_file.write(to_write)
         return
     if mode == 'code':
-        y = editor.get_curr_window().buffer_cursor[1] + 1
-        file_path = editor.get_curr_buffer().file_path
-        if not file_path: return
-
-        scope = editor.get_curr_buffer().visual_get_scope()
-        if not scope: return
-        start_x, start_y, end_x, end_y = scope
-        start_x = 0
-        end_x = len(editor.get_curr_window().get_line(end_y)) - 1
-        text = editor.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
-        if len(text) == 0: return
-        text = ''.join(text)
-
-        to_write = f"[{time}] `{file_path}:{y}`\n"
-        to_write += "```\n"
-        to_write += f"{text}\n"
-        to_write += "```\n"
-
-        blog_file = open(blog_path, 'a+')
-        blog_file.write(to_write)
-        blog_file.close()
+        to_write = _blog_code(editor)
+        if not to_write: return
+        with open(blog_path, 'a+') as blog_file:
+            blog_file.write(to_write)
         return
