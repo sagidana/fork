@@ -1788,9 +1788,19 @@ class Editor():
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+
+            text = self.get_curr_buffer().get_scope_text(   start_x,
+                                                            start_y,
+                                                            end_x,
+                                                            end_y)
+            if len(text) == 0: return False
+
+            # send yanked text to clipboard
+            clipboard(text)
+
             self.change_begin()
 
-            start_x, start_y, end_x, end_y = scope
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
 
             self.change_end()
