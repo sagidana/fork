@@ -238,6 +238,7 @@ class Window():
         if self.status_line: self.draw_status_line()
         if self.line_numbers: self.draw_line_numbers()
         self.visualize()
+        self.highlight()
         self._draw_pairs()
         self._draw_cursor()
 
@@ -626,9 +627,9 @@ class Window():
                                         to_flush=debug)
 
             # the rest calls will do implicit flush.
-            self.highlight()
             self.tailing_spaces()
             self.visualize()
+            self.highlight()
             if self.status_line: self.draw_status_line()
             if self.line_numbers: self.draw_line_numbers()
             # is focused?
