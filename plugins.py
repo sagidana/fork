@@ -181,13 +181,13 @@ def _blog_code(editor):
     if len(text) == 0: return None
     text = ''.join(text)
 
-    to_write = f"[{time}] `{file_path}:{y}`\n"
+    to_write = f"[{time}] [CODE] `{file_path}:{y}`\n"
     to_write += "```\n"
     to_write += f"{text}\n"
     to_write += "```\n"
     return to_write
 
-def _blog_text(editor):
+def _blog_note(editor):
     time = datetime.now().strftime("%H:%M:%S")
     file_path = editor.get_curr_buffer().file_path
     if not file_path: file_path = ""
@@ -201,11 +201,19 @@ def _blog_text(editor):
     if len(text) == 0: return
     text = ''.join(text)
 
-    to_write = f"[{time}] {file_path}:\n"
+    to_write = f"[{time}] [NOTE] {file_path}:\n"
     to_write += f"{text}\n"
     return to_write
 
-def _blog_location(editor): pass
+def _blog_location(editor):
+    time = datetime.now().strftime("%H:%M:%S")
+    x = editor.get_curr_window().buffer_cursor[0]
+    y = editor.get_curr_window().buffer_cursor[1] + 1
+    file_path = editor.get_curr_buffer().file_path
+    if not file_path: return None
+
+    to_write = f"[{time}] [LOCATION] `{file_path}:{y}:{x}`\n"
+    return to_write
 
 def blog(mode, editor):
     # create blog folder if not exist
@@ -215,8 +223,8 @@ def blog(mode, editor):
     file_name = f"{date.today()}.md"
     blog_path = path.join(blog_path, file_name)
 
-    if mode == 'text':
-        to_write = _blog_text(editor)
+    if mode == 'note':
+        to_write = _blog_note(editor)
         if not to_write: return
         with open(blog_path, 'a+') as blog_file:
             blog_file.write(to_write)

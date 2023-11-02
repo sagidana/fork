@@ -1588,7 +1588,7 @@ class Editor():
         self.maps[VISUAL_LINE][ord(' ')] = {} # leader
         self.maps[VISUAL_LINE][ord(' ')][ord('b')] = {} # blog
         self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('c')] = None # blog code
-        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('t')] = None # blog text
+        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('n')] = None # blog note
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
@@ -1789,11 +1789,11 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('c')] = leader_bc_map
-        def leader_bt_map(self):
-            blog('text', self)
+        def leader_bn_map(self):
+            blog('note', self)
             self.change_mode(NORMAL)
             return False
-        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('t')] = leader_bt_map
+        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('n')] = leader_bn_map
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):
