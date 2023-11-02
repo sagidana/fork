@@ -55,22 +55,20 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - visual block mode
-- add support for diff output
-- add support for bash scripts
-- add support for `cat file | ed`
+- make asterisk work as <cword> in vim
+- record jumps in all the right places
 - make ALL delete operations to also yank the text...
     - never thought this is something I used so much, I actually useless without it.
-
+- add support for diff output
+- add support for bash scripts
+- add support to <ctrl><x><f> in insert mode: auto complete filesystem paths
 
 - in visual line mode, when highlights are one and we change the selected lines,
   the highlight do not drawing smoothly
 - take influence from helix/kakoun
     - mutli lines selection
     - server/client architecture
-- make asterisk work as <cword> in vim
-- record jumps in all the right places
 - make gq take into account the indent level..
-
 - horizontal scrolling
 - add tabs status line like in vim
     - adding set_position() and resize() methods in Tab class
@@ -80,15 +78,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
         - status line on all windows
 - move windows (especially in the rg cases)
 - add command auto complete at tab
-- add support to <ctrl><x><f> in insert mode: auto complete filesystem paths
 - searching in large files is extremely slow
-- add commands:
-    - e <file_path>
-    - q!
-    - qa!
-    - wq
-    - wqa
-    - wqa!
 
 - `=` operator
 
@@ -100,8 +90,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
     - close a window will cause colition of windows
 - BUG: in visual mode, tabs do not uses the right style
 - BUG: status line dont show if cursor is on last line
-
-- LEGACY?: BUG: editor do not redraw on write()/close_window() [not deterministic]
 
 - ctags
 - maybe add ast based text object?

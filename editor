@@ -9,7 +9,7 @@ import json
 import re
 import os
 
-from settings import get_settings, load_settings
+from settings import *
 from buffer import Buffer
 from window import Window
 from task import Task
@@ -2045,8 +2045,8 @@ class Editor():
 
     def draw_command(self, command):
         style = {}
-        style['background'] = get_settings()['status_line_background']
-        style['foreground'] = get_settings()['status_line_foreground']
+        style['background'] = get_setting('status_line_background')
+        style['foreground'] = get_setting('status_line_foreground')
 
         command_position = [0, 0]
 
@@ -2078,7 +2078,7 @@ class Editor():
             return False
 
         if key == TAB_KEY:
-            tab = get_settings()["tab_insert"]
+            tab = get_setting("tab_insert")
             return False
 
         try:
@@ -2108,7 +2108,7 @@ class Editor():
 
         if key == TAB_KEY:
             # expand tab to spaces
-            self.get_curr_window().insert_string(get_settings()["tab_insert"])
+            self.get_curr_window().insert_string(get_setting("tab_insert"))
             return ret
 
         try:
@@ -2147,10 +2147,9 @@ class Editor():
         self.get_curr_window().move_cursor_to_buf_location( pos[0],
                                                             pos[1])
 
-        # reverse the colors for highlights
         style = {}
         style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
-        style['background'] = get_settings()['theme']['colors']['selection.background']
+        style['background'] = "#FFC09F" #get_settings()['theme']['colors']['selection.background']
 
         self.get_curr_buffer().add_highlights("/", pattern, style)
         self.get_curr_window().draw()

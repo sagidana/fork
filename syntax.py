@@ -2,7 +2,7 @@
 import json
 
 from treesitter import TreeSitter
-from settings import get_settings
+from settings import *
 from log import elog
 
 from functools import lru_cache

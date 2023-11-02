@@ -3,7 +3,7 @@
 # VT100 escape codes:
 # https://www.csie.ntu.edu.tw/~r92094/c++/VT100.html
 
-from settings import get_settings
+from settings import *
 from log import elog
 from events import *
 from hooks import *

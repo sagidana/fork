@@ -1,7 +1,7 @@
 from log import elog
 
 from treesitter import traverse_tree
-from settings import get_settings
+from settings import *
 from screen import *
 from os import path
 
@@ -26,18 +26,18 @@ class DetailsPopup():
         if len(pending_tasks) > 0:
             self.details.append("tasks")
             for task in pending_tasks:
-                self.details.append(f"{get_settings()['tab_insert']}- {task.id}")
+                self.details.append(f"{get_setting('tab_insert')}- {task.id}")
         buffers = self.editor.buffers
         if len(buffers) > 0:
             self.details.append("buffers")
             for b in buffers:
-                self.details.append(f"{get_settings()['tab_insert']}- {b.describe()}")
+                self.details.append(f"{get_setting('tab_insert')}- {b.describe()}")
 
         self.details.append("tabs")
         for tab in self.editor.tabs:
-            self.details.append(f"{get_settings()['tab_insert']}- [tab {tab.id}]")
+            self.details.append(f"{get_setting('tab_insert')}- [tab {tab.id}]")
             for window in tab.windows:
-                self.details.append(f"{get_settings()['tab_insert']*2}- {window.describe()}")
+                self.details.append(f"{get_setting('tab_insert')*2}- {window.describe()}")
 
         width_margin = 5
         height_margin = 3
@@ -74,7 +74,7 @@ class DetailsPopup():
         style['background'] = get_settings()['theme']['colors']['menu.background']
         style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
         frame_style = {}
-        frame_style['background'] = get_settings()['status_line_background']
+        frame_style['background'] = get_setting('status_line_background')
         # frame_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
 
         self.__draw(0,0," "*self.width, frame_style)
@@ -902,7 +902,7 @@ class ErrorPopup():
         style['background'] = get_settings()['theme']['colors']['menu.background']
         style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
         frame_style = {}
-        frame_style['background'] = get_settings()['status_line_background']
+        frame_style['background'] = get_setting('status_line_background')
         # frame_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
 
         self.__draw(0,0," "*self.width, frame_style)
