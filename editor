@@ -24,6 +24,7 @@ from plugins import clipboard
 from plugins import comment
 from plugins import ripgrep
 from plugins import format
+from plugins import blog
 from plugins import fzf
 
 from utils import *
@@ -1137,6 +1138,12 @@ class Editor():
         self.maps[NORMAL][ord(' ')][ord('e')] = {} # execute
         self.maps[NORMAL][ord(' ')][ord('s')] = {} # search
         self.maps[NORMAL][ord(' ')][ord('t')] = {} # treesitter
+        self.maps[NORMAL][ord(' ')][ord('b')] = {} # blog
+        self.maps[NORMAL][ord(' ')][ord('b')][ord('l')] = None # blog location
+        def leader_bl_map(self): # blog location
+            blog('location', self)
+            return False
+        self.maps[NORMAL][ord(' ')][ord('b')][ord('l')] = leader_bl_map
         def leader_sf_map(self): # search file
             file_path = fzf(self)
             if file_path:
@@ -1579,6 +1586,9 @@ class Editor():
 
     def _initialize_visual_line_maps(self):
         self.maps[VISUAL_LINE][ord(' ')] = {} # leader
+        self.maps[VISUAL_LINE][ord(' ')][ord('b')] = {} # blog
+        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('c')] = None # blog code
+        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('t')] = None # blog text
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
@@ -1774,6 +1784,16 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL_LINE][ord(' ')][ord('r')] = leader_r_map
+        def leader_bc_map(self):
+            blog('code', self)
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('c')] = leader_bc_map
+        def leader_bt_map(self):
+            blog('text', self)
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('t')] = leader_bt_map
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):
