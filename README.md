@@ -57,6 +57,9 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - visual block mode
 - make asterisk work as <cword> in vim
 - record jumps in all the right places
+- when pasting from clipboard it is very slow because of the insert operation
+    - make it faster by pasting it directly from the clipboard instead of inserting
+    char by char
 - make ALL delete operations to also yank the text...
     - never thought this is something I used so much, I actually useless without it.
 - add support for diff output

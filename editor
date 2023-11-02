@@ -9,9 +9,9 @@ import json
 import re
 import os
 
-from settings import *
 from buffer import Buffer
 from window import Window
+from settings import *
 from task import Task
 from screen import *
 from log import elog
