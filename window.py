@@ -333,7 +333,9 @@ class Window():
             syntax_map[start_pos:end_pos] = style
         return syntax_map
 
-    def _visualize_block(self): pass
+    def _visualize_block(self):
+        start_x, start_y, end_x, end_y = self.buffer.visual_get_scope()
+        elog(f"({start_x}, {start_y}) => ({end_x}, {end_y})")
 
     def _visualize(self):
         style = {}

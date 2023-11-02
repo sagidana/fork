@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from signal import signal, SIGWINCH
 from string import printable
 import traceback
 import argparse
@@ -70,6 +69,8 @@ class Editor():
             self.screen.set_cursor_i_beam()
         if self.mode == NORMAL and target == VISUAL_LINE:
             self.get_curr_window().visual_begin(VISUAL_LINE)
+        if self.mode == NORMAL and target == VISUAL_BLOCK:
+            self.get_curr_window().visual_begin(VISUAL_BLOCK)
         if self.mode == NORMAL and target == VISUAL:
             self.get_curr_window().visual_begin(VISUAL)
         if self.mode == VISUAL and target == NORMAL:
@@ -77,6 +78,8 @@ class Editor():
         if self.mode == VISUAL and target == INSERT:
             self.get_curr_window().visual_end()
         if self.mode == VISUAL_LINE and target == NORMAL:
+            self.get_curr_window().visual_end()
+        if self.mode == VISUAL_BLOCK and target == NORMAL:
             self.get_curr_window().visual_end()
         if self.mode == NORMAL and target == REPLACE:
             self.screen.set_cursor_underline()
@@ -187,6 +190,10 @@ class Editor():
         self.maps[NORMAL][CTRL_W_KEY][ord('L')] = ctrl_w_L_map
 
     def _initialize_normal_ctrl_maps(self):
+        def ctrl_v_map(self):
+            self.change_mode(VISUAL_BLOCK)
+            return False
+        self.maps[NORMAL][CTRL_V_KEY] = ctrl_v_map
         def ctrl_u_map(self):
             self.get_curr_window().scroll_up_half_page()
             return False
@@ -1309,6 +1316,267 @@ class Editor():
     def _initialize_insert_maps(self):
         self._initialize_insert_ctrl_maps()
 
+    def _initialize_visual_block_maps(self):
+        # def visual_object_map(scope):
+            # start_x, start_y, end_x, end_y = scope
+
+            # self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
+            # self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
+
+            # self.draw()
+            # return False
+        # self.__initialize_inner_around_objects_maps(self.maps[VISUAL_BLOCK], visual_object_map)
+        def d_map(self):
+            # scope = self.get_curr_buffer().visual_get_scope()
+            # if not scope: return False
+            # self.change_begin()
+
+            # start_x, start_y, end_x, end_y = scope
+            # self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+
+            # self.change_end()
+
+            # self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_BLOCK][ord('d')] = d_map
+        def p_map(self):
+            # scope = self.get_curr_buffer().visual_get_scope()
+            # if not scope: return False
+            # start_x, start_y, end_x, end_y = scope
+
+            # self.change_begin()
+
+            # self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            # data = self.registers['"']
+            # if data:
+                # if data['meta'] == 'line':
+                    # lines = data['data']
+                    # for line in reversed(lines):
+                        # self.get_curr_window().insert_line_before(line, propagate=False)
+                    # self.get_curr_buffer().flush_changes()
+                # elif data['meta'] == 'char':
+                    # lines = data['data']
+                    # string = '\n'.join(lines)
+                    # self.get_curr_window().insert_string(string)
+                # elif data['meta'] == 'block': pass
+
+            # self.change_end()
+
+            # self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_BLOCK][ord('p')] = p_map
+        def c_map(self):
+            # scope = self.get_curr_buffer().visual_get_scope()
+            # if not scope: return False
+            # self.change_begin()
+
+            # start_x, start_y, end_x, end_y = scope
+            # self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+
+            # self.change_mode(INSERT, effect_change=False)
+            return False
+        self.maps[VISUAL_BLOCK][ord('c')] = c_map
+        def y_map(self):
+            # scope = self.get_curr_buffer().visual_get_scope()
+            # if not scope: return False
+
+            # start_x, start_y, end_x, end_y = scope
+            # text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+            # if len(text) == 0: return False
+
+            # # send yanked text to clipboard
+            # clipboard(text)
+
+            # data = {}
+            # data['meta'] = 'char'
+            # data['data'] = text
+            # self.registers['"'] = data
+
+            # self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_BLOCK][ord('y')] = y_map
+        def j_map(self):
+            self.get_curr_window()._move_down()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('j')] = j_map
+        def k_map(self):
+            self.get_curr_window()._move_up()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('k')] = k_map
+        def l_map(self):
+            self.get_curr_window()._move_right()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('l')] = l_map
+        def h_map(self):
+            self.get_curr_window()._move_left()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('h')] = h_map
+        def w_map(self):
+            self.get_curr_window().move_word_forward()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('w')] = w_map
+        def W_map(self):
+            self.get_curr_window().move_WORD_forward()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('W')] = W_map
+        def e_map(self):
+            self.get_curr_window().move_word_end()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('e')] = e_map
+        def E_map(self):
+            self.get_curr_window().move_WORD_end()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('E')] = E_map
+        def b_map(self):
+            self.get_curr_window().move_word_backward()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('b')] = b_map
+        def f_map(self):
+            try:
+                char = self.get_curr_window().find()
+                self._action = 'f'
+                self._char = char
+
+                x = self.get_curr_window().buffer_cursor[0]
+                y = self.get_curr_window().buffer_cursor[1]
+                self.get_curr_buffer().visual_set_current(x, y)
+                self.draw()
+            except Exception as e: elog(f"Exception: {e}")
+            return False
+        self.maps[VISUAL_BLOCK][ord('f')] = f_map
+        def F_map(self):
+            char = self.get_curr_window().find_back()
+            self._action = 'F'
+            self._char = char
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('F')] = F_map
+        def t_map(self):
+            char = self.get_curr_window().till()
+            self._action = 't'
+            self._char = char
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('t')] = t_map
+        def T_map(self):
+            char = self.get_curr_window().till_back()
+            self._action = 'T'
+            self._char = char
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('T')] = T_map
+        def semicolon_map(self):
+            if self._action == 'f':
+                self.get_curr_window()._find(self._char)
+            if self._action == 'F':
+                self.get_curr_window()._find_back(self._char)
+            if self._action == 't':
+                self.get_curr_window()._till(self._char)
+            if self._action == 'T':
+                self.get_curr_window()._till_back(self._char)
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord(';')] = semicolon_map
+        def comma_map(self):
+            if self._action == 'f':
+                self.get_curr_window()._find_back(self._char)
+            if self._action == 'F':
+                self.get_curr_window()._find(self._char)
+            if self._action == 't':
+                self.get_curr_window()._till_back(self._char)
+            if self._action == 'T':
+                self.get_curr_window()._till(self._char)
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord(',')] = comma_map
+        def dollar_map(self):
+            self.get_curr_window().move_line_end()
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL_BLOCK][ord('$')] = dollar_map
+
+        self.maps[VISUAL_BLOCK][ord(' ')] = {}
+        # def leader_r_map(self):
+            # scope = self.get_curr_buffer().visual_get_scope()
+            # if not scope: return False
+            # start_x, start_y, end_x, end_y = scope
+
+            # text = self.prompt("replace: ")
+            # if len(text) == 0: return False
+            # last_pattern = self.registers['/']
+            # if not last_pattern or len(last_pattern) == 0: return False
+
+            # self.change_begin()
+            # self.get_curr_window().search_replace_scope(start_x,
+                                                        # start_y,
+                                                        # end_x,
+                                                        # end_y,
+                                                        # last_pattern,
+                                                        # text)
+            # self.change_end()
+            # self.change_mode(NORMAL)
+            # return False
+        # self.maps[VISUAL_BLOCK][ord(' ')][ord('r')] = leader_r_map
+
     def _initialize_visual_line_maps(self):
         self.maps[VISUAL_LINE][ord(' ')] = {} # leader
         def d_map(self):
@@ -1835,6 +2103,7 @@ class Editor():
         self._initialize_normal_maps()
         self._initialize_insert_maps()
         self._initialize_visual_maps()
+        self._initialize_visual_block_maps()
         self._initialize_visual_line_maps()
         self._initialize_replace_maps()
 
