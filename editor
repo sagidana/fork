@@ -2148,8 +2148,8 @@ class Editor():
                                                             pos[1])
 
         style = {}
-        style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
-        style['background'] = "#FFC09F" #get_settings()['theme']['colors']['selection.background']
+        style['foreground'] = get_setting('search_highlights_foreground')
+        style['background'] = get_setting('search_highlights_background')
 
         self.get_curr_buffer().add_highlights("/", pattern, style)
         self.get_curr_window().draw()
