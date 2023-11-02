@@ -1976,27 +1976,51 @@ class Editor():
         cmd = command.split()[0]
         args = command.split()[1:] if len(command.split()) > 1 else None
         force = cmd.endswith('!')
+        # remove the '!'
+        cmd = cmd[:-1] if force else cmd
 
-        if "e" in cmd:
+        if cmd == 'e':
             if not args:
                 if not self.get_curr_buffer().reload(force=force):
                     elog("file changed on disk!", type="ERROR")
                     pass
-                else:
-                    # TODO:
-                    pass
+            else:
+                # TODO:
+                pass
             return False
-        if "w" in cmd:
+        if cmd == 'w':
             if not self.get_curr_buffer().write(force=force):
                 elog("file changed on disk!", type="ERROR")
-                pass
-        if "q" in cmd:
+            return False
+        if cmd == 'q':
             if not force and self.get_curr_buffer().file_changed_on_disk():
                 elog("file changed on disk!", type="ERROR")
                 return False
+            if not force and self.get_curr_buffer().is_there_local_change():
+                elog("file changed on buffer!", type="ERROR")
+                return False
             return self._quit_command()
-        if 'qa' in cmd:
+        if cmd == 'wq':
+            if not self.get_curr_buffer().write(force=force):
+                elog("file changed on disk!", type="ERROR")
+                return False
+            return self._quit_command()
+        if cmd == 'qa':
+            for buf in self.buffers:
+                if not force and buf.file_changed_on_disk():
+                    elog("file changed on disk!", type="ERROR")
+                    return False
+                if not force and buf.is_there_local_change():
+                    elog("file changed on buffer!", type="ERROR")
+                    return False
             return True
+        if cmd == 'wqa':
+            for buf in self.buffers:
+                if not buf.write(force=force):
+                    elog("file changed on disk!", type="ERROR")
+                    return False
+            return True
+
         try:
             line_num = int(command)
             curr_x = self.get_curr_window().buffer_cursor[0]
@@ -2279,7 +2303,6 @@ def main():
         screen = Screen()
         editor = Editor(screen)
         editor.bootstrap()
-        elog("here")
     except Exception as e:
         elog(f"Exception: {e}", type="ERROR")
         elog(f"traceback: {traceback.format_exc()}", type="ERROR")

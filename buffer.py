@@ -131,13 +131,22 @@ class Buffer():
                 return hashlib.md5(h_file.read()).hexdigest()
         except: return None
 
+    def _hash_local(self):
+        try:
+            return hashlib.md5(self.get_file_bytes()).hexdigest()
+        except: return None
+
     def _match_hash(self):
         try:
-            with open(self.file_path, 'rb') as h_file:
-                curr_hash = hashlib.md5(h_file.read()).hexdigest()
-                return self.hash == curr_hash
-        except:
-            return False
+            if path.exists(self.file_path):
+                with open(self.file_path, 'rb') as h_file:
+                    curr_hash = hashlib.md5(h_file.read()).hexdigest()
+                    return self.hash == curr_hash
+            else: return True
+        except: return False
+
+    def is_there_local_change(self):
+        return not (self.hash == self._hash_local())
 
     def file_changed_on_disk(self):
         if not self.file_path: return False

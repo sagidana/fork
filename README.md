@@ -54,17 +54,21 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- FIX: on search, the prompt isn't draw smoothly as we write more and more characters
+- visual block mode
+- add support for diff output
+- add support for bash scripts
+- add support for `cat file | ed`
+- make ALL delete operations to also yank the text...
+    - never thought this is something I used so much, I actually useless without it.
+
+
 - in visual line mode, when highlights are one and we change the selected lines,
   the highlight do not drawing smoothly
 - take influence from helix/kakoun
     - mutli lines selection
     - server/client architecture
-- visual block mode
 - make asterisk work as <cword> in vim
 - record jumps in all the right places
-- make ALL delete operations to also yank the text...
-    - never thought this is something I used so much, I actually useless without it.
 - make gq take into account the indent level..
 
 - horizontal scrolling
@@ -76,10 +80,8 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
         - status line on all windows
 - move windows (especially in the rg cases)
 - add command auto complete at tab
-- add support for bash scripts
 - add support to <ctrl><x><f> in insert mode: auto complete filesystem paths
 - searching in large files is extremely slow
-- add support for `cat file | ed`
 - add commands:
     - e <file_path>
     - q!
@@ -90,6 +92,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 - `=` operator
 
+- FIX: on search, the prompt isn't draw smoothly as we write more and more characters
 - BUG: difflib is extremely slow or maybe even freezes
     - try to comment/indent all lines of a large file
 - BUG: tab._adjust_sizes() corner case:
