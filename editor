@@ -2313,14 +2313,9 @@ def main():
     args = parser.parse_args()
 
     stdin_pending()
-
-    try:
-        screen = Screen()
-        editor = Editor(screen)
-        editor.bootstrap()
-    except Exception as e:
-        elog(f"Exception: {e}", type="ERROR")
-        elog(f"traceback: {traceback.format_exc()}", type="ERROR")
+    screen = Screen()
+    editor = Editor(screen)
+    editor.bootstrap()
 
     k = 0
     while True:
@@ -2328,9 +2323,14 @@ def main():
             to_exit = editor.on_key(k)
             if to_exit: break
         except Exception as e:
-            # TODO: pop error!
             elog(f"Exception: {e}", type="ERROR")
             elog(f"traceback: {traceback.format_exc()}", type="ERROR")
+
+            error_text = f"Exception: {e}\n"
+            error_text += f"traceback: {traceback.format_exc()}"
+            error = ErrorPopup(editor, error_text)
+            error.pop()
+            editor.get_curr_tab().draw() # need to redraw after popup
 
         k = screen.get_key()
         # elog(f"key {k}")
