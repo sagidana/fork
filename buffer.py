@@ -84,6 +84,7 @@ class Buffer():
         self.lines = []
         self.file_path = None
         self.in_memory_data = None
+        self.hash = None
 
         if not file_path:
             if not data_in_bytes:
