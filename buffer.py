@@ -185,8 +185,9 @@ class Buffer():
             # return "ruby"
         elif    self.file_path.endswith('.rs'):
             return "rust"
-        # elif    self.file_path.endswith('.sh'):
-            # return "sh"
+        elif    self.file_path.endswith('.sh') or \
+                self.file_path.endswith('.bashrc'):
+            return "bash"
         elif    self.file_path.endswith('.cpp') or \
                 self.file_path.endswith('.hpp'):
             return "cpp"

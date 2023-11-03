@@ -123,6 +123,10 @@ class TreeSitter():
                 with open(query_path.format("go"),"r") as f: query = f.read()
                 self.query = GO_LANGUAGE.query(query)
                 self.parser.set_language(GO_LANGUAGE)
+            elif language == 'bash':
+                with open(query_path.format("bash"),"r") as f: query = f.read()
+                self.query = BASH_LANGUAGE.query(query)
+                self.parser.set_language(BASH_LANGUAGE)
             else:
                 raise Exception("treesitter not support that language.. :(")
         except Exception as e: elog(f"Exception: {e}")
