@@ -147,6 +147,7 @@ class Buffer():
         except: return False
 
     def is_there_local_change(self):
+        if not self.file_path: return False
         return not (self.hash == self._hash_local())
 
     def file_changed_on_disk(self):
