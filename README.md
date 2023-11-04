@@ -55,6 +55,8 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 ## TODOs
 - visual block mode
+- adding kill to tasks
+- adding popup for managing tasks
 - make asterisk work as <cword> in vim
 - record jumps in all the right places
 - when pasting from clipboard it is very slow because of the insert operation
