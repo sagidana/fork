@@ -78,6 +78,7 @@ class Editor():
             self.get_curr_window().visual_end()
         if self.mode == VISUAL and target == INSERT:
             self.get_curr_window().visual_end()
+            self.screen.set_cursor_i_beam()
         if self.mode == VISUAL_LINE and target == NORMAL:
             self.get_curr_window().visual_end()
         if self.mode == VISUAL_BLOCK and target == NORMAL:
