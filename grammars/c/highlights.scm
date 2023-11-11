@@ -30,6 +30,7 @@
 "#include" @keyword
 
 (preproc_directive) @keyword
+(labeled_statement) @keyword
 
 (primitive_type) @constant.language
 

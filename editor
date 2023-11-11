@@ -26,6 +26,7 @@ from plugins import ripgrep
 from plugins import format
 from plugins import blog
 from plugins import fzf
+from plugins import gd
 
 from utils import *
 
@@ -314,7 +315,13 @@ class Editor():
                                                             scope[2],
                                                             scope[3])
             if len(pattern) == 0: return False
-            # TODO: goto definition
+            pattern = pattern[0]
+
+            results = gd(self, pattern)
+            if not results: return False
+
+            self.get_curr_tab().split(Buffer(data_in_bytes=results))
+
             return False
         self.maps[NORMAL][CTRL_CLOSE_BRACKET_KEY] = ctrl_close_bracket_map
 

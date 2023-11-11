@@ -189,7 +189,8 @@ class Buffer():
                 self.file_path.endswith('.bashrc'):
             return "bash"
         elif    self.file_path.endswith('.cpp') or \
-                self.file_path.endswith('.hpp'):
+                self.file_path.endswith('.hpp') or \
+                self.file_path.endswith('.cc'):
             return "cpp"
         # elif    self.file_path.endswith('.xml'):
             # # return "xml"  # treesitter not supporting

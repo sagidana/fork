@@ -90,6 +90,21 @@ def _index_of_first_nonspace_char(string):
     if m: return len(m.group(0))
     return -1
 
+def gd(editor, search):
+    try:
+        cmd = [ "/home/s/github/gd/gd",
+                "--language", editor.get_curr_buffer().language,
+                "--symbol", search,
+                # "--action", "goto-definition"
+              ]
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        output, errors = p.communicate()
+
+        if len(output) > 0:
+            return output
+    except Exception as e: elog(f"ripgrep exception: {e}")
+    return None
+
 def comment(editor, start_y, end_y):
     comment_syntax = _get_comment_syntax(editor.get_curr_buffer().language)
 
