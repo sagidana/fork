@@ -5,6 +5,7 @@ ON_BUFFER_DESTROY_BEFORE = "on_buffer_destroy_before"
 ON_BUFFER_DESTROY_AFTER = "on_buffer_destroy_after"
 
 ON_RESIZE = "on_resize"
+ON_KEY = "on_key"
 
 # Draw events
 ON_CURSOR_MOVE_BEFORE = "on_cursor_move_before"

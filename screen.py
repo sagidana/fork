@@ -141,6 +141,8 @@ class Screen():
         signal(SIGWINCH, self.screen_resize_handler)
         self._disable_wrap()
 
+        self.queue = []
+
         self.old_stdin_settings = tcgetattr(self.stdin)
         r = setraw(self.stdin.fileno())
 
@@ -155,10 +157,16 @@ class Screen():
         self.stdout.write(to_write)
         if to_flush: self.flush()
 
+    def set_keys(self, keys):
+        self.queue.extend(reversed(keys))
+
     def get_key(self):
         try:
-            k = ord(self.stdin.read(1))
-            # elog(f"{k} != {ENTER_KEY}")
+            if len(self.queue) > 0:
+                k = self.queue.pop()
+            else:
+                k = ord(self.stdin.read(1))
+            Hooks.execute(ON_KEY, k)
             return k
         except Exception as e:
             elog(f"get_key: {e}", type="ERROR")

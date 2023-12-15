@@ -48,6 +48,9 @@ class Editor():
     def on_buffer_create_after_callback(self, buf):
         self.buffers.append(buf)
 
+    def on_key_callback(self, key):
+        self.internal_registers["."].append(key)
+
     def draw(self):
         self.get_curr_tab().draw()
 
@@ -1120,7 +1123,7 @@ class Editor():
             return False
         self.maps[NORMAL][ord('D')] = D_map
         def dot_map(self):
-            for k in self.registers['.']: self.on_key(k)
+            self.screen.set_keys(self.registers['.'])
             return False
         self.maps[NORMAL][ord('.')] = dot_map
 
@@ -2212,6 +2215,7 @@ class Editor():
         # Register to global events!
         Hooks.register(ON_BUFFER_CREATE_AFTER, self.on_buffer_create_after_callback)
         Hooks.register(ON_BUFFER_DESTROY_AFTER, self.on_buffer_destroy_after_callback)
+        Hooks.register(ON_KEY, self.on_key_callback)
 
     def get_or_create_buffer(self, file_path):
         for buf in self.buffers:
@@ -2530,16 +2534,8 @@ class Editor():
                     key = self.screen.get_key()
 
         # dot functionality, recording.
-        if self.mode == NORMAL:
-            # If we on top level, start recording from top.
-            if self.curr_maps == self.maps[self.mode]:
-                self.internal_registers["."] = [key]
-            # If we nested somewhere just append the key to the already
-            # existing keys
-            else:
-                self.internal_registers["."].append(key)
-        if self.mode == INSERT:
-            self.internal_registers["."].append(key)
+        if self.mode == NORMAL and self.curr_maps == self.maps[self.mode]:
+            self.internal_registers["."] = [key]
 
         if key == ESC_KEY:
             self.change_mode(NORMAL)
