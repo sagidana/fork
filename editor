@@ -195,6 +195,7 @@ class Editor():
     def _initialize_normal_ctrl_maps(self):
         def ctrl_v_map(self):
             self.change_mode(VISUAL_BLOCK)
+            elog("starting viusal block")
             return False
         self.maps[NORMAL][CTRL_V_KEY] = ctrl_v_map
         def ctrl_u_map(self):

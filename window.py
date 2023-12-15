@@ -334,8 +334,39 @@ class Window():
         return syntax_map
 
     def _visualize_block(self):
-        start_x, start_y, end_x, end_y = self.buffer.visual_get_scope()
-        elog(f"({start_x}, {start_y}) => ({end_x}, {end_y})")
+        style = {}
+        style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
+        style['background'] = get_settings()['theme']['colors']['selection.background']
+
+        orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
+        if orig_start_x > orig_end_x:
+            temp = orig_start_x
+            orig_start_x = orig_end_x
+            orig_end_x = temp
+        orig_end_x += 1
+        buffer_height = len(self.buffer.lines) - 1
+        screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+        screen_end_y = min(screen_start_y + self.content_height, buffer_height)
+
+        if orig_start_y > screen_end_y: return
+        if orig_end_y < screen_start_y: return
+
+        start_y = max(orig_start_y, screen_start_y)
+        if start_y == orig_start_y: start_x = orig_start_x
+        else: start_x = 0
+
+        end_y = min(orig_end_y, screen_end_y)
+        if end_y == orig_end_y: end_x = orig_end_x
+        else: end_x = len(self.get_line(end_y)) - 1
+
+        for y in range(start_y, end_y+1):
+            try:
+                string = self.get_line(y)[start_x:end_x]
+                self._screen_write( self._expanded_x(y, start_x),
+                                    y - screen_start_y,
+                                    string,
+                                    style)
+            except: pass
 
     def _visualize(self):
         style = {}
