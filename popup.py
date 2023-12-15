@@ -272,20 +272,9 @@ class TSNode():
         return f"[{self.level}]{self.node.type}: {text}"
 
 class TreeSitterPopup():
-    def __init__(   self,
-                    editor,
-                    screen,
-                    treesitter,
-                    position):
-        self.editor = editor
-        self.screen = screen
-        self.treesitter = treesitter
-        self.position = position
-        self.ret_node = None
-
+    def find_closest_node(self):
         x = self.position[0]
         y = self.position[1]
-
         closest_node = self.treesitter.tree.root_node
         closest_level = 0
 
@@ -345,6 +334,32 @@ class TreeSitterPopup():
                     self.selected = nodes.index(prev)
                     self.nodes = [TSNode(node, closest_level + 1) for node in nodes]
                     break
+
+    def __init__(   self,
+                    editor,
+                    screen,
+                    treesitter,
+                    position,
+                    search_for=None):
+        self.editor = editor
+        self.screen = screen
+        self.treesitter = treesitter
+        self.position = position
+        self.ret_node = None
+
+        if search_for:
+            filtered_nodes = []
+            def search(node, level, nth_child):
+                nonlocal filtered_nodes
+                nonlocal search_for
+                node = TSNode(node, level)
+                if search_for in str(node):
+                    filtered_nodes.append(node)
+            traverse_tree(self.treesitter.tree.root_node, search)
+            self.nodes = filtered_nodes
+            self.selected = 0
+        else:
+            self.find_closest_node()
 
         if len(self.nodes) == 0: raise Exception('should not happend')
 
