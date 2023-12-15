@@ -86,6 +86,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - searching in large files is extremely slow
 
 - `=` operator
+- adding marks?
 
 - FIX: on search, the prompt isn't draw smoothly as we write more and more characters
 - BUG: difflib is extremely slow or maybe even freezes
@@ -97,7 +98,7 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - BUG: status line dont show if cursor is on last line
 
 - ctags
-- maybe add ast based text object?
+- maybe add AST-based text object?
     - `if`/`af` inner/arround if
     - `ir`/`ar` inner/arround for
     - `ie`/`ae` inner/arround while

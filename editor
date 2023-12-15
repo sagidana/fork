@@ -24,7 +24,7 @@ from plugins import clipboard
 from plugins import comment
 from plugins import ripgrep
 from plugins import format
-from plugins import blog
+from plugins import doc
 from plugins import fzf
 from plugins import gd
 
@@ -1146,12 +1146,12 @@ class Editor():
         self.maps[NORMAL][ord(' ')][ord('e')] = {} # execute
         self.maps[NORMAL][ord(' ')][ord('s')] = {} # search
         self.maps[NORMAL][ord(' ')][ord('t')] = {} # treesitter
-        self.maps[NORMAL][ord(' ')][ord('b')] = {} # blog
-        self.maps[NORMAL][ord(' ')][ord('b')][ord('l')] = None # blog location
-        def leader_bl_map(self): # blog location
-            blog('location', self)
+        self.maps[NORMAL][ord(' ')][ord('d')] = {} # doc
+        self.maps[NORMAL][ord(' ')][ord('d')][ord('l')] = None # doc location
+        def leader_dl_map(self): # doc location
+            doc('location', self)
             return False
-        self.maps[NORMAL][ord(' ')][ord('b')][ord('l')] = leader_bl_map
+        self.maps[NORMAL][ord(' ')][ord('d')][ord('l')] = leader_dl_map
         def leader_sf_map(self): # search file
             file_path = fzf(self)
             if file_path:
@@ -1204,12 +1204,12 @@ class Editor():
             except Exception as e: elog(f"Exception: {e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('t')][ord('s')] = leader_ts_map
-        def leader_d_map(self):
+        def leader_p_map(self):
             details = DetailsPopup(self)
             details.pop()
             self.get_curr_tab().draw() # need to redraw after popup
             return False
-        self.maps[NORMAL][ord(' ')][ord('d')] = leader_d_map
+        self.maps[NORMAL][ord(' ')][ord('p')] = leader_p_map
         def leader_oc_map(self):
             config_path = os.path.expanduser('~/.config/editor/config.json')
             buffer = self.get_or_create_buffer(config_path)
@@ -1594,9 +1594,9 @@ class Editor():
 
     def _initialize_visual_line_maps(self):
         self.maps[VISUAL_LINE][ord(' ')] = {} # leader
-        self.maps[VISUAL_LINE][ord(' ')][ord('b')] = {} # blog
-        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('c')] = None # blog code
-        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('n')] = None # blog note
+        self.maps[VISUAL_LINE][ord(' ')][ord('d')] = {} # doc
+        self.maps[VISUAL_LINE][ord(' ')][ord('d')][ord('c')] = None # doc code
+        self.maps[VISUAL_LINE][ord(' ')][ord('d')][ord('n')] = None # doc note
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
@@ -1792,16 +1792,16 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL_LINE][ord(' ')][ord('r')] = leader_r_map
-        def leader_bc_map(self):
-            blog('code', self)
+        def leader_dc_map(self):
+            doc('code', self)
             self.change_mode(NORMAL)
             return False
-        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('c')] = leader_bc_map
-        def leader_bn_map(self):
-            blog('note', self)
+        self.maps[VISUAL_LINE][ord(' ')][ord('d')][ord('c')] = leader_dc_map
+        def leader_dn_map(self):
+            doc('note', self)
             self.change_mode(NORMAL)
             return False
-        self.maps[VISUAL_LINE][ord(' ')][ord('b')][ord('n')] = leader_bn_map
+        self.maps[VISUAL_LINE][ord(' ')][ord('d')][ord('n')] = leader_dn_map
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):

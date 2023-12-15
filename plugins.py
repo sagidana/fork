@@ -181,7 +181,7 @@ def format(editor, start_x, start_y, end_x, end_y):
                                             end_y,
                                             stream)
 
-def _blog_code(editor):
+def _doc_code(editor):
     time = datetime.now().strftime("%H:%M:%S")
     y = editor.get_curr_window().buffer_cursor[1] + 1
     file_path = editor.get_curr_buffer().file_path
@@ -202,7 +202,7 @@ def _blog_code(editor):
     to_write += "```\n"
     return to_write
 
-def _blog_note(editor):
+def _doc_note(editor):
     time = datetime.now().strftime("%H:%M:%S")
     file_path = editor.get_curr_buffer().file_path
     if not file_path: file_path = ""
@@ -220,7 +220,7 @@ def _blog_note(editor):
     to_write += f"{text}\n"
     return to_write
 
-def _blog_location(editor):
+def _doc_location(editor):
     time = datetime.now().strftime("%H:%M:%S")
     x = editor.get_curr_window().buffer_cursor[0]
     y = editor.get_curr_window().buffer_cursor[1] + 1
@@ -230,29 +230,29 @@ def _blog_location(editor):
     to_write = f"[{time}] [LOCATION] `{file_path}:{y}:{x}`\n"
     return to_write
 
-def blog(mode, editor):
-    # create blog folder if not exist
-    default_blog_path = path.expanduser('~/.blog/')
-    blog_path = get_setting("blog_path", default=default_blog_path)
-    if not path.exists(blog_path): os.makedirs(blog_path)
+def doc(mode, editor):
+    # create doc folder if not exist
+    default_doc_path = path.expanduser('~/.doc/')
+    doc_path = get_setting("doc_path", default=default_doc_path)
+    if not path.exists(doc_path): os.makedirs(doc_path)
     file_name = f"{date.today()}.md"
-    blog_path = path.join(blog_path, file_name)
+    doc_path = path.join(doc_path, file_name)
 
     if mode == 'note':
-        to_write = _blog_note(editor)
+        to_write = _doc_note(editor)
         if not to_write: return
-        with open(blog_path, 'a+') as blog_file:
-            blog_file.write(to_write)
+        with open(doc_path, 'a+') as doc_file:
+            doc_file.write(to_write)
         return
     if mode == 'location':
-        to_write = _blog_location(editor)
+        to_write = _doc_location(editor)
         if not to_write: return
-        with open(blog_path, 'a+') as blog_file:
-            blog_file.write(to_write)
+        with open(doc_path, 'a+') as doc_file:
+            doc_file.write(to_write)
         return
     if mode == 'code':
-        to_write = _blog_code(editor)
+        to_write = _doc_code(editor)
         if not to_write: return
-        with open(blog_path, 'a+') as blog_file:
-            blog_file.write(to_write)
+        with open(doc_path, 'a+') as doc_file:
+            doc_file.write(to_write)
         return
