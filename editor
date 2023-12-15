@@ -24,7 +24,7 @@ from plugins import clipboard
 from plugins import comment
 from plugins import ripgrep
 from plugins import format
-from plugins import doc
+from plugins import doc, doc_get_latest_file
 from plugins import fzf
 from plugins import gd
 
@@ -1148,10 +1148,17 @@ class Editor():
         self.maps[NORMAL][ord(' ')][ord('t')] = {} # treesitter
         self.maps[NORMAL][ord(' ')][ord('d')] = {} # doc
         self.maps[NORMAL][ord(' ')][ord('d')][ord('l')] = None # doc location
+        self.maps[NORMAL][ord(' ')][ord('d')][ord('o')] = None # doc open
         def leader_dl_map(self): # doc location
             doc('location', self)
             return False
         self.maps[NORMAL][ord(' ')][ord('d')][ord('l')] = leader_dl_map
+        def leader_do_map(self): # doc open
+            doc_path = doc_get_latest_file()
+            buffer = self.get_or_create_buffer(doc_path)
+            self.get_curr_tab().vsplit(buffer)
+            return False
+        self.maps[NORMAL][ord(' ')][ord('d')][ord('o')] = leader_do_map
         def leader_sf_map(self): # search file
             file_path = fzf(self)
             if file_path:

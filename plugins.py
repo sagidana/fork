@@ -230,6 +230,15 @@ def _doc_location(editor):
     to_write = f"[{time}] [LOCATION] `{file_path}:{y}:{x}`\n"
     return to_write
 
+def doc_get_latest_file():
+    # create doc folder if not exist
+    default_doc_path = path.expanduser('~/.doc/')
+    doc_path = get_setting("doc_path", default=default_doc_path)
+    if not path.exists(doc_path): os.makedirs(doc_path)
+    file_name = f"{date.today()}.md"
+    doc_path = path.join(doc_path, file_name)
+    return doc_path
+
 def doc(mode, editor):
     # create doc folder if not exist
     default_doc_path = path.expanduser('~/.doc/')
