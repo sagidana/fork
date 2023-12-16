@@ -1240,6 +1240,31 @@ class Editor():
             except Exception as e: elog(f"Exception: {e}")
             return False
         self.maps[NORMAL][ord(' ')][ord('t')][ord('f')] = leader_tf_map
+        def leader_tc_map(self): # tree_sitter class
+            abs_position = [0,0]
+            window_x = self.get_curr_window().position[0]
+            window_y = self.get_curr_window().position[1]
+            window_cursor_x = 0
+            window_cursor_y = 0
+            abs_position[0] = window_x + window_cursor_x
+            abs_position[1] = window_y + window_cursor_y
+            try:
+                ts = TreeSitterPopup(   self,
+                                        self.screen,
+                                        self.get_curr_buffer().treesitter,
+                                        self.get_curr_window().buffer_cursor,
+                                        search_for="class")
+                node = ts.pop()
+                if node:
+                    y = node.start_point[0]
+                    x = node.start_point[1]
+                    self.get_curr_window().move_cursor_to_buf_location(x, y)
+                    self.get_curr_window().align_center()
+
+                self.get_curr_tab().draw() # need to redraw after popup
+            except Exception as e: elog(f"Exception: {e}")
+            return False
+        self.maps[NORMAL][ord(' ')][ord('t')][ord('c')] = leader_tc_map
         def leader_p_map(self):
             details = DetailsPopup(self)
             details.pop()
