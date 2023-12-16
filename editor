@@ -199,7 +199,7 @@ class Editor():
         def ctrl_t_map(self):
             elog("here")
             keymap = {}
-            def question_mark_map():
+            def question_mark_map(popup):
                 elog("question_mark_map")
                 return False
             keymap[ord('?')] = question_mark_map

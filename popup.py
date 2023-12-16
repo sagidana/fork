@@ -22,7 +22,7 @@ class GenericPopup():
 
     def on_key(self, key):
         if key in self.keymap:
-            return self.keymap[key]()
+            return self.keymap[key](self)
 
         if key == ESC_KEY: return True
         if key == ENTER_KEY:
