@@ -323,8 +323,18 @@ class Editor():
 
             results = gd(self, pattern)
             if not results: return False
-
-            self.get_curr_tab().split(Buffer(data_in_bytes=results))
+            _results = results.decode('utf-8')
+            _results = _results.splitlines()
+            if len(_results) == 1:
+                file_path, file_line, file_col = extract_destination(_results[0])
+                buffer = self.get_or_create_buffer(file_path)
+                self.get_curr_window().add_jump()
+                self.get_curr_window().change_buffer(buffer)
+                self.get_curr_window().move_cursor_to_buf_location(file_col, file_line)
+                self.get_curr_window().add_jump()
+                self.get_curr_window().align_center()
+            else:
+                self.get_curr_tab().split(Buffer(data_in_bytes=results))
 
             return False
         self.maps[NORMAL][CTRL_CLOSE_BRACKET_KEY] = ctrl_close_bracket_map
