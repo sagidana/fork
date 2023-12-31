@@ -54,7 +54,8 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
 
 ## TODOs
-- fix window managements bugs
+- fix window managements bugs and add move windows and resize windows
+  functionality
 - fix draw_pairs crashes
 - fix insert mode lags on large files
 - visual block mode

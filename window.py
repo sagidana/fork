@@ -200,39 +200,43 @@ class Window():
         return ret_x, ret_y
 
     def _draw_pairs(self):
-        if self._need_to_clear_pairs:
-            self.draw()
-            self._need_to_clear_pairs = False
+        try:
+            if self._need_to_clear_pairs:
+                self.draw()
+                self._need_to_clear_pairs = False
 
-        x_1 = self.buffer_cursor[0]
-        y_1 = self.buffer_cursor[1]
-        char_1 = self.get_curr_line()[x_1]
-        if char_1 not in "(){}[]": return
+            x_1 = self.buffer_cursor[0]
+            y_1 = self.buffer_cursor[1]
+            char_1 = self.get_curr_line()[x_1]
+            if char_1 not in "(){}[]": return
 
-        char_2 = self.buffer.negate_char(char_1)
-        x_2 = x_1
-        x_2 = y_1
-        if char_1 in "({[":
-            ret = self.buffer.find_next_char(x_1, y_1, char_2, smart=True)
+            char_2 = self.buffer.negate_char(char_1)
+            x_2 = x_1
+            x_2 = y_1
+            if char_1 in "({[":
+                ret = self.buffer.find_next_char(x_1, y_1, char_2, smart=True)
+                if not ret: return
+                x_2, y_2 = ret
+            else:
+                ret = self.buffer.find_prev_char(x_1, y_1, char_2, smart=True)
+                if not ret: return
+                x_2, y_2 = ret
+
+            ret = self._translate_buf_x_y_to_win_x_y(x_1, y_1)
+            if not ret: return
+            x_1, y_1 = ret
+            ret = self._translate_buf_x_y_to_win_x_y(x_2, y_2)
             if not ret: return
             x_2, y_2 = ret
-        else:
-            ret = self.buffer.find_prev_char(x_1, y_1, char_2, smart=True)
-            if not ret: return
-            x_2, y_2 = ret
 
-        ret = self._translate_buf_x_y_to_win_x_y(x_1, y_1)
-        if not ret: return
-        x_1, y_1 = ret
-        ret = self._translate_buf_x_y_to_win_x_y(x_2, y_2)
-        if not ret: return
-        x_2, y_2 = ret
-
-        style = {}
-        style['background'] = "#FF00FF"
-        self._screen_write(x_1, y_1, char_1, style)
-        self._screen_write(x_2, y_2, char_2, style)
-        self._need_to_clear_pairs = True
+            style = {}
+            style['background'] = "#FF00FF"
+            self._screen_write(x_1, y_1, char_1, style)
+            self._screen_write(x_2, y_2, char_2, style)
+            self._need_to_clear_pairs = True
+        except Exception as e:
+            elog(f"_draw_pairs bug..: {e}", type="ERROR")
+            pass
 
     def draw_cursor(self):
         if self.status_line: self.draw_status_line()
