@@ -56,7 +56,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 ## TODOs
 - fix window managements bugs
 - fix draw_pairs crashes
-- fix visual mode lag on large files.. (probably because of the on changes)
 - fix insert mode lags on large files
 - visual block mode
 - adding kill to tasks

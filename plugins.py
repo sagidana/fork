@@ -11,6 +11,25 @@ import os
 from settings import *
 from log import elog
 
+def gotovim(editor):
+    elog("here")
+    try:
+        stdin = editor.screen.stdin
+        stdout = editor.screen.stdout
+
+        current_file = editor.get_curr_buffer().file_path
+        current_line = editor.get_curr_window().buffer_cursor[1]
+
+        cmd = ["nvim", f"+{current_line}", current_file]
+        env = environ.copy()
+        p = Popen(cmd,
+                  stdin=stdin,
+                  stdout=stdout,
+                  env=env)
+        output, errors = p.communicate()
+    except Exception as e: elog(f"Exception: {e}")
+    return None
+
 def fzf(editor):
     """
     This is so cool, fzf print out to stderr the fuzzing options,
