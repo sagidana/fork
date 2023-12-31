@@ -18,11 +18,12 @@ SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
 
 class Buffer():
     def on_buffer_change_callback(self, change):
-        if self.treesitter:
-            if change:
-                self.treesitter.edit(change, self.get_file_bytes())
-            else:
-                self.resync_treesitter()
+        if change:
+            if self.treesitter:
+                if "all" not in change:
+                    self.treesitter.edit(change, self.get_file_bytes())
+                else:
+                    self.resync_treesitter()
         self.update_highlights()
 
     def raise_event(func):
@@ -41,7 +42,7 @@ class Buffer():
         if event in self.events:
             for cb in self.events[event]: cb(args)
 
-    def flush_changes(self, change=None):
+    def flush_changes(self, change={"all": True}):
         self._raise_event(ON_BUFFER_CHANGE, change)
 
     def register_events(self, handlers):
@@ -601,7 +602,8 @@ class Buffer():
 
         self.lines = stream.splitlines(keepends=True)
 
-        if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
+        # if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
+        if propagate: self.flush_changes()
 
     # CORE: change
     def search_replace_scope( self,
@@ -632,7 +634,8 @@ class Buffer():
 
         self.lines = stream.splitlines(keepends=True)
 
-        if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
+        # if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
+        if propagate: self.flush_changes()
 
     def replace_char(self, x, y, char, propagate=True):
         self.remove_char(x+1, y, propagate=propagate)
