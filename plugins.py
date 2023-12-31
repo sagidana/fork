@@ -197,7 +197,7 @@ def _doc_code(editor):
     text = ''.join(text)
 
     to_write = f"[{time}] [CODE] `{file_path}:{y}`\n"
-    to_write += "```\n"
+    to_write += f"```{editor.get_curr_buffer().language}\n"
     to_write += f"{text}\n"
     to_write += "```\n"
     return to_write
@@ -227,7 +227,7 @@ def _doc_location(editor):
     file_path = editor.get_curr_buffer().file_path
     if not file_path: return None
 
-    to_write = f"[{time}] [LOCATION] `{file_path}:{y}:{x}`\n"
+    to_write = f"[{time}] [LOCATION] `{file_path}:{y}:{x}`\n\n"
     return to_write
 
 def doc_get_latest_file():

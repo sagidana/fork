@@ -9,7 +9,13 @@ from string import printable
 
 
 class GenericPopup():
-    def __init__(self, screen, position, width, height, lines, selected=0,keymap=None):
+    def __init__(   self,
+                    screen,
+                    position,
+                    width, height,
+                    lines,
+                    selected=0,
+                    keymap=None):
         self.screen = screen
         self.position = position
         self.width = width
