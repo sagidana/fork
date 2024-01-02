@@ -56,6 +56,8 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 ## TODOs
 - fix window managements bugs and add move windows and resize windows
   functionality
+- quickfix list I dont know how but make it better!!!
+- add history functionality to search on `/` and `?`
 - fix draw_pairs crashes
 - fix insert mode lags on large files
 - visual block mode

@@ -195,6 +195,22 @@ class Editor():
             elog("ctrl_w_L_map")
             return False
         self.maps[NORMAL][CTRL_W_KEY][ord('L')] = ctrl_w_L_map
+        def ctrl_w_colon_map(self):
+            elog("ctrl_w_colon_map")
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord(',')] = ctrl_w_colon_map
+        def ctrl_w_m_map(self):
+            elog("ctrl_w_m_map")
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('m')] = ctrl_w_m_map
+        def ctrl_w_dot_map(self):
+            elog("ctrl_w_dot_map")
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('.')] = ctrl_w_dot_map
+        def ctrl_w_n_map(self):
+            elog("ctrl_w_n_map")
+            return False
+        self.maps[NORMAL][CTRL_W_KEY][ord('n')] = ctrl_w_n_map
 
     def _initialize_normal_ctrl_maps(self):
         def ctrl_t_map(self):
