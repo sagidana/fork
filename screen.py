@@ -166,6 +166,7 @@ class Screen():
                 k = self.queue.pop()
             else:
                 k = ord(self.stdin.read(1))
+            # elog(f"key: {k}")
             Hooks.execute(ON_KEY, k)
             return k
         except Exception as e:
