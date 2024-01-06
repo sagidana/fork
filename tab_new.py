@@ -148,8 +148,8 @@ class Tab():
 
         # self._adjust_sizes()
 
-    def focus_window(self, window):
-        pass
+    def focus_window(self, winnode):
+        self.curr_winnode = winnode
 
     def close_window(self, window):
         self._remove_window(window)
@@ -170,8 +170,8 @@ class Tab():
         left_bot_y = left_top_y + window.height - 1
 
         found = None
-        for curr_index, curr in enumerate(iter_windows_tree(self.root)):
-            curr = curr.window
+        for curr_index, winnode in enumerate(iter_windows_tree(self.root)):
+            curr = winnode.window
             if not curr: continue
             if curr == window: continue
             curr_right_top_x = curr.position[0] + curr.width - 1
@@ -184,11 +184,11 @@ class Tab():
             if curr_right_bot_y < left_top_y: continue
 
             if not found:
-                found = curr
+                found = winnode
                 continue
 
-            if self._windows_distance(curr, window) < self._windows_distance(found, window):
-                found = curr
+            if self._windows_distance(curr, window) < self._windows_distance(found.window, window):
+                found = winnode
         return found
 
     def _find_right_window(self, window):
@@ -198,8 +198,8 @@ class Tab():
         right_bot_y = right_top_y + window.height - 1
 
         found = None
-        for curr_index, curr in enumerate(iter_windows_tree(self.root)):
-            curr = curr.window
+        for curr_index, winnode in enumerate(iter_windows_tree(self.root)):
+            curr = winnode.window
             if not curr: continue
             if curr == window: continue
             curr_left_top_x = curr.position[0]
@@ -212,11 +212,11 @@ class Tab():
             if curr_left_bot_y < right_top_y: continue
 
             if not found:
-                found = curr
+                found = winnode
                 continue
 
-            if self._windows_distance(curr, window) < self._windows_distance(found, window):
-                found = curr
+            if self._windows_distance(curr, window) < self._windows_distance(found.window, window):
+                found = winnode
         return found
 
     def _find_up_window(self, window):
@@ -226,8 +226,8 @@ class Tab():
         top_right_y = top_left_y
 
         found = None
-        for curr_index, curr in enumerate(iter_windows_tree(self.root)):
-            curr = curr.window
+        for curr_index, winnode in enumerate(iter_windows_tree(self.root)):
+            curr = winnode.window
             if not curr: continue
             if curr == window: continue
             curr_bot_left_x = curr.position[0]
@@ -240,11 +240,11 @@ class Tab():
             if curr_bot_right_x <= top_left_x: continue
 
             if not found:
-                found = curr
+                found = winnode
                 continue
 
-            if self._windows_distance(curr, window) < self._windows_distance(found, window):
-                found = curr
+            if self._windows_distance(curr, window) < self._windows_distance(found.window, window):
+                found = winnode
         return found
 
     def _find_down_window(self, window):
@@ -254,8 +254,8 @@ class Tab():
         bot_right_y = bot_left_y
 
         found = None
-        for curr_index, curr in enumerate(iter_windows_tree(self.root)):
-            curr = curr.window
+        for curr_index, winnode in enumerate(iter_windows_tree(self.root)):
+            curr = winnode.window
             if not curr: continue
             if curr == window: continue
             curr_top_left_x = curr.position[0]
@@ -268,11 +268,11 @@ class Tab():
             if curr_top_right_x <= bot_left_x: continue
 
             if not found:
-                found = curr
+                found = winnode
                 continue
 
-            if self._windows_distance(curr, window) < self._windows_distance(found, window):
-                found = curr
+            if self._windows_distance(curr, window) < self._windows_distance(found.window, window):
+                found = winnode
         return found
 
     def focus_to_left_window(self):
@@ -548,17 +548,16 @@ if __name__ == "__main__":
             if key == ord('h'): # focus
                 tab.focus_to_left_window()
             if key == ord('j'): # focus
-                tab.focus_to_up_window()
-            if key == ord('k'): # focus
                 tab.focus_to_down_window()
+            if key == ord('k'): # focus
+                tab.focus_to_up_window()
             if key == ord('l'): # focus
                 tab.focus_to_right_window()
-
             if key == ord('s'): # split
                 tab.split()
-
             if key == ord('v'): # vsplit
                 tab.vsplit()
+
             if key == ord('H'): pass # move
             if key == ord('J'): pass # move
             if key == ord('K'): pass # move
