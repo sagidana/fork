@@ -5,14 +5,20 @@ from hooks import *
 from events import *
 from idr import *
 
+SINGLE = 1
+HORIZONTAL= 2
+VERTICAL = 3
+
 class WinNode:
     def __init__(   self,
                     x,
                     y,
                     width,
                     height,
-                    window=None):
+                    window=None,
+                    orientation=SINGLE):
         self.parent = None
+        self.orientation = orientation
         self.width = width
         self.height = height
         self.x = x
@@ -106,6 +112,12 @@ class Tab():
         self.events = {}
 
     def get_curr_window(self): return self.curr_winnode.window
+    def get_winnode_by_window(self, window):
+        for winnode in iter_windows_tree(self.root):
+            if winnode.window == window:
+                return winnode
+        return None
+
     def hide(self): self.visible = False
     def show(self): self.visible = True
 
@@ -151,8 +163,28 @@ class Tab():
     def focus_window(self, winnode):
         self.curr_winnode = winnode
 
+    def _resize_winnode(self, winnode, width, height):
+        pass
+
+    def _remove_winnode(self, winnode):
+        parent = winnode.parent
+        if not parent: return
+
+        num_of_siblings = len(parent.children) - 1
+
+        if num_of_siblings == 0:
+            self._remove_winnode(parent)
+            return
+
+        for child in parent.children:
+            pass
+
     def close_window(self, window):
-        self._remove_window(window)
+        winnode = self.get_winnode_by_window(window)
+        if not winnode: return
+
+        self._remove_winnode(winnode)
+
         window.close()
         self.draw()
 
@@ -557,6 +589,8 @@ if __name__ == "__main__":
                 tab.split()
             if key == ord('v'): # vsplit
                 tab.vsplit()
+            if key == ord('c'): # close
+                tab.close_window(tab.get_curr_window())
 
             if key == ord('H'): pass # move
             if key == ord('J'): pass # move
