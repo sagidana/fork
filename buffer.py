@@ -9,10 +9,11 @@ from idr import *
 from treesitter import TreeSitter
 
 from difflib import Differ
-from os import path
+from subprocess import run
 import hashlib
 import json
 import re
+import os
 
 WORD_REGEX = '[a-zA-Z0-9_]'
 SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
@@ -27,7 +28,7 @@ class Buffer():
                     else:
                         self.resync_treesitter()
                 elif get_setting('syntax') == 'async':
-                    pass
+                    pass # TODO
         self.update_highlights()
 
     def raise_event(func):
@@ -762,6 +763,75 @@ class Buffer():
         self.change_start_position = (x, y)
         self.redo_stack = [] # reset the redo stack on new edit.
 
+    def __analyze_change(self):
+        change = {}
+        open('/tmp/a.dif.tmp', 'w').write(''.join(self.shadow))
+        open('/tmp/b.dif.tmp', 'w').write(''.join(self.lines))
+
+        p = run(["diff", "/tmp/a.dif.tmp", "/tmp/b.dif.tmp"],
+                capture_output=True)
+        if p.returncode != 1:
+            raise Exception("Failed to diff the edit!")
+
+        lines = p.stdout.decode().splitlines(keepends=True)
+        cur = 0
+        while cur < len(lines) - 1:
+            cmd = lines[cur]
+            m = re.match("^(?P<a_start>\d+)(,(?P<a_end>\d+))?(?P<cmd>[adc])(?P<b_start>\d+)(,(?P<b_end>\d+))?\s*$", cmd)
+            if not m:
+                raise Exception("Failed to diff the edit!")
+            a_start = int(m.group('a_start'))
+            a_end = m.group('a_end')
+            a_end = int(a_end) if a_end != None else a_start
+            cmd = m.group('cmd')
+            b_start = int(m.group('b_start'))
+            b_end = m.group('b_end')
+            b_end = int(b_end) if b_end != None else b_start
+
+            if cmd == 'a':
+                while b_start <= b_end:
+                    cur += 1
+                    if b_start-1 not in change: change[b_start-1] = {}
+                    line = lines[cur]
+                    if not line.startswith('> '):
+                        raise Exception("Failed to diff the edit!")
+                    change[b_start-1]['new'] = line[2:]
+                    b_start += 1
+            if cmd == 'd':
+                while a_start <= a_end:
+                    cur += 1
+                    if a_start-1 not in change: change[a_start-1] = {}
+                    line = lines[cur]
+                    if not line.startswith('< '):
+                        raise Exception("Failed to diff the edit!")
+                    change[a_start-1]['old'] = line[2:]
+                    a_start += 1
+            if cmd == 'c':
+                while a_start <= a_end:
+                    cur += 1
+                    if a_start-1 not in change: change[a_start-1] = {}
+                    line = lines[cur]
+                    if not line.startswith('< '):
+                        raise Exception("Failed to diff the edit!")
+                    change[a_start-1]['old'] = line[2:]
+                    a_start += 1
+                cur += 1
+                line = lines[cur]
+                if not line.startswith('---'):
+                    raise Exception("Failed to diff the edit!")
+                while b_start <= b_end:
+                    cur += 1
+                    if b_start-1 not in change: change[b_start-1] = {}
+                    line = lines[cur]
+                    if not line.startswith('> '):
+                        raise Exception("Failed to diff the edit!")
+                    change[b_start-1]['new'] = line[2:]
+                    b_start += 1
+
+        os.remove('/tmp/a.dif.tmp')
+        os.remove('/tmp/b.dif.tmp')
+        return change
+
     def _analyze_change(self):
         """
         The change format is as follows:
@@ -775,6 +845,7 @@ class Buffer():
         In case there are no old/new line (removal/addition) the apropriate
         action is done correspondingly.
         """
+        return self.__analyze_change()
         change = {}
 
         d = Differ()
