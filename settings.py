@@ -82,6 +82,9 @@ def get_setting(key, default=None):
     if key == "tab_insert":
         _ = "    " if not default else default
         return get_settings().get(key, _)
+    if key == "syntax":
+        _ = "sync" if not default else default
+        return get_settings().get(key, _)
 
     return get_settings().get(key, default)
 

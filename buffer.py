@@ -1,5 +1,6 @@
 from log import elog
 
+from settings import *
 from events import *
 from utils import *
 from hooks import *
@@ -20,10 +21,13 @@ class Buffer():
     def on_buffer_change_callback(self, change):
         if change:
             if self.treesitter:
-                if "all" not in change:
-                    self.treesitter.edit(change, self.get_file_bytes())
-                else:
-                    self.resync_treesitter()
+                if get_setting('syntax') == 'sync':
+                    if "all" not in change:
+                        self.treesitter.edit(change, self.get_file_bytes())
+                    else:
+                        self.resync_treesitter()
+                elif get_setting('syntax') == 'async':
+                    pass
         self.update_highlights()
 
     def raise_event(func):
