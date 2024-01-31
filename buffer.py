@@ -770,6 +770,7 @@ class Buffer():
 
         p = run(["diff", "/tmp/a.dif.tmp", "/tmp/b.dif.tmp"],
                 capture_output=True)
+        if p.returncode == 0: return change # unchanged.
         if p.returncode != 1:
             raise Exception("Failed to diff the edit!")
 
