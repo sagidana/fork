@@ -616,6 +616,8 @@ class Editor():
             if scope: return cb(scope)
         maps[ord('i')][ord('(')] = inner_parentheses
         maps[ord('i')][ord(')')] = inner_parentheses
+        maps[ord(')')] = inner_parentheses
+        maps[ord('(')] = inner_parentheses
         def inner_square_brackets(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -623,6 +625,8 @@ class Editor():
             if scope: return cb(scope)
         maps[ord('i')][ord('[')] = inner_square_brackets
         maps[ord('i')][ord(']')] = inner_square_brackets
+        maps[ord('[')] = inner_square_brackets
+        maps[ord(']')] = inner_square_brackets
         def inner_curly_brackets(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -630,6 +634,8 @@ class Editor():
             if scope: return cb(scope)
         maps[ord('i')][ord('{')] = inner_curly_brackets
         maps[ord('i')][ord('}')] = inner_curly_brackets
+        maps[ord('}')] = inner_curly_brackets
+        maps[ord('{')] = inner_curly_brackets
         def inner_greater_than(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -637,24 +643,29 @@ class Editor():
             if scope: return cb(scope)
         maps[ord('i')][ord('<')] = inner_greater_than
         maps[ord('i')][ord('>')] = inner_greater_than
+        maps[ord('<')] = inner_greater_than
+        maps[ord('>')] = inner_greater_than
         def inner_quotation(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_quotation(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord('"')] = inner_quotation
+        maps[ord('"')] = inner_quotation
         def inner_apostrophe(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_apostrophe(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("'")] = inner_apostrophe
+        maps[ord("'")] = inner_apostrophe
         def inner_backtick(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_backtick(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("`")] = inner_backtick
+        maps[ord("`")] = inner_backtick
         def inner_word(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
