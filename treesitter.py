@@ -504,20 +504,29 @@ class TreeSitter():
                 if start_y == y and start_x > x: continue
                 if end_y == y and end_x < x: continue
 
-                end_x -= 1 # exclude the new line char
+                end_x -= 1 # why python parser returns the end exclusive?
                 return start_x, start_y, end_x, end_y
 
-        # if self.language == 'c':
-            # query = self._language.query("(if_statement) @name")
-            # node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
-            # if not node: return None
+        if self.language == 'c':
+            query = self._language.query("""
+            (argument_list) @name
+            """)
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y, most_relevant=True)
+            if not node: return None
 
-            # start_y = node.start_point[0]
-            # start_x = node.start_point[1]
-            # end_y = node.end_point[0]
-            # end_x = node.end_point[1]
+            for parameter in node.children:
+                start_y = parameter.start_point[0]
+                start_x = parameter.start_point[1]
+                end_y = parameter.end_point[0]
+                end_x = parameter.end_point[1]
 
-            # return start_x, start_y, end_x-1, end_y
+                if start_y > y: continue
+                if end_y < y: continue
+                if start_y == y and start_x > x: continue
+                if end_y == y and end_x < x: continue
+
+                end_x -= 1 # why c parser returns the end exclusive?
+                return start_x, start_y, end_x, end_y
         return None
 
 if __name__ == '__main__':
