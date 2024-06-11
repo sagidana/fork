@@ -798,6 +798,7 @@ class Buffer():
                         raise Exception("Failed to diff the edit!")
                     change[b_start-1]['new'] = line[2:]
                     b_start += 1
+                cur += 1
             if cmd == 'd':
                 while a_start <= a_end:
                     cur += 1
@@ -807,6 +808,7 @@ class Buffer():
                         raise Exception("Failed to diff the edit!")
                     change[a_start-1]['old'] = line[2:]
                     a_start += 1
+                cur += 1
             if cmd == 'c':
                 while a_start <= a_end:
                     cur += 1

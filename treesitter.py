@@ -216,7 +216,6 @@ class TreeSitter():
                                         start_point=[y-1 if y > 0 else y, 0],
                                         end_point=[y+1, 0])
 
-        elog(f"captures: {captures}")
         if most_relevant: captures = reversed(captures)
 
         for node, name in captures:
@@ -228,8 +227,6 @@ class TreeSitter():
             end_y = node.end_point[0]
             end_x = node.end_point[1]
 
-            elog(f"{y, x}")
-            elog(f"{(start_y, start_x, end_y, end_x)}")
             if start_y > y: continue
             if end_y < y: continue
             if start_y == y and start_x > x: continue
