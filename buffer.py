@@ -628,7 +628,7 @@ class Buffer():
         stream = self.get_file_stream()
 
         part = stream[start_pos:end_pos]
-        part = part.replace(pattern, dest)
+        part = re.sub(pattern, dest, part)
 
         stream = stream[:start_pos] +   \
                  part +                 \
