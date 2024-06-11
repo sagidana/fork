@@ -117,46 +117,57 @@ class TreeSitter():
 
         try:
             if language == 'python':
+                self._language = PYTHON_LANGUAGE
                 with open(query_path.format("python"),"r") as f: query = f.read()
                 self.query = PYTHON_LANGUAGE.query(query)
                 self.parser.set_language(PYTHON_LANGUAGE)
             elif language == 'c':
+                self._language = C_LANGUAGE
                 with open(query_path.format("c"),"r") as f: query = f.read()
                 self.query = C_LANGUAGE.query(query)
                 self.parser.set_language(C_LANGUAGE)
             elif language == 'json':
+                self._language = JSON_LANGUAGE
                 with open(query_path.format("json"),"r") as f: query = f.read()
                 self.query = JSON_LANGUAGE.query(query)
                 self.parser.set_language(JSON_LANGUAGE)
             elif language == 'java':
+                self._language = JAVA_LANGUAGE
                 with open(query_path.format("java"),"r") as f: query = f.read()
                 self.query = JAVA_LANGUAGE.query(query)
                 self.parser.set_language(JAVA_LANGUAGE)
             elif language == 'javascript':
+                self._language = JAVASCRIPT_LANGUAGE
                 with open(query_path.format("javascript"),"r") as f: query = f.read()
                 self.query = JAVASCRIPT_LANGUAGE.query(query)
                 self.parser.set_language(JAVASCRIPT_LANGUAGE)
             elif language == 'smali':
+                self._language = SMALI_LANGUAGE
                 with open(query_path.format("smali"),"r") as f: query = f.read()
                 self.query = SMALI_LANGUAGE.query(query)
                 self.parser.set_language(SMALI_LANGUAGE)
             elif language == 'markdown':
+                self._language = MARKDOWN_LANGUAGE
                 with open(query_path.format("markdown"),"r") as f: query = f.read()
                 self.query = MARKDOWN_LANGUAGE.query(query)
                 self.parser.set_language(MARKDOWN_LANGUAGE)
             elif language == 'cpp':
+                self._language = CPP_LANGUAGE
                 with open(query_path.format("cpp"),"r") as f: query = f.read()
                 self.query = CPP_LANGUAGE.query(query)
                 self.parser.set_language(CPP_LANGUAGE)
             elif language == 'rust':
+                self._language = RUST_LANGUAGE
                 with open(query_path.format("rust"),"r") as f: query = f.read()
                 self.query = RUST_LANGUAGE.query(query)
                 self.parser.set_language(RUST_LANGUAGE)
             elif language == 'go':
+                self._language = GO_LANGUAGE
                 with open(query_path.format("go"),"r") as f: query = f.read()
                 self.query = GO_LANGUAGE.query(query)
                 self.parser.set_language(GO_LANGUAGE)
             elif language == 'bash':
+                self._language = BASH_LANGUAGE
                 with open(query_path.format("bash"),"r") as f: query = f.read()
                 self.query = BASH_LANGUAGE.query(query)
                 self.parser.set_language(BASH_LANGUAGE)
@@ -196,6 +207,89 @@ class TreeSitter():
         return list(self.query.captures(target_node,
                                         start_point=start_point,
                                         end_point=end_point))
+
+    def _get_relevant_nodes(self, node, query, x=None, y=None, most_relevant=True):
+        if x is None or y is None:
+            captures = query.captures(node)
+        else:
+            captures = query.captures(  node,
+                                        start_point=[y-1 if y > 0 else y, 0],
+                                        end_point=[y+1, 0])
+
+        if most_relevant: captures = reversed(captures)
+
+        for node, name in captures:
+            if x is None or y is None:
+                return node
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+
+            elog(f"{y, x}")
+            elog(f"{(start_y, start_x, end_y, end_x)}")
+            if start_y > y: continue
+            if end_y < y: continue
+            if start_y == y and start_x > x: continue
+            if end_y == y and end_x < x: continue
+            return node
+        return None
+
+    def get_inner_if(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(if_statement (block) @name)")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+            return start_x, start_y, end_x, end_y
+
+        if self.language == 'c':
+            query = self._language.query("(if_statement (compound_statement) @name)")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+
+            start_x += 1 # exclude the curly braces
+            end_x -= 1 # exclude the curly braces
+
+            return start_x, start_y, end_x, end_y
+        return None
+    def get_inner_IF(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(if_statement (block) @name)")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+            return start_x, start_y, end_x, end_y
+
+        if self.language == 'c':
+            query = self._language.query("(if_statement (compound_statement) @name)")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+
+            start_x += 1 # exclude the curly braces
+            end_x -= 1 # exclude the curly braces
+
+            return start_x, start_y, end_x, end_y
+        return None
 
 if __name__ == '__main__':
     Language.build_library(

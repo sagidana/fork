@@ -1242,88 +1242,122 @@ class Buffer():
         return start_x, start_y, end_x, end_y
 
     def inner_if(self, x, y):
-        # TODO
-        return None
+        if not self.treesitter: return None
+        range = self.treesitter.get_inner_if(x, y)
+        if not range: return None
+        start_x, start_y, end_x, end_y = range
+        end_x -= 1 # do not include the new line char
+        return start_x, start_y, end_x-1, end_y
+
     def inner_IF(self, x, y):
-        # TODO
-        return None
+        if not self.treesitter: return None
+        range = self.treesitter.get_inner_IF(x, y)
+        if not range: return None
+        start_x, start_y, end_x, end_y = range
+        return start_x, start_y, end_x, end_y
     def inner_else(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_for(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_FOR(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_while(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_WHILE(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_method(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_METHOD(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_class(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_CLASS(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_try(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_except(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def inner_EXCEPT(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
 
     def arround_if(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_IF(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_else(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_for(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_FOR(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_while(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_WHILE(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_method(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_METHOD(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_class(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_CLASS(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_try(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_except(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
     def arround_EXCEPT(self, x, y):
+        if not self.treesitter: return None
         # TODO
         return None
 

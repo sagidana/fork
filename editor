@@ -1378,6 +1378,11 @@ class Editor():
             end_x = size - 2
             end_y = y
 
+            data = {}
+            data["data"] = [self.get_curr_window().get_curr_line()[start_x:end_x]]
+            data["meta"] = "char"
+            self.registers['"'] = data
+
             self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.change_end()
