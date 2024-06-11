@@ -681,98 +681,84 @@ class Editor():
 
         # code objects here...
         def inner_if(self):
-            elog('if object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_if(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("f")] = inner_if
         def inner_IF(self):
-            elog('IF object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_IF(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("F")] = inner_IF
         def inner_for(self):
-            elog('for object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_for(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("r")] = inner_for
         def inner_FOR(self):
-            elog('FOR object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_FOR(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("R")] = inner_FOR
         def inner_else(self):
-            elog('else object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_else(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("l")] = inner_else
         def inner_while(self):
-            elog('while object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_while(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("e")] = inner_while
         def inner_WHILE(self):
-            elog('WHILE object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_WHILE(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("E")] = inner_WHILE
         def inner_method(self):
-            elog('method object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_method(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("m")] = inner_method
         def inner_METHOD(self):
-            elog('METHOD object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_METHOD(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("M")] = inner_METHOD
         def inner_class(self):
-            elog('class object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_class(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("s")] = inner_class
         def inner_CLASS(self):
-            elog('CLASS object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_CLASS(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("S")] = inner_CLASS
         def inner_try(self):
-            elog('try object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_try(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("y")] = inner_try
         def inner_except(self):
-            elog('except object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_except(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("x")] = inner_except
         def inner_EXCEPT(self):
-            elog('EXCEPT object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_EXCEPT(x, y)
@@ -841,98 +827,84 @@ class Editor():
 
         # code objects here...
         def arround_if(self):
-            elog('if object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_if(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("f")] = arround_if
         def arround_IF(self):
-            elog('IF object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_IF(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("F")] = arround_IF
         def arround_for(self):
-            elog('for object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_for(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("r")] = arround_for
         def arround_FOR(self):
-            elog('FOR object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_FOR(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("R")] = arround_FOR
         def arround_else(self):
-            elog('else object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_else(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("l")] = arround_else
         def arround_while(self):
-            elog('while object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_while(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("e")] = arround_while
         def arround_WHILE(self):
-            elog('WHILE object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_WHILE(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("E")] = arround_WHILE
         def arround_method(self):
-            elog('method object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_method(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("m")] = arround_method
         def arround_METHOD(self):
-            elog('METHOD object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_METHOD(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("M")] = arround_METHOD
         def arround_class(self):
-            elog('class object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_class(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("s")] = arround_class
         def arround_CLASS(self):
-            elog('CLASS object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_CLASS(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("S")] = arround_CLASS
         def arround_try(self):
-            elog('try object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_try(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("y")] = arround_try
         def arround_except(self):
-            elog('except object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_except(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("x")] = arround_except
         def arround_EXCEPT(self):
-            elog('EXCEPT object')
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_EXCEPT(x, y)
