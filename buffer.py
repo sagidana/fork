@@ -1370,6 +1370,13 @@ class Buffer():
         if not self.treesitter: return None
         # TODO
         return None
+    def arround_argument(self, x, y):
+        if not self.treesitter: return None
+        range = self.treesitter.get_arround_argument(x, y)
+        if not range: return None
+        start_x, start_y, end_x, end_y = range
+        return start_x, start_y, end_x, end_y
+
 
 
     def search_pattern(self, pattern):

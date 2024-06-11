@@ -938,6 +938,13 @@ class Editor():
             scope = self.get_curr_window().buffer.arround_EXCEPT(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("X")] = arround_EXCEPT
+        def arround_argument(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_argument(x, y)
+            if scope: return cb(scope)
+        maps[ord('a')][ord("a")] = arround_argument
+        maps[ord('p')] = arround_argument
 
     def _initialize_objects_maps(self, maps, cb):
         self.__initialize_movement_objects_maps(maps, cb)
