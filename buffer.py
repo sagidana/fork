@@ -828,6 +828,7 @@ class Buffer():
                         raise Exception("Failed to diff the edit!")
                     change[b_start-1]['new'] = line[2:]
                     b_start += 1
+                cur += 1
 
         os.remove('/tmp/a.dif.tmp')
         os.remove('/tmp/b.dif.tmp')
