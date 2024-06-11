@@ -15,7 +15,7 @@ class GenericPopup():
                     width, height,
                     lines,
                     selected=0,
-                    keymap=None):
+                    keymap=[]):
         self.screen = screen
         self.position = position
         self.width = width
@@ -1088,3 +1088,24 @@ class ErrorPopup():
                                 style,
                                 to_flush=False)
         except Exception as e: elog(f"Exception: {e}")
+
+class QuickfixPopup():
+    def __init__(self, window):
+        self.window = window
+
+        width_margin = 5
+        height_margin = 3
+        self.position = list([  self.window.position[0] + width_margin,
+                                self.window.position[1] + height_margin])
+        self.width = self.window.width - (width_margin * 2)
+        self.height = self.window.height - (height_margin * 2)
+
+        self.popup = GenericPopup(  window.screen,
+                                    self.position,
+                                    self.width,
+                                    self.height,
+                                    self.window.quickfix,
+                                    selected=max(self.window.quickfix_pos, 0))
+    def pop(self):
+        return self.popup.pop()
+

@@ -6,6 +6,9 @@ from hooks import *
 from syntax import get_syntax_highlights
 from syntax import get_scope_style
 
+from popup import *
+from utils import *
+
 from intervaltree import Interval, IntervalTree
 from string import printable
 from os import path
@@ -90,6 +93,9 @@ class Window():
         self.jumpslist = jumpslist.copy()
         self.jumpslist_cursor = -1
         self.discarded_jumps = []
+
+        self.quickfix = []
+        self.quickfix_pos = -1
 
     def close(self):
         handlers = {}
@@ -1450,6 +1456,66 @@ class Window():
     def move_left(self):
         self._move_left()
         self.draw_cursor()
+
+    def quickfix_set(self, locations):
+        self.quickfix = locations
+        self.quickfix_pos = -1
+
+    def quickfix_clear(self):
+        self.quickfix = []
+        self.quickfix_pos = -1
+
+    def quickfix_pop(self, get_or_create_buffer_cb):
+        popup = QuickfixPopup(self)
+        location = popup.pop()
+        self.draw() # redraw after pop
+        if not location: return
+
+        # update pos according to popup
+        for i, loc in enumerate(self.quickfix):
+            if loc == location:
+                self.quickfix_pos = i
+                break
+
+        file_path, file_line, file_col = extract_destination(location)
+
+        buffer = get_or_create_buffer_cb(file_path)
+
+        self.add_jump()
+        self.change_buffer(buffer)
+        self.move_cursor_to_buf_location(file_col, file_line)
+        self.add_jump()
+        self.align_center()
+
+    def quickfix_next(self, get_or_create_buffer_cb):
+        if len(self.quickfix) == 0: return
+        self.quickfix_pos += 1
+        self.quickfix_pos = self.quickfix_pos % len(self.quickfix)
+        location = self.quickfix[self.quickfix_pos]
+        file_path, file_line, file_col = extract_destination(location)
+
+        buffer = get_or_create_buffer_cb(file_path)
+
+        self.add_jump()
+        self.change_buffer(buffer)
+        self.move_cursor_to_buf_location(file_col, file_line)
+        self.add_jump()
+        self.align_center()
+
+    def quickfix_prev(self, get_or_create_buffer_cb):
+        if len(self.quickfix) == 0: return
+        self.quickfix_pos -= 1
+        self.quickfix_pos = self.quickfix_pos % len(self.quickfix)
+        location = self.quickfix[self.quickfix_pos]
+        file_path, file_line, file_col = extract_destination(location)
+
+        buffer = get_or_create_buffer_cb(file_path)
+
+        self.add_jump()
+        self.change_buffer(buffer)
+        self.move_cursor_to_buf_location(file_col, file_line)
+        self.add_jump()
+        self.align_center()
 
     def _screen_move(self, x, y):
         x_margin = self.content_position[0] - self.position[0]

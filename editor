@@ -329,13 +329,18 @@ class Editor():
             self.tasks.append(task)
             def rg_on_done(results):
                 if not results: return
-                self.get_curr_tab().split(Buffer(data_in_bytes=results))
+                results = results.decode().splitlines()
+                if len(results) == 0: return
+                self.get_curr_window().quickfix_set(results)
 
                 # remove the task when done.
                 self.tasks.remove(task)
-
             task.on_done(rg_on_done)
+
             task.start()
+            task.wait()
+
+            self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
             return False
         self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('c')] = ctrl_backslash_c_map
         def ctrl_backslash_s_map(self):
@@ -353,13 +358,18 @@ class Editor():
             self.tasks.append(task)
             def rg_on_done(results):
                 if not results: return
-                self.get_curr_tab().split(Buffer(data_in_bytes=results))
+                results = results.decode().splitlines()
+                if len(results) == 0: return
+                self.get_curr_window().quickfix_set(results)
 
                 # remove the task when done.
                 self.tasks.remove(task)
 
             task.on_done(rg_on_done)
             task.start()
+            task.wait()
+
+            self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
             return False
         self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('s')] = ctrl_backslash_s_map
         def ctrl_close_bracket_map(self):
@@ -1561,7 +1571,7 @@ class Editor():
             return False
         # replace editor pattern
         self.maps[NORMAL][ord(' ')][ord('r')] = leader_r_map
-        def leader_l_map(self):
+        def leader_i_map(self):
             self.get_curr_window().buffer_cursor[1]
             lines = LinesPopup( self,
                                 self.screen,
@@ -1572,7 +1582,19 @@ class Editor():
 
             self.get_curr_tab().draw() # need to redraw after popup
             return False
+        self.maps[NORMAL][ord(' ')][ord('i')] = leader_i_map
+        def leader_l_map(self):
+            self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
+            return False
         self.maps[NORMAL][ord(' ')][ord('l')] = leader_l_map
+        def leader_j_map(self):
+            self.get_curr_window().quickfix_next(self.get_or_create_buffer)
+            return False
+        self.maps[NORMAL][ord(' ')][ord('j')] = leader_j_map
+        def leader_k_map(self):
+            self.get_curr_window().quickfix_prev(self.get_or_create_buffer)
+            return False
+        self.maps[NORMAL][ord(' ')][ord('k')] = leader_k_map
         def leader_ec_map(self):
             load_settings()
             return False
