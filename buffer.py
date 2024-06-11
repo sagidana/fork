@@ -1246,8 +1246,7 @@ class Buffer():
         range = self.treesitter.get_inner_if(x, y)
         if not range: return None
         start_x, start_y, end_x, end_y = range
-        end_x -= 1 # do not include the new line char
-        return start_x, start_y, end_x-1, end_y
+        return start_x, start_y, end_x, end_y
 
     def inner_IF(self, x, y):
         if not self.treesitter: return None

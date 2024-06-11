@@ -208,7 +208,7 @@ class TreeSitter():
                                         start_point=start_point,
                                         end_point=end_point))
 
-    def _get_relevant_nodes(self, node, query, x=None, y=None, most_relevant=True):
+    def _get_relevant_nodes(self, node, query, x=None, y=None, most_relevant=False):
         if x is None or y is None:
             captures = query.captures(node)
         else:
@@ -216,6 +216,7 @@ class TreeSitter():
                                         start_point=[y-1 if y > 0 else y, 0],
                                         end_point=[y+1, 0])
 
+        elog(f"captures: {captures}")
         if most_relevant: captures = reversed(captures)
 
         for node, name in captures:
@@ -239,18 +240,19 @@ class TreeSitter():
     def get_inner_if(self, x, y):
         if self.language == 'python':
             query = self._language.query("(if_statement (block) @name)")
-            node = self._get_relevant_nodes(self.tree.root_node, query, x,y)
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y, most_relevant=True)
             if not node: return None
 
             start_y = node.start_point[0]
             start_x = node.start_point[1]
             end_y = node.end_point[0]
             end_x = node.end_point[1]
+            end_x -= 1 # exclude the new line char
             return start_x, start_y, end_x, end_y
 
         if self.language == 'c':
             query = self._language.query("(if_statement (compound_statement) @name)")
-            node = self._get_relevant_nodes(self.tree.root_node, query, x,y)
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
             if not node: return None
 
             start_y = node.start_point[0]
@@ -261,34 +263,53 @@ class TreeSitter():
             start_x += 1 # exclude the curly braces
             end_x -= 1 # exclude the curly braces
 
-            return start_x, start_y, end_x, end_y
+            return start_x, start_y, end_x-1, end_y
         return None
+
     def get_inner_IF(self, x, y):
         if self.language == 'python':
-            query = self._language.query("(if_statement (block) @name)")
-            node = self._get_relevant_nodes(self.tree.root_node, query, x,y)
+            query = self._language.query("(if_statement) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y, most_relevant=True)
             if not node: return None
 
-            start_y = node.start_point[0]
-            start_x = node.start_point[1]
-            end_y = node.end_point[0]
-            end_x = node.end_point[1]
+            node_start_y = node.start_point[0]
+            node_start_x = node.start_point[1]
+            node_end_y = node.end_point[0]
+            node_end_x = node.end_point[1]
+
+            start_y = node_start_y
+            start_x = node_start_x + len('if ')
+            end_y = start_y
+            end_x = start_x
+
+            for ch in node.text.decode()[len('if '):]:
+                if ch == ':': break
+                if ch == '\n':
+                    end_x = 0
+                    end_y += 1
+                else:
+                    end_x += 1
+            end_x -= 1 # remove the ':' from the range
+
             return start_x, start_y, end_x, end_y
 
         if self.language == 'c':
-            query = self._language.query("(if_statement (compound_statement) @name)")
-            node = self._get_relevant_nodes(self.tree.root_node, query, x,y)
+            query = self._language.query("(if_statement) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y, most_relevant=True)
+            if not node: return None
+            query = self._language.query("(if_statement (parenthesized_expression) @name)")
+            node = self._get_relevant_nodes(node, query)
             if not node: return None
 
+            start_y = node.start_point[0]
             start_y = node.start_point[0]
             start_x = node.start_point[1]
             end_y = node.end_point[0]
             end_x = node.end_point[1]
+            end_x -= 1 # exclude the parenthesize
+            start_x += 1 # exclude the parenthesize
 
-            start_x += 1 # exclude the curly braces
-            end_x -= 1 # exclude the curly braces
-
-            return start_x, start_y, end_x, end_y
+            return start_x, start_y, end_x-1, end_y
         return None
 
 if __name__ == '__main__':
