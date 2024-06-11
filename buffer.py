@@ -1247,7 +1247,6 @@ class Buffer():
         if not range: return None
         start_x, start_y, end_x, end_y = range
         return start_x, start_y, end_x, end_y
-
     def inner_IF(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_inner_IF(x, y)
@@ -1276,12 +1275,16 @@ class Buffer():
         return None
     def inner_method(self, x, y):
         if not self.treesitter: return None
-        # TODO
-        return None
+        range = self.treesitter.get_inner_method(x, y)
+        if not range: return None
+        start_x, start_y, end_x, end_y = range
+        return start_x, start_y, end_x, end_y
     def inner_METHOD(self, x, y):
         if not self.treesitter: return None
-        # TODO
-        return None
+        range = self.treesitter.get_inner_METHOD(x, y)
+        if not range: return None
+        start_x, start_y, end_x, end_y = range
+        return start_x, start_y, end_x, end_y
     def inner_class(self, x, y):
         if not self.treesitter: return None
         # TODO
@@ -1305,8 +1308,10 @@ class Buffer():
 
     def arround_if(self, x, y):
         if not self.treesitter: return None
-        # TODO
-        return None
+        range = self.treesitter.get_arround_if(x, y)
+        if not range: return None
+        start_x, start_y, end_x, end_y = range
+        return start_x, start_y, end_x, end_y
     def arround_IF(self, x, y):
         if not self.treesitter: return None
         # TODO
@@ -1333,12 +1338,16 @@ class Buffer():
         return None
     def arround_method(self, x, y):
         if not self.treesitter: return None
-        # TODO
-        return None
+        range = self.treesitter.get_arround_method(x, y)
+        if not range: return None
+        start_x, start_y, end_x, end_y = range
+        return start_x, start_y, end_x, end_y
     def arround_METHOD(self, x, y):
         if not self.treesitter: return None
-        # TODO
-        return None
+        range = self.treesitter.get_arround_METHOD(x, y)
+        if not range: return None
+        start_x, start_y, end_x, end_y = range
+        return start_x, start_y, end_x, end_y
     def arround_class(self, x, y):
         if not self.treesitter: return None
         # TODO

@@ -266,6 +266,32 @@ class TreeSitter():
             return start_x, start_y, end_x-1, end_y
         return None
 
+    def get_arround_if(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(if_statement) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y, most_relevant=True)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+            end_x -= 1 # exclude the new line char
+            return start_x, start_y, end_x, end_y
+
+        if self.language == 'c':
+            query = self._language.query("(if_statement) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+
+            return start_x, start_y, end_x-1, end_y
+        return None
+
     def get_inner_IF(self, x, y):
         if self.language == 'python':
             query = self._language.query("(if_statement) @name")
@@ -310,6 +336,74 @@ class TreeSitter():
             start_x += 1 # exclude the parenthesize
 
             return start_x, start_y, end_x-1, end_y
+        return None
+
+    def get_inner_method(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(function_definition (block) @name)")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x,y, most_relevant=True)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+            end_x -= 1 # exclude the new line char
+            return start_x, start_y, end_x, end_y
+
+        if self.language == 'c':
+            query = self._language.query("(function_definition (compound_statement) @name)")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+
+            end_x -= 1 # why c parser returns the end exclusive?
+            end_x -= 1 # exclude the parenthesize
+            start_x += 1 # exclude the parenthesize
+
+            return start_x, start_y, end_x, end_y
+        return None
+
+    def get_inner_METHOD(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(function_definition) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
+            if not node: return None
+            query = self._language.query("(function_definition (parameters) @name)")
+            node = self._get_relevant_nodes(node, query)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+            end_x -= 1 # why python parser returns the end exclusive?
+            start_x += 1 # exclude the parenthesize
+            end_x -= 1 # exclude the parenthesize
+            return start_x, start_y, end_x, end_y
+
+        if self.language == 'c':
+            query = self._language.query("(function_definition) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
+            if not node: return None
+            query = self._language.query("(function_definition (function_declarator (parameter_list) @name))")
+            node = self._get_relevant_nodes(node, query)
+            if not node: return None
+
+            start_y = node.start_point[0]
+            start_x = node.start_point[1]
+            end_y = node.end_point[0]
+            end_x = node.end_point[1]
+
+            end_x -= 1 # why c parser returns the end exclusive?
+            end_x -= 1 # exclude the parenthesize
+            start_x += 1 # exclude the parenthesize
+
+            return start_x, start_y, end_x, end_y
         return None
 
 if __name__ == '__main__':
