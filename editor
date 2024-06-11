@@ -1991,6 +1991,43 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL_LINE][ord('y')] = y_map
+        def p_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+
+            lines = []
+            for y in range(start_y, end_y + 1):
+                lines.append(self.get_curr_buffer().lines[y])
+
+            self.change_begin()
+            # remove current lines
+            for y in reversed(range(start_y, end_y + 1)):
+                self.get_curr_window().remove_line_at(y, propagate=False)
+            self.get_curr_buffer().flush_changes()
+
+            self.get_curr_window().move_up()
+
+            # paste yanked data
+            data = self.registers['"']
+            if data:
+                if data['meta'] == 'line':
+                    lines = data['data']
+                    for line in lines:
+                        self.get_curr_window().insert_line_after(line, propagate=False)
+                    self.get_curr_buffer().flush_changes()
+                elif data['meta'] == 'char':
+                    lines = data['data']
+                    string = '\n'.join(lines)
+                    self.get_curr_window().move_right()
+                    self.get_curr_window().insert_string(string)
+                elif data['meta'] == 'block': pass
+
+            self.change_end()
+
+            self.change_mode(NORMAL)
+            return False
+        self.maps[VISUAL_LINE][ord('p')] = p_map
         def j_map(self):
             num = 1
             if len(self._number) > 0: num = int(self._number)
