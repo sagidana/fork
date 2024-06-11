@@ -2692,11 +2692,11 @@ class Editor():
 
             words = []
             for buf in self.buffers:
-                words.extend(re.findall('\w+', buf.get_file_stream()))
+                words.extend(re.findall(r'\w+', buf.get_file_stream()))
             if len(words) == 0: return None
 
             line = self.get_curr_window().get_curr_line()
-            if re.match('\s', line[x - 1]):
+            if re.match(r'\s', line[x - 1]):
                 options = [(option, option) for option in words]
                 start_x = x
             else:

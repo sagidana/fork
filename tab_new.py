@@ -131,7 +131,7 @@ class Tab():
         self.width = width
         self.height = height
 
-        # self._adjust_sizes()
+        # TODO: self._adjust_sizes()
 
     def is_window_visible(self, window_id):
         if not self.visible: return False
@@ -147,16 +147,6 @@ class Tab():
 
         if len(self.windows) == 0: raise Exception('close tab')
         if index == self.curr_window_index: self.set_curr_window(0)
-
-        # self._adjust_sizes()
-
-    # def _add_window(self, window):
-        # if self.zoom_mode: self.zoom_toggle()
-
-
-        # winnode = WinNode(window)
-        # self.curr_winnode.add_child(winnode)
-        # self.curr_winnode = winnode
 
         # self._adjust_sizes()
 
@@ -176,8 +166,29 @@ class Tab():
             self._remove_winnode(parent)
             return
 
-        for child in parent.children:
-            pass
+        parent.children.remove(winnode)
+
+        if parent.orientation == HORIZONTAL:
+            elog("HORIZONTAL")
+            new_width = int(parent.width / num_of_siblings)
+            last_width = int(parent.width / num_of_siblings) + (parent.width % num_of_siblings)
+            for child in parent.children[:-1]:
+                child.width = new_width
+                child.window.resize(child.width, child.height)
+
+            parent.children[-1].width = last_width
+            parent.children[-1].window.resize(parent.children[-1].width, parent.children[-1].height)
+
+        if parent.orientation == VERTICAL:
+            elog("VERTICAL")
+            new_height = int(parent.height / num_of_siblings)
+            last_height = int(parent.height / num_of_siblings) + (parent.height % num_of_siblings)
+            for child in parent.children[:-1]:
+                child.height = new_height
+                child.window.resize(child.width, child.height)
+
+            parent.children[-1].height = last_height
+            parent.children[-1].window.resize(parent.children[-1].width, parent.children[-1].height)
 
     def close_window(self, window):
         winnode = self.get_winnode_by_window(window)
@@ -495,6 +506,7 @@ class Tab():
                            new_window)
 
         self.curr_winnode.window = None
+        self.curr_winnode.orientation = HORIZONTAL
         self.curr_winnode.children.append(left)
         self.curr_winnode.children.append(right)
         left.parent = self.curr_winnode
@@ -558,6 +570,7 @@ class Tab():
                           new_window)
 
         self.curr_winnode.window = None
+        self.curr_winnode.orientation = VERTICAL
         self.curr_winnode.children.append(up)
         self.curr_winnode.children.append(down)
         up.parent = self.curr_winnode
@@ -572,7 +585,7 @@ if __name__ == "__main__":
     try:
         screen = Screen()
         buffer = Buffer("/tmp/editor.log")
-        tab = Tab(screen, 120, 20, buffer)
+        tab = Tab(screen, screen.width, screen.height, buffer)
         while True:
             tab.draw()
             key = screen.get_key()
