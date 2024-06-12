@@ -1178,13 +1178,19 @@ class Window():
 
         self.move_cursor_to_buf_location(_x, _y, to_draw=propagate)
 
-    def empty_line(self):
+    def empty_line(self, keep_whitespaces=False):
         y = self.buffer_cursor[1]
+        line = self.get_line(y)
 
-        self.move_cursor_to_buf_location(0, y)
-
-        # replace with empty line (including the newline char)
-        self.buffer.replace_line(y, "\n", propagate=False)
+        if re.match(r"^\s*$", line) or keep_whitespaces: # if only whitespaces
+            self.move_cursor_to_buf_location(0, y)
+            # replace with empty line (including the newline char)
+            self.buffer.replace_line(y, "\n", propagate=False)
+        else:
+            indent = len(line) - len(line.lstrip())
+            self.move_cursor_to_buf_location(indent, y)
+            # replace with empty line (including the newline char)
+            self.buffer.replace_line(y, line[:indent]+'\n', propagate=False)
         self.buffer.flush_changes()
 
     def remove_line(self):

@@ -1024,7 +1024,7 @@ class Editor():
             data["meta"] = "line" # to let the paste know the data is entire line.
             self.registers['"'] = data
 
-            self.get_curr_window().empty_line()
+            self.get_curr_window().empty_line(keep_whitespaces=True)
             self.change_mode(INSERT, effect_change=False)
             return False
         self.maps[NORMAL][ord('c')][ord('c')] = cc_map
@@ -1318,6 +1318,10 @@ class Editor():
             self.change_end()
             return False
         self.maps[NORMAL][ord('p')] = p_map
+        def q_map(self):
+            # TODO
+            return False
+        self.maps[NORMAL][ord('q')] = q_map
         def u_map(self):
             self.get_curr_window().undo()
             return False
@@ -1606,18 +1610,18 @@ class Editor():
             return self.on_command()
         self.maps[NORMAL][ord(':')] = colon_map
 
-        def enter_map(self):
-            if not self.get_curr_window().line_numbers:
-                self.get_curr_window().enable_lines_numbers()
-            else:
-                self.get_curr_window().disable_lines_numbers()
-            if not self.get_curr_window().status_line:
-                self.get_curr_window().enable_status_line()
-            else:
-                self.get_curr_window().disable_status_line()
+        # def enter_map(self):
+            # if not self.get_curr_window().line_numbers:
+                # self.get_curr_window().enable_lines_numbers()
+            # else:
+                # self.get_curr_window().disable_lines_numbers()
+            # if not self.get_curr_window().status_line:
+                # self.get_curr_window().enable_status_line()
+            # else:
+                # self.get_curr_window().disable_status_line()
 
-            return False
-        self.maps[NORMAL][ENTER_KEY] = enter_map
+            # return False
+        # self.maps[NORMAL][ENTER_KEY] = enter_map
 
         self._initialize_legends_maps(NORMAL)
         self._initialize_normal_mainstream_maps()
