@@ -247,6 +247,7 @@ class Window():
         if self.line_numbers: self.draw_line_numbers()
         self.visualize()
         self.highlight()
+        self.multi_cursors()
         self._draw_pairs()
         self._draw_cursor()
 

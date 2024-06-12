@@ -40,7 +40,8 @@ VISUAL = 'visual'
 VISUAL_LINE = 'visual_line'
 VISUAL_BLOCK = 'visual_block'
 REPLACE = 'replace'
-MULTI_CURSOR = 'multi_cursor'
+MULTI_CURSOR_NORMAL = 'multi_cursor_normal'
+MULTI_CURSOR_INSERT = 'multi_cursor_insert'
 MAP_TIMEOOUT = 2 # in seconds
 
 class Editor():
@@ -104,8 +105,16 @@ class Editor():
             self._replace_line = ""
             self._replace_x = -1
             self._replace_y = -1
-        if self.mode == NORMAL and target == MULTI_CURSOR:
+        if self.mode == NORMAL and target == MULTI_CURSOR_NORMAL:
             pass
+        if self.mode == MULTI_CURSOR_INSERT and target == MULTI_CURSOR_NORMAL:
+            # y = self.get_curr_window().buffer_cursor[1]
+            # line = self.get_curr_window().get_line(y)
+            # if re.match(r'^\s*$', line):
+                # self.get_curr_window().empty_line(y)
+            if effect_change: self.change_end()
+        if self.mode == MULTI_CURSOR_NORMAL and target == MULTI_CURSOR_INSERT:
+            if effect_change: self.change_begin()
 
         self.mode = target
         self.curr_maps = self.maps[self.mode]
@@ -1446,7 +1455,7 @@ class Editor():
         self.maps[NORMAL][ord(' ')][ord('m')] = {} # multi-cursor
         def leader_mm_map(self):
             elog("multi-cursor")
-            self.change_mode(MULTI_CURSOR)
+            self.change_mode(MULTI_CURSOR_NORMAL)
             return False
         self.maps[NORMAL][ord(' ')][ord('m')][ord('m')] = leader_mm_map
         def leader_ma_map(self):
@@ -2560,12 +2569,41 @@ class Editor():
     def _initialize_replace_maps(self):
         pass
 
-    def _initialize_multi_cursor_maps(self):
-        def w_map(self):
-            elog("multi_cursor w")
-            return False
+    def __foreach_cursor(self, cb):
+        buf = self.get_curr_buffer()
 
-        self.maps[MULTI_CURSOR][ord('w')] = w_map
+        local_cursors = buf.cursors.copy()
+
+        buf_index = 0
+        for i, (x, y) in enumerate(local_cursors):
+            ret = cb(self, buf, x, y)
+
+            # remove cursor
+            if ret is None:
+                elog(f"remove cursor: {i}")
+                buf.cursors.pop(buf_index)
+                continue
+
+            # update cursor if need be
+            buf.cursors[buf_index] = ret
+            buf_index += 1
+
+    def _initialize_multi_cursor_insert_maps(self):
+        pass
+    def _initialize_multi_cursor_normal_maps(self):
+        def w_map(self):
+            def _w_map(self, buffer, x, y):
+                ret = buffer.find_next_word(x, y)
+                if not ret: return x, y
+                return ret
+            self.__foreach_cursor(_w_map)
+            self.get_curr_tab().draw()
+            return False
+        self.maps[MULTI_CURSOR_NORMAL][ord('w')] = w_map
+        def i_map(self):
+            self.change_mode(MULTI_CURSOR_INSERT)
+            return False
+        self.maps[MULTI_CURSOR_NORMAL][ord('i')] = i_map
 
     def initialize_maps(self):
         self._initialize_normal_maps()
@@ -2574,7 +2612,8 @@ class Editor():
         self._initialize_visual_block_maps()
         self._initialize_visual_line_maps()
         self._initialize_replace_maps()
-        self._initialize_multi_cursor_maps()
+        self._initialize_multi_cursor_normal_maps()
+        self._initialize_multi_cursor_insert_maps()
 
     def initialize_registers(self):
         # we dont add all of vim's registers for now..
@@ -2618,7 +2657,8 @@ class Editor():
         self.maps[VISUAL_LINE] = {}
         self.maps[VISUAL_BLOCK] = {}
         self.maps[REPLACE] = {}
-        self.maps[MULTI_CURSOR] = {}
+        self.maps[MULTI_CURSOR_NORMAL] = {}
+        self.maps[MULTI_CURSOR_INSERT] = {}
 
         self.initialize_maps()
 
@@ -2833,6 +2873,39 @@ class Editor():
         except Exception as e: elog(f"Exception: {e}")
         return False
 
+    def on_multi_insert(self, key):
+        def _single_insert(self, buffer, x, y):
+            elog(f"key: {key}")
+            ret_x, ret_y = x, y
+            if key == BACKSPACE_KEY:
+                # line = self.get_curr_window().get_curr_line()
+                # x = self.get_curr_window().buffer_cursor[0]
+                # if line[x-4:x] == '    ':
+                    # self.get_curr_window().remove_chars(4)
+                # else:
+                    # self.get_curr_window().remove_char()
+
+                return ret_x, ret_y
+
+            if key == TAB_KEY:
+                # expand tab to spaces
+                ret_x, ret_y = buffer.insert_string(x, y, get_setting("tab_insert"))
+                return ret_x, ret_y
+
+            try:
+                char = chr(key)
+                elog(f"MULTI_CURSOR_INSERT: ({key}) -> {char}")
+                if char in printable:
+                    ret_x, ret_y = buffer.insert_string(x, y, char)
+                else:
+                    elog(f"INSERT: ({key}) not printable.")
+            except Exception as e: elog(f"[!] on_multi_insert: {e}")
+            return ret_x, ret_y
+
+        self.__foreach_cursor(_single_insert)
+        self.get_curr_tab().draw()
+        return False
+
     def on_insert(self, key):
         ret = False
 
@@ -2959,6 +3032,10 @@ class Editor():
             self.internal_registers["."] = [key]
 
         if key == ESC_KEY:
+            if self.mode == MULTI_CURSOR_INSERT:
+                self.change_mode(MULTI_CURSOR_NORMAL)
+                return False
+
             self.change_mode(NORMAL)
             return False
 
@@ -2985,6 +3062,8 @@ class Editor():
             return self.on_insert(key)
         elif self.mode == REPLACE:
             return self.on_replace(key)
+        elif self.mode == MULTI_CURSOR_INSERT:
+            return self.on_multi_insert(key)
 
         # We reached a dead-end. start from the top again in normal
         # mode.
