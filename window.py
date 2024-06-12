@@ -3,8 +3,7 @@ from settings import *
 from idr import *
 from buffer import *
 from hooks import *
-from syntax import get_syntax_highlights
-from syntax import get_scope_style
+from syntax import get_syntax_highlights, get_scope_style
 
 from popup import *
 from utils import *

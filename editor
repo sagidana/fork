@@ -66,6 +66,10 @@ class Editor():
 
     def change_mode(self, target, effect_change=True):
         if self.mode == INSERT and target == NORMAL:
+            y = self.get_curr_window().buffer_cursor[1]
+            line = self.get_curr_window().get_line(y)
+            if re.match(r'^\s*$', line):
+                self.get_curr_window().empty_line(y)
             if effect_change: self.change_end()
             self.get_curr_window().move_left()
             self.screen.set_cursor_block_blink()
@@ -951,6 +955,17 @@ class Editor():
         self.maps[NORMAL][ord('c')][ord('w')] = self.maps[NORMAL][ord('c')][ord('e')]
         def delete_object_map(scope):
             start_x, start_y, end_x, end_y = scope
+            text = self.get_curr_buffer().get_scope_text(   start_x,
+                                                            start_y,
+                                                            end_x,
+                                                            end_y)
+            if len(text) == 0: return False
+
+            data = {}
+            data['meta'] = 'char'
+            data['data'] = text
+            self.registers['"'] = data
+
             self.change_begin()
             self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
             self.change_end()
@@ -2203,6 +2218,11 @@ class Editor():
                                                             end_x,
                                                             end_y)
             if len(text) == 0: return False
+
+            data = {}
+            data['meta'] = 'char'
+            data['data'] = text
+            self.registers['"'] = data
 
             # send yanked text to clipboard
             clipboard(text)
