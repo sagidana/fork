@@ -1182,7 +1182,7 @@ class Window():
         y = self.buffer_cursor[1]
         line = self.get_line(y)
 
-        if re.match(r"^\s*$", line) or keep_whitespaces: # if only whitespaces
+        if re.match(r'^\s*$', line) or not keep_whitespaces: # if only whitespaces
             self.move_cursor_to_buf_location(0, y)
             # replace with empty line (including the newline char)
             self.buffer.replace_line(y, "\n", propagate=False)
