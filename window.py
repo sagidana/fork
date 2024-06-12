@@ -1003,7 +1003,7 @@ class Window():
         if ignore_spaces:
             line = self.get_line(self.buffer_cursor[1])
             while self.buffer_cursor[0] < len(line) - 1:
-                if not re.match("\s", line[self.buffer_cursor[0]]): break
+                if not re.match(r"\s", line[self.buffer_cursor[0]]): break
                 self._move_right()
 
     def move_line_begin(self, ignore_spaces=False):
@@ -1332,7 +1332,7 @@ class Window():
             ret = self._move_down()
             if ret and ret[1]:
                 if to_draw: self.draw() # scrolled
-            self._move_line_begin()
+            self._move_line_begin(ignore_spaces=True)
         else:
             self._move_right()
 

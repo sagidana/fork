@@ -386,7 +386,8 @@ class Buffer():
     def _split_line(self, x, y):
         line = self.lines[y]
         first = line[:x] + '\n'
-        second = line[x:]
+        indent = len(first) - len(first.lstrip())
+        second = first[:indent]+line[x:]
         self.lines[y] = first
         self.lines.insert(y + 1, second)
 

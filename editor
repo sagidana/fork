@@ -61,7 +61,6 @@ class Editor():
     def change_end(self):
         self.get_curr_window().change_end()
 
-        # set last change in '.' register for the repeat operation.
         self.registers["."] = self.internal_registers["."].copy()
         self.internal_registers["."] = []
 
