@@ -413,6 +413,10 @@ class Editor():
             self.get_curr_window().move_line_end()
             return False
         self.maps[NORMAL][ord('$')] = dollar_map
+        def caret_map(self):
+            self.get_curr_window().move_line_begin(ignore_spaces=True)
+            return False
+        self.maps[NORMAL][ord('^')] = caret_map
         def slash_map(self):
             self.on_search(True)
             return False
