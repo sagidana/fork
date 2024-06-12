@@ -64,18 +64,28 @@ def get_setting(key, default=None):
     if key == "status_line_foreground":
         _ = "#000000" if not default else default
         return get_settings().get(key, _)
+
     if key == "line_numbers_background":
         _ = "#2D2D2A" if not default else default
         return get_settings().get(key, _)
     if key == "line_numbers_foreground":
         _ = "#4C4C47" if not default else default
         return get_settings().get(key, _)
+
     if key == "search_highlights_background":
         _ = "#FFC09F" if not default else default
         return get_settings().get(key, _)
     if key == "search_highlights_foreground":
         _ = "#000000" if not default else default
         return get_settings().get(key, _)
+
+    if key == "multi_cursors_background":
+        _ = "#FFC000" if not default else default
+        return get_settings().get(key, _)
+    if key == "multi_cursors_foreground":
+        _ = "#000000" if not default else default
+        return get_settings().get(key, _)
+
     if key == "tab_representation":
         _ = ">\u00b7\u00b7\u00b7" if not default else default
         return get_settings().get(key, _)

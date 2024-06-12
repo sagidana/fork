@@ -40,6 +40,7 @@ VISUAL = 'visual'
 VISUAL_LINE = 'visual_line'
 VISUAL_BLOCK = 'visual_block'
 REPLACE = 'replace'
+MULTI_CURSOR = 'multi_cursor'
 MAP_TIMEOOUT = 2 # in seconds
 
 class Editor():
@@ -103,6 +104,8 @@ class Editor():
             self._replace_line = ""
             self._replace_x = -1
             self._replace_y = -1
+        if self.mode == NORMAL and target == MULTI_CURSOR:
+            pass
 
         self.mode = target
         self.curr_maps = self.maps[self.mode]
@@ -1440,8 +1443,24 @@ class Editor():
         self.maps[NORMAL][ord(' ')][ord('s')] = {} # search
         self.maps[NORMAL][ord(' ')][ord('t')] = {} # treesitter
         self.maps[NORMAL][ord(' ')][ord('d')] = {} # doc
-        self.maps[NORMAL][ord(' ')][ord('d')][ord('l')] = None # doc location
-        self.maps[NORMAL][ord(' ')][ord('d')][ord('o')] = None # doc open
+        self.maps[NORMAL][ord(' ')][ord('m')] = {} # multi-cursor
+        def leader_mm_map(self):
+            elog("multi-cursor")
+            self.change_mode(MULTI_CURSOR)
+            return False
+        self.maps[NORMAL][ord(' ')][ord('m')][ord('m')] = leader_mm_map
+        def leader_ma_map(self):
+            location = self.get_curr_window().buffer_cursor
+            self.get_curr_buffer().add_cursor((location[0], location[1]))
+            self.get_curr_tab().draw()
+            return False
+        self.maps[NORMAL][ord(' ')][ord('m')][ord('a')] = leader_ma_map
+        def leader_md_map(self):
+            location = self.get_curr_window().buffer_cursor
+            self.get_curr_buffer().del_cursor((location[0], location[1]))
+            self.get_curr_tab().draw()
+            return False
+        self.maps[NORMAL][ord(' ')][ord('m')][ord('d')] = leader_md_map
         def leader_dl_map(self): # doc location
             doc('location', self)
             return False
@@ -2541,6 +2560,13 @@ class Editor():
     def _initialize_replace_maps(self):
         pass
 
+    def _initialize_multi_cursor_maps(self):
+        def w_map(self):
+            elog("multi_cursor w")
+            return False
+
+        self.maps[MULTI_CURSOR][ord('w')] = w_map
+
     def initialize_maps(self):
         self._initialize_normal_maps()
         self._initialize_insert_maps()
@@ -2548,6 +2574,7 @@ class Editor():
         self._initialize_visual_block_maps()
         self._initialize_visual_line_maps()
         self._initialize_replace_maps()
+        self._initialize_multi_cursor_maps()
 
     def initialize_registers(self):
         # we dont add all of vim's registers for now..
@@ -2591,6 +2618,7 @@ class Editor():
         self.maps[VISUAL_LINE] = {}
         self.maps[VISUAL_BLOCK] = {}
         self.maps[REPLACE] = {}
+        self.maps[MULTI_CURSOR] = {}
 
         self.initialize_maps()
 

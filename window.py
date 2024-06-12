@@ -463,6 +463,30 @@ class Window():
         if self.buffer.visual_mode == 'visual_block':
             self._visualize_block()
 
+    def multi_cursors(self):
+        try:
+            buffer_height = len(self.buffer.lines) - 1
+
+            screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
+            screen_end_y = min(screen_start_y + self.content_height, buffer_height)
+
+            style = {}
+            style['background'] = get_setting("multi_cursors_background")
+            style['foreground'] = get_setting("multi_cursors_foreground")
+
+            for x,y in self.buffer.cursors:
+                if y >= screen_end_y: continue
+                if y < screen_start_y: continue
+
+                char = self.get_line(y)[x]
+                # elog(f"line: {self.get_line(y)} {x} {char}")
+                self._screen_write( self._expanded_x(y, x),
+                                    y - screen_start_y,
+                                    char,
+                                    style)
+        except Exception as e:
+            elog(f"[!] multi_cursors {e}")
+
     def _get_curr_highlight(self):
         buf_x = self.buffer_cursor[0]
         buf_y = self.buffer_cursor[1]
@@ -671,6 +695,7 @@ class Window():
             self.tailing_spaces()
             self.visualize()
             self.highlight()
+            self.multi_cursors()
             if self.status_line: self.draw_status_line()
             if self.line_numbers: self.draw_line_numbers()
             # is focused?

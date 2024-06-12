@@ -122,6 +122,8 @@ class Buffer():
         if self.language:
             self.treesitter = TreeSitter(self.get_file_bytes(), self.language)
 
+        self.cursors = []
+
         handlers = {}
         handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
         self.register_events(handlers)
@@ -318,6 +320,15 @@ class Buffer():
     def add_highlights(self, name, pattern, style):
         self.highlights_meta[name] = (pattern, style)
         self.update_highlights()
+
+    def clear_cursors(self):
+        self.cursors = []
+    def add_cursor(self, location):
+        if location not in self.cursors:
+            self.cursors.append(location)
+    def del_cursor(self, location):
+        if location in self.cursors:
+            self.cursors.remove(location)
 
     def visual_begin(self, mode, x, y):
         self.visual_mode = mode
