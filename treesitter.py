@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from settings import EDITOR_HOME_PATH
+from settings import INSTALLATION_PATH
 from log import elog
 
 from tree_sitter import Language, Parser
@@ -88,7 +88,7 @@ class TreeSitter():
 
     def _initialize_language(self, language):
         self.parser = Parser()
-        query_path = path.join(EDITOR_HOME_PATH, "grammars/{}/highlights.scm")
+        query_path = path.join(INSTALLATION_PATH, "grammars/{}/highlights.scm")
 
         try:
             if language == 'python':

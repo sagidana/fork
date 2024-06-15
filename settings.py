@@ -5,6 +5,7 @@ from log import elog
 
 
 EDITOR_HOME_PATH = path.expanduser('~/.config/editor/')
+INSTALLATION_PATH = path.dirname(path.abspath(__file__))
 g_settings = {}
 
 def add_to_theme(scope, style):
