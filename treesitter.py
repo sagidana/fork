@@ -538,7 +538,14 @@ class TreeSitter():
                 method_y = method.start_point[0]
                 if method_y > y: return method_x, method_y
             return None
-        if self.language == 'c': pass
+        if self.language == 'c':
+            query = self._language.query("(function_definition) @name")
+            methods = query.captures(self.tree.root_node)
+            for method, name in methods:
+                method_x = method.start_point[1]
+                method_y = method.start_point[0]
+                if method_y > y: return method_x, method_y
+            return None
         return None
 
     def get_prev_method(self, x, y):
@@ -550,7 +557,14 @@ class TreeSitter():
                 method_y = method.start_point[0]
                 if method_y < y: return method_x, method_y
             return None
-        if self.language == 'c': pass
+        if self.language == 'c':
+            query = self._language.query("(function_definition) @name")
+            methods = query.captures(self.tree.root_node)
+            for method, name in reversed(methods):
+                method_x = method.start_point[1]
+                method_y = method.start_point[0]
+                if method_y < y: return method_x, method_y
+            return None
         return None
 
     def get_method_end(self, x, y):
@@ -561,7 +575,13 @@ class TreeSitter():
             method_x = node.end_point[1]
             method_y = node.end_point[0]
             return method_x, method_y
-        if self.language == 'c': pass
+        if self.language == 'c':
+            query = self._language.query("(function_definition) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
+            if not node: return None
+            method_x = node.end_point[1]
+            method_y = node.end_point[0]
+            return method_x, method_y
         return None
 
 if __name__ == '__main__':
