@@ -1,5 +1,6 @@
 from log import elog
 
+from difflib import SequenceMatcher as SM
 from treesitter import traverse_tree
 from settings import *
 from screen import *
@@ -286,6 +287,15 @@ class CompletionPopup():
 
         return height, width
 
+    def fzf_tiny(self, niddle, haystack):
+        try:
+            scores = []
+            for i_1, (whole, option) in enumerate(haystack):
+                score = SM(None, niddle, option).ratio()
+                scores.append((whole, option, score))
+        except Exception as e: elog(f'Exception: {e}')
+        return [(whole, option) for whole, option, _ in reversed(sorted(scores, key=lambda x: x[2]))]
+
     def on_key(self, key):
         if key == ESC_KEY: return True
         if key == ENTER_KEY:
@@ -304,7 +314,7 @@ class CompletionPopup():
             original_options = self.options
             self.selected = 0
             while True:
-                options = [option for option in original_options if pattern in option[0]]
+                options = self.fzf_tiny(pattern, original_options)
                 if len(options) > 0:
                     self.options = options
                     self.draw()
@@ -332,7 +342,8 @@ class CompletionPopup():
                         pattern += char
                     else: break
                 except: continue
-        except: pass
+        except Exception as e:
+            elog(f"[!] CompletionPop: Exception: {e}")
         return False
 
     def pop(self):
