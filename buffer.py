@@ -397,7 +397,7 @@ class Buffer():
     def _split_line(self, x, y):
         line = self.lines[y]
         first = line[:x] + '\n'
-        indent = len(first) - len(first.lstrip())
+        indent = len(first) - (len(first.lstrip()) if len(first.lstrip()) > 0 else 1)
         second = first[:indent]+line[x:]
         self.lines[y] = first
         self.lines.insert(y + 1, second)
@@ -1388,8 +1388,6 @@ class Buffer():
         if not range: return None
         start_x, start_y, end_x, end_y = range
         return start_x, start_y, end_x, end_y
-
-
 
     def search_pattern(self, pattern):
         results = []
