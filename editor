@@ -1442,6 +1442,37 @@ class Editor():
             return False
         self.maps[NORMAL][ord('z')][ord('t')] = zt_map
 
+        self.maps[NORMAL][ord('[')] = {}
+        self.maps[NORMAL][ord(']')] = {}
+
+        def bracket_right_m_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_next_method(x, y)
+            if not ret: return False
+            x, y = ret
+            self.get_curr_window().move_cursor_to_buf_location(x, y)
+            return False
+        self.maps[NORMAL][ord(']')][ord('m')] = bracket_right_m_map
+        def bracket_right_M_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_method_end(x, y)
+            if not ret: return False
+            x, y = ret
+            self.get_curr_window().move_cursor_to_buf_location(x, y)
+            return False
+        self.maps[NORMAL][ord(']')][ord('M')] = bracket_right_M_map
+        def bracket_left_m_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_method(x, y)
+            if not ret: return False
+            x, y = ret
+            self.get_curr_window().move_cursor_to_buf_location(x, y)
+            return False
+        self.maps[NORMAL][ord('[')][ord('m')] = bracket_left_m_map
+
         self._initialize_normal_ctrl_maps()
         self._initialize_normal_symbol_maps()
 

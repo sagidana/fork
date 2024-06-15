@@ -1077,6 +1077,23 @@ class Buffer():
             found += 1
         return None
 
+    # CORE: movement
+    def find_method_end(self, x, y):
+        if not self.treesitter: return None
+        ret = self.treesitter.get_method_end(x, y)
+        return ret
+    def find_next_method(self, x, y):
+        if not self.treesitter: return None
+        ret = self.treesitter.get_next_method(x, y)
+        return ret
+    def find_prev_method(self, x, y):
+        if not self.treesitter: return None
+        ret = self.treesitter.get_prev_method(x, y)
+        return ret
+
+    def find_(self, x, y, skip_current=True):
+        pass
+
     def _find_relevant_object(self, pattern, x, y):
         curr_index = len(''.join(self.lines[:y])) + x
 

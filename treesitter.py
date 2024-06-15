@@ -529,37 +529,45 @@ class TreeSitter():
                 return start_x, start_y, end_x, end_y
         return None
 
+    def get_next_method(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(function_definition) @name")
+            methods = query.captures(self.tree.root_node)
+            for method, name in methods:
+                method_x = method.start_point[1]
+                method_y = method.start_point[0]
+                if method_y > y: return method_x, method_y
+            return None
+        if self.language == 'c': pass
+        return None
+
+    def get_prev_method(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(function_definition) @name")
+            methods = query.captures(self.tree.root_node)
+            for method, name in reversed(methods):
+                method_x = method.start_point[1]
+                method_y = method.start_point[0]
+                if method_y < y: return method_x, method_y
+            return None
+        if self.language == 'c': pass
+        return None
+
+    def get_method_end(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(function_definition) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
+            if not node: return None
+            method_x = node.end_point[1]
+            method_y = node.end_point[0]
+            return method_x, method_y
+        if self.language == 'c': pass
+        return None
+
 if __name__ == '__main__':
     Language.build_library(
         # Store the library in the `build` directory
         'grammars/tree-sitter-lib/my-languages.so',
-
-        # do into vendor/:
-        # git clone https://github.com/tree-sitter/tree-sitter-python
-        # git clone https://github.com/tree-sitter/tree-sitter-bash
-        # git clone https://github.com/tree-sitter/tree-sitter-c
-        # git clone https://github.com/tree-sitter/tree-sitter-cpp
-        # git clone https://github.com/tree-sitter/tree-sitter-css
-        # git clone https://github.com/tree-sitter/tree-sitter-go
-        # git clone https://github.com/tree-sitter/tree-sitter-html
-        # git clone https://github.com/tree-sitter/tree-sitter-java
-        # git clone https://github.com/tree-sitter/tree-sitter-javascript
-        # git clone https://github.com/tree-sitter/tree-sitter-php
-        # git clone https://github.com/tree-sitter/tree-sitter-ruby
-        # git clone https://github.com/tree-sitter/tree-sitter-rust
-        # git clone https://github.com/tree-sitter/tree-sitter-c-sharp
-        # git clone https://github.com/tree-sitter/tree-sitter-json
-        # git clone https://github.com/amaanq/tree-sitter-smali.git
-        # git clone https://github.com/MDeiml/tree-sitter-markdown.git
-
-        # git clone https://github.com/tree-sitter/tree-sitter-markdown
-        # git clone https://github.com/tree-sitter/tree-sitter-make
-        # git clone https://github.com/tree-sitter/tree-sitter-elisp
-        # git clone https://github.com/tree-sitter/tree-sitter-lua
-        # git clone https://github.com/tree-sitter/tree-sitter-yaml
-        # git clone https://github.com/tree-sitter/tree-sitter-r
-
-        # Include one or more languages
 
         [
             'vendor/tree-sitter-python',
@@ -578,39 +586,5 @@ if __name__ == '__main__':
             'vendor/tree-sitter-json',
             'vendor/tree-sitter-smali',
             'vendor/tree-sitter-markdown',
-            # 'vendor/tree-sitter-markdown',
-            # 'vendor/tree-sitter-make',
-            # 'vendor/tree-sitter-elisp',
-            # 'vendor/tree-sitter-lua',
-            # 'vendor/tree-sitter-yaml',
-            # 'vendor/tree-sitter-r',
         ]
     )
-
-    # with open("editor", "rb") as f: file_bytes = f.read()
-
-    # ts = TreeSitter(file_bytes)
-    # captures = ts.get_captures()
-    # for c in captures:
-        # print(c)
-
-    # print(PYTHON_LANGUAGE)
-    # print(BASH_LANGUAGE)
-    # print(C_LANGUAGE)
-    # print(CPP_LANGUAGE)
-    # print(CSS_LANGUAGE)
-    # print(GO_LANGUAGE)
-    # print(HTML_LANGUAGE)
-    # print(JAVA_LANGUAGE)
-    # print(JAVASCRIPT_LANGUAGE)
-    # print(MARKDOWN_LANGUAGE)
-    # print(PHP_LANGUAGE)
-    # print(RUBY_LANGUAGE)
-    # print(RUST_LANGUAGE)
-    # print(MAKE_LANGUAGE)
-    # print(CSHARP_LANGUAGE)
-    # print(ELISP_LANGUAGE)
-    # print(LUA_LANGUAGE)
-    # print(YAML_LANGUAGE)
-    # print(R_LANGUAGE)
-    # print(JSON_LANGUAGE)
