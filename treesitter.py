@@ -212,6 +212,7 @@ class TreeSitter():
         return None
 
     def get_inner_if(self, x, y):
+        x += 1
         if self.language == 'python':
             query = self._language.query("""
             (if_statement) @name
@@ -250,6 +251,7 @@ class TreeSitter():
         return None
 
     def get_arround_if(self, x, y):
+        x += 1
         if self.language == 'python':
             query = self._language.query("""
             (if_statement) @name
@@ -279,6 +281,7 @@ class TreeSitter():
         return None
 
     def get_inner_IF(self, x, y):
+        x += 1
         if self.language == 'python':
             query = self._language.query("""
             (if_statement) @name
@@ -336,6 +339,7 @@ class TreeSitter():
         return None
 
     def get_inner_method(self, x, y):
+        x += 1
         if self.language == 'python':
             query = self._language.query("(function_definition (block) @name)")
             node = self._get_relevant_nodes(self.tree.root_node, query, x,y, most_relevant=True)
@@ -366,6 +370,7 @@ class TreeSitter():
         return None
 
     def get_arround_method(self, x, y):
+        x += 1 # index is out of sync?
         if self.language == 'python':
             query = self._language.query("(function_definition) @name")
             node = self._get_relevant_nodes(self.tree.root_node, query, x,y, most_relevant=True)
@@ -392,6 +397,7 @@ class TreeSitter():
         return None
 
     def get_inner_METHOD(self, x, y):
+        x += 1
         if self.language == 'python':
             query = self._language.query("(function_definition) @name")
             node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
@@ -430,6 +436,7 @@ class TreeSitter():
         return None
 
     def get_arround_METHOD(self, x, y):
+        x += 1 # index is out of sync?
         if self.language == 'python':
             query = self._language.query("(function_definition) @name")
             node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
@@ -463,6 +470,7 @@ class TreeSitter():
         return None
 
     def get_arround_argument(self, x, y):
+        x += 1 # index is out of sync?
         if self.language == 'python':
             query = self._language.query("""
             (argument_list) @name
@@ -507,6 +515,7 @@ class TreeSitter():
         return None
 
     def get_next_method(self, x, y):
+        x += 1
         if self.language == 'python':
             query = self._language.query("(function_definition) @name")
             methods = query.captures(self.tree.root_node)
@@ -526,6 +535,7 @@ class TreeSitter():
         return None
 
     def get_prev_method(self, x, y):
+        x += 1
         if self.language == 'python':
             query = self._language.query("(function_definition) @name")
             methods = query.captures(self.tree.root_node)
