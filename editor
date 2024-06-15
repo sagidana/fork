@@ -1407,7 +1407,14 @@ class Editor():
                     self.get_curr_buffer().flush_changes()
                 elif data['meta'] == 'char':
                     lines = data['data']
-                    string = '\n'.join(lines)
+                    _lines = []
+                    for line in lines:
+                        if line.endswith('\n'):
+                            _lines.append(line[:-1])
+                        else:
+                            _lines.append(line)
+                    lines = _lines
+                    string = '\n'.join(_lines)
                     self.get_curr_window().move_right()
                     self.get_curr_window().insert_string(string)
                 elif data['meta'] == 'block': pass
@@ -2200,6 +2207,13 @@ class Editor():
                     self.get_curr_buffer().flush_changes()
                 elif data['meta'] == 'char':
                     lines = data['data']
+                    _lines = []
+                    for line in lines:
+                        if line.endswith('\n'):
+                            _lines.append(line[:-1])
+                        else:
+                            _lines.append(line)
+                    lines = _lines
                     string = '\n'.join(lines)
                     self.get_curr_window().move_right()
                     self.get_curr_window().insert_string(string)
@@ -2425,6 +2439,13 @@ class Editor():
                     self.get_curr_buffer().flush_changes()
                 elif data['meta'] == 'char':
                     lines = data['data']
+                    _lines = []
+                    for line in lines:
+                        if line.endswith('\n'):
+                            _lines.append(line[:-1])
+                        else:
+                            _lines.append(line)
+                    lines = _lines
                     string = '\n'.join(lines)
                     self.get_curr_window().insert_string(string)
                 elif data['meta'] == 'block': pass
