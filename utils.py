@@ -1,4 +1,4 @@
-from os import path
+from os import path, listdir
 import re
 
 from log import elog
@@ -15,7 +15,7 @@ def extract_destination(string):
     file_col = None
 
     try:
-        m = re.match(f'^(?P<file_path>[\w\.\/\-]+)(:(?P<file_line>\d+):(?P<file_col>\d+))?.*$',
+        m = re.match(f'^(?P<file_path>[\\w\\.\\/\\-]+)(:(?P<file_line>\\d+):(?P<file_col>\\d+))?.*$',
                     string)
         if not m: return None, None, None
 
@@ -28,3 +28,84 @@ def extract_destination(string):
     except Exception as e: elog(f"Exception: {e}")
 
     return file_path, file_line, file_col
+
+def find_files_suggestions(start_x, start_of_path):
+    elog("-"*10)
+    elog(f"start_of_path: {start_of_path}")
+
+    # explicit relative path
+    path_until_now = start_of_path.split('./', 1)
+    if len(path_until_now) == 2:
+        to_add = start_of_path.find('./')
+        path_until_now = './'+path_until_now[1]
+
+        dir_name = path.dirname(path_until_now)
+        file_prefix = path.basename(path_until_now)
+
+        files = listdir(dir_name)
+        suggestions = []
+        for file_name in files:
+            if not file_name.startswith(file_prefix): continue
+            suggestions.append((file_name, file_name[len(file_prefix):]))
+
+        return (start_x + to_add + len(dir_name) + len('/'), suggestions)
+
+    # explicit absolut path
+    path_until_now = start_of_path.split('/', 1)
+    if len(path_until_now) == 2:
+        to_add = start_of_path.find('/')
+        path_until_now = '/'+path_until_now[1]
+
+        dir_name = path.dirname(path_until_now)
+        add_slash = 0 if dir_name == '/' else 1
+        file_prefix = path.basename(path_until_now)
+
+        files = listdir(dir_name)
+        suggestions = []
+        for file_name in files:
+            if not file_name.startswith(file_prefix): continue
+            suggestions.append((file_name, file_name[len(file_prefix):]))
+
+        return (start_x + to_add + len(dir_name) + add_slash, suggestions)
+
+    # # implicit relative path
+    # to_add = start_of_path.find('./')
+    # path_until_now = './'+path_until_now[1]
+
+    # elog(f"path_until_now: {path_until_now}")
+
+    # dir_name = path.dirname(path_until_now)
+    # file_prefix = path.basename(path_until_now)
+
+    # files = listdir(dir_name)
+    # suggestions = []
+    # for file_name in files:
+        # if not file_name.startswith(file_prefix): continue
+        # suggestions.append((file_name, file_name[len(file_prefix):]))
+
+    # return (start_x + to_add + len(dir_name) + len('/'), suggestions)
+
+if __name__=='__main__':
+    print('-'*80)
+    elog('-'*80)
+    print(find_files_suggestions(1, './ut'))
+    print('-'*80)
+    print(find_files_suggestions(1, './themes/da'))
+    print('-'*80)
+    print(find_files_suggestions(1, './'))
+    print('-'*80)
+    print(find_files_suggestions(1, './themes/'))
+    print('-'*80)
+    print(find_files_suggestions(1,'a=./ut'))
+    print('-'*80)
+    # print(find_files_suggestions('VI = ./ut'))
+    # print('-'*80)
+    # print(find_files_suggestions('ASDJKFL=./'))
+    # print('-'*80)
+
+    # print(find_files_suggestions('ut'))
+    # print('-'*80)
+    # print(find_files_suggestions('/bi'))
+    # print('-'*80)
+    # print(find_files_suggestions('/bin/'))
+    # print('-'*80)

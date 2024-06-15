@@ -1721,6 +1721,7 @@ class Editor():
         self._initialize_leader_maps()
 
     def _initialize_insert_ctrl_maps(self):
+        self.maps[INSERT][CTRL_X_KEY] = {}
         def ctrl_w_map(self):
             window = self.get_curr_window()
 
@@ -1735,7 +1736,7 @@ class Editor():
             return False
         self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
         def ctrl_n_map(self):
-            ret = self.generate_completion_options()
+            ret = self.generate_word_completion_options()
             if not ret: return False
             x, options = ret
             if len(options) == 0: return False
@@ -1763,6 +1764,37 @@ class Editor():
                 self.get_curr_window().insert_string(choise[1])
             return False
         self.maps[INSERT][CTRL_N_KEY] = ctrl_n_map
+        def ctrl_xf_map(self):
+            ret = self.generate_path_completion_options()
+            if not ret: return False
+            elog(ret)
+            x, options = ret
+            if len(options) == 0: return False
+            if len(options) == 1:
+                self.get_curr_window().insert_string(options[0][1])
+                return False
+
+            window_x = self.get_curr_window().content_position[0]
+            window_y = self.get_curr_window().content_position[1]
+            buf_y = self.get_curr_window().buffer_cursor[1]
+
+            abs_position = [0,0]
+            expanded_x = self.get_curr_window()._expanded_x(buf_y, x)
+            abs_position[0] = window_x + expanded_x
+            abs_position[1] = window_y + self.get_curr_window().window_cursor[1]
+
+            completion = CompletionPopup(   self,
+                                            self.screen,
+                                            position=abs_position,
+                                            options=options)
+            choise = completion.pop()
+            self.get_curr_tab().draw() # need to redraw after completion
+
+            if choise:
+                self.get_curr_window().insert_string(choise[1])
+            return False
+        self.maps[INSERT][CTRL_X_KEY][ord('f')] = ctrl_xf_map
+        self.maps[INSERT][CTRL_X_KEY][CTRL_F_KEY] = ctrl_xf_map
 
     def _initialize_insert_maps(self):
         self._initialize_insert_ctrl_maps()
@@ -3120,7 +3152,7 @@ class Editor():
         self.change_mode(NORMAL)
         return False
 
-    def generate_completion_options(self):
+    def generate_word_completion_options(self):
         options = []
 
         try:
@@ -3147,6 +3179,30 @@ class Editor():
                     if word.startswith(curr_word) and word != curr_word:
                         options.append((word, word[len(curr_word):]))
             return (start_x, list(set(options)))
+        except Exception as e: elog(f"Exception: {e}")
+        return None
+
+    def generate_path_completion_options(self):
+        options = []
+        curr_word = ""
+
+        try:
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            start_x = x
+
+            line = self.get_curr_window().get_curr_line()
+            if re.match(r'\s', line[x - 1]):
+                start_x = x
+            else:
+                ret = self.get_curr_buffer().find_prev_WORD(x, y)
+                if not ret: return None
+                start_x, start_y = ret
+                curr_WORD = line[start_x:x]
+
+            start_pos, options = find_files_suggestions(start_x, curr_WORD)
+            # return (start_x, list(set(options)))
+            return (start_pos, options)
         except Exception as e: elog(f"Exception: {e}")
         return None
 
