@@ -42,7 +42,6 @@ VISUAL_BLOCK = 'visual_block'
 REPLACE = 'replace'
 MULTI_CURSOR_NORMAL = 'multi_cursor_normal'
 MULTI_CURSOR_INSERT = 'multi_cursor_insert'
-MAP_TIMEOOUT = 2 # in seconds
 
 class Editor():
     def on_buffer_destroy_after_callback(self, buf):
@@ -67,6 +66,10 @@ class Editor():
         self.internal_registers["."] = []
 
     def change_mode(self, target, effect_change=True):
+        # escape while in normal mode is a no-op (or is it?;)
+        if self.mode == NORMAL and target == NORMAL:
+            self.get_curr_buffer().clear_highlights()
+            self.get_curr_window().draw()
         if self.mode == INSERT and target == NORMAL:
             y = self.get_curr_window().buffer_cursor[1]
             line = self.get_curr_window().get_line(y)
@@ -411,7 +414,9 @@ class Editor():
                 self.get_curr_window().add_jump()
                 self.get_curr_window().align_center()
             else:
-                self.get_curr_tab().split(Buffer(data_in_bytes=results))
+                self.get_curr_window().quickfix_set(_results)
+                self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
+                # self.get_curr_tab().split(Buffer(data_in_bytes=results))
 
             return False
         self.maps[NORMAL][CTRL_CLOSE_BRACKET_KEY] = ctrl_close_bracket_map
@@ -1100,6 +1105,10 @@ class Editor():
             self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('g')][ord('g')] = gg_map
+        def gd_map(self):
+            elog('gd()')
+            return False
+        self.maps[NORMAL][ord('g')][ord('d')] = gd_map
         def comment_object_map(scope):
             start_x, start_y, end_x, end_y = scope
             self.change_begin()
