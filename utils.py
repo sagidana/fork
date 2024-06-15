@@ -65,22 +65,18 @@ def find_files_suggestions(start_x, start_of_path):
 
         return (start_x + to_add + len(dir_name) + add_slash, suggestions)
 
-    # # implicit relative path
-    # to_add = start_of_path.find('./')
-    # path_until_now = './'+path_until_now[1]
+    # implicit relative path
+    to_add = 0
+    path_until_now = start_of_path
 
-    # elog(f"path_until_now: {path_until_now}")
+    file_prefix = path_until_now
+    files = listdir('.')
+    suggestions = []
+    for file_name in files:
+        if not file_name.startswith(file_prefix): continue
+        suggestions.append((file_name, file_name[len(file_prefix):]))
 
-    # dir_name = path.dirname(path_until_now)
-    # file_prefix = path.basename(path_until_now)
-
-    # files = listdir(dir_name)
-    # suggestions = []
-    # for file_name in files:
-        # if not file_name.startswith(file_prefix): continue
-        # suggestions.append((file_name, file_name[len(file_prefix):]))
-
-    # return (start_x + to_add + len(dir_name) + len('/'), suggestions)
+    return (start_x + to_add, suggestions)
 
 if __name__=='__main__':
     print('-'*80)

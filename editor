@@ -3184,7 +3184,7 @@ class Editor():
 
     def generate_path_completion_options(self):
         options = []
-        curr_word = ""
+        curr_WORD = ""
 
         try:
             x = self.get_curr_window().buffer_cursor[0]
