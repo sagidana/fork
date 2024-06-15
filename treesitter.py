@@ -35,6 +35,7 @@ RUBY_LANGUAGE =         Language(tree_sitter_ruby.language())
 RUST_LANGUAGE =         Language(tree_sitter_rust.language())
 CSHARP_LANGUAGE =       Language(tree_sitter_c_sharp.language())
 JSON_LANGUAGE =         Language(tree_sitter_json.language())
+# MARKDOWN_LANGUAGE =     Language(tree_sitter_json.language())
 
 
 def walk(node, cb, level=0, nth_child=0):
@@ -122,11 +123,11 @@ class TreeSitter():
                 with open(query_path.format("smali"),"r") as f: query = f.read()
                 self.query = SMALI_LANGUAGE.query(query)
                 self.parser.set_language(SMALI_LANGUAGE)
-            elif language == 'markdown':
-                self._language = MARKDOWN_LANGUAGE
-                with open(query_path.format("markdown"),"r") as f: query = f.read()
-                self.query = MARKDOWN_LANGUAGE.query(query)
-                self.parser.set_language(MARKDOWN_LANGUAGE)
+            # elif language == 'markdown':
+                # self._language = MARKDOWN_LANGUAGE
+                # with open(query_path.format("markdown"),"r") as f: query = f.read()
+                # self.query = MARKDOWN_LANGUAGE.query(query)
+                # self.parser.set_language(MARKDOWN_LANGUAGE)
             elif language == 'cpp':
                 self._language = CPP_LANGUAGE
                 with open(query_path.format("cpp"),"r") as f: query = f.read()

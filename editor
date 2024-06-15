@@ -505,6 +505,18 @@ class Editor():
             scope = (start_x, start_y, end_x - 1, end_y)
             if scope: return cb(scope)
         maps[ord('w')] = move_w
+        def move_dash(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_next_w_o_r_d(start_x, start_y)
+            if not ret: return False
+            end_x, end_y = ret
+            if end_y > start_y:
+                end_y = start_y
+                end_x = len(self.get_curr_window().get_line(end_y)) - 1
+            scope = (start_x, start_y, end_x - 1, end_y)
+            if scope: return cb(scope)
+        maps[ord('-')] = move_dash
         def move_W(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
@@ -526,6 +538,15 @@ class Editor():
             scope = (start_x, start_y, end_x - 1, end_y)
             if scope: return cb(scope)
         maps[ord('b')] = move_b
+        def move_underscore(self):
+            end_x = self.get_curr_window().buffer_cursor[0]
+            end_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_w_o_r_d(end_x, end_y)
+            if not ret: return False
+            start_x, start_y = ret
+            scope = (start_x, start_y, end_x - 1, end_y)
+            if scope: return cb(scope)
+        maps[ord('_')] = move_underscore
         def move_B(self):
             end_x = self.get_curr_window().buffer_cursor[0]
             end_y = self.get_curr_window().buffer_cursor[1]
@@ -710,6 +731,12 @@ class Editor():
             scope = self.get_curr_window().buffer.inner_word(x, y)
             if scope: return cb(scope)
         maps[ord('i')][ord("w")] = inner_word
+        def inner_w_o_r_d(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.inner_w_o_r_d(x, y)
+            if scope: return cb(scope)
+        maps[ord('i')][ord("_")] = inner_w_o_r_d
         def inner_WORD(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -856,6 +883,12 @@ class Editor():
             scope = self.get_curr_window().buffer.arround_word(x, y)
             if scope: return cb(scope)
         maps[ord('a')][ord("w")] = arround_word
+        def arround_w_o_r_d(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_window().buffer.arround_w_o_r_d(x, y)
+            if scope: return cb(scope)
+        maps[ord('a')][ord("_")] = arround_w_o_r_d
         def arround_WORD(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -1136,10 +1169,28 @@ class Editor():
             self.get_curr_window().move_word_forward()
             return False
         self.maps[NORMAL][ord('w')] = w_map
+        def dash_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_next_w_o_r_d(x, y)
+            if not ret: return
+            x, y = ret
+            self.get_curr_window().move_cursor_to_buf_location(x, y)
+            return False
+        self.maps[NORMAL][ord('-')] = dash_map
         def W_map(self):
             self.get_curr_window().move_WORD_forward()
             return False
         self.maps[NORMAL][ord('W')] = W_map
+        def underscore_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_w_o_r_d(x, y)
+            if not ret: return
+            x, y = ret
+            self.get_curr_window().move_cursor_to_buf_location(x, y)
+            return False
+        self.maps[NORMAL][ord('_')] = underscore_map
         def b_map(self):
             self.get_curr_window().move_word_backward()
             return False

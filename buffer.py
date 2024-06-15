@@ -16,6 +16,7 @@ import re
 import os
 
 WORD_REGEX = '[a-zA-Z0-9_]'
+W_O_R_D_REGEX = '[a-zA-Z0-9]'
 SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
 
 class Buffer():
@@ -960,6 +961,50 @@ class Buffer():
         return (prev, next)
 
     # CORE: movement
+    def find_next_w_o_r_d(self, x, y, skip_current=True):
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
+
+        # skip current word
+        if skip_current:
+            found = pos + 1
+            if re.match(SINGLE_REGEX, stream[pos]): pass
+            else:
+                for c in stream[found:]:
+                    if not re.match(W_O_R_D_REGEX, c):
+                        break
+                    found += 1
+        else: found = pos
+
+        if found >= len(stream) - 1: return None
+        for c in stream[found:]:
+            if re.match(W_O_R_D_REGEX, c):
+                return self.get_file_x_y(found)
+            elif re.match(SINGLE_REGEX, c):
+                return self.get_file_x_y(found)
+
+            found += 1
+
+    def find_prev_w_o_r_d(self, x, y, skip_current=True):
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
+
+        # skip current word
+        found = pos - 1 if skip_current else pos
+        for c in stream[:found+1][::-1]:
+            if re.match(W_O_R_D_REGEX, c):
+                break
+            elif re.match(SINGLE_REGEX, c):
+                return self.get_file_x_y(found)
+
+            found -= 1
+        if found <= 0: return None
+        for c in stream[:found][::-1]:
+            if not re.match(W_O_R_D_REGEX, c):
+                return self.get_file_x_y(found)
+            found -= 1
+        return None
+
     def find_next_word(self, x, y, skip_current=True):
         pos = self.get_file_pos(x, y)
         stream = self.get_file_stream()
@@ -1055,6 +1100,23 @@ class Buffer():
         if found >= len(stream) - 1: return None
         for c in stream[found:]:
             if not re.match(WORD_REGEX, c):
+                return self.get_file_x_y(found - 1)
+            found += 1
+        return None
+
+    def find_w_o_r_d_end(self, x, y, skip_current=True):
+        pos = self.get_file_pos(x, y)
+        stream = self.get_file_stream()
+
+        # skip current end
+        found = pos + 1 if skip_current else pos
+        for c in stream[found:]:
+            if re.match(W_O_R_D_REGEX, c): break
+            found += 1
+
+        if found >= len(stream) - 1: return None
+        for c in stream[found:]:
+            if not re.match(W_O_R_D_REGEX, c):
                 return self.get_file_x_y(found - 1)
             found += 1
         return None
@@ -1175,6 +1237,13 @@ class Buffer():
         if not end: return None
         return begin[0]-1, begin[1], end[0]+1, end[1]
 
+    def arround_w_o_r_d(self, x, y):
+        begin = self.find_prev_w_o_r_d(x, y, skip_current=False)
+        if not begin: return None
+        end = self.find_w_o_r_d_end(x, y, skip_current=False)
+        if not end: return None
+        return begin[0]-1, begin[1], end[0]+1, end[1]
+
     def arround_WORD(self, x, y):
         begin = self.find_prev_WORD(x, y, skip_current=False)
         if not begin: return None
@@ -1254,6 +1323,16 @@ class Buffer():
 
     def inner_word(self, x, y):
         ret = self.arround_word(x, y)
+        if not ret: return None
+        start_x, start_y, end_x, end_y = ret
+
+        start_x += 1
+        end_x -= 1
+
+        return start_x, start_y, end_x, end_y
+
+    def inner_w_o_r_d(self, x, y):
+        ret = self.arround_w_o_r_d(x, y)
         if not ret: return None
         start_x, start_y, end_x, end_y = ret
 
