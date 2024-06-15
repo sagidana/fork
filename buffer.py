@@ -1411,9 +1411,10 @@ class Buffer():
         try:
             for y, line in enumerate(self.lines):
                 for m in re.finditer(pattern, line):
-                    start_x = m.start()
-                    end_x = m.end()
-
+                    if m.lastindex:
+                        start_x, end_x = m.span(m.lastindex)
+                    else:
+                        start_x, end_x = m.span()
                     results.append((start_x, y, end_x, y))
         except: pass
         return results

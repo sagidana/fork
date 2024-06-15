@@ -1199,6 +1199,7 @@ class Editor():
                                                             scope[3])
             if len(pattern) == 0: return False
             pattern = pattern[0]
+            pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
             self.registers['/'] = pattern
             self._search_forward = False
             self._on_search(x, y, pattern, self._search_forward)
@@ -1214,6 +1215,7 @@ class Editor():
                                                             scope[3])
             if len(pattern) == 0: return False
             pattern = pattern[0]
+            pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
             self.registers['/'] = pattern
             self._search_forward = True
             self._on_search(x, y, pattern, self._search_forward)
