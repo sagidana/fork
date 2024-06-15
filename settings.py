@@ -86,6 +86,13 @@ def get_setting(key, default=None):
         _ = "#000000" if not default else default
         return get_settings().get(key, _)
 
+    if key == "menu_background":
+        _ = "#3C474B" if not default else default
+        return get_settings().get(key, _)
+    if key == "menu_foreground":
+        _ = "#C0E0DE" if not default else default
+        return get_settings().get(key, _)
+
     if key == "tab_representation":
         _ = ">\u00b7\u00b7\u00b7" if not default else default
         return get_settings().get(key, _)

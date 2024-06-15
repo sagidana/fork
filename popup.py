@@ -114,8 +114,8 @@ class GenericPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = get_settings()['theme']['colors']['menu.background']
-            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            style['background'] = get_setting("menu_background")
+            style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
             selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
             selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
@@ -205,8 +205,10 @@ class DetailsPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = get_settings()['theme']['colors']['menu.background']
-            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            # style['background'] = get_settings()['theme']['colors']['menu.background']
+            # style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            style['background'] = get_setting("menu_background")
+            style['foreground'] = get_setting("menu_foreground")
 
             self.__draw_frame()
 
@@ -218,8 +220,10 @@ class DetailsPopup():
 
     def __draw_frame(self):
         style = {}
-        style['background'] = get_settings()['theme']['colors']['menu.background']
-        style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+        # style['background'] = get_settings()['theme']['colors']['menu.background']
+        # style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+        style['background'] = get_setting("menu_background")
+        style['foreground'] = get_setting("menu_foreground")
         frame_style = {}
         frame_style['background'] = get_setting('status_line_background')
         # frame_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
@@ -288,12 +292,10 @@ class CompletionPopup():
         return height, width
 
     def fzf_tiny(self, niddle, haystack):
-        try:
-            scores = []
-            for i_1, (whole, option) in enumerate(haystack):
-                score = SM(None, niddle, option).ratio()
-                scores.append((whole, option, score))
-        except Exception as e: elog(f'Exception: {e}')
+        scores = []
+        for i_1, (whole, option) in enumerate(haystack):
+            score = SM(None, niddle, option).ratio()
+            scores.append((whole, option, score))
         return [(whole, option) for whole, option, _ in reversed(sorted(scores, key=lambda x: x[2]))]
 
     def on_key(self, key):
@@ -359,8 +361,10 @@ class CompletionPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = get_settings()['theme']['colors']['menu.background']
-            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            # style['background'] = get_settings()['theme']['colors']['menu.background']
+            # style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            style['background'] = get_setting("menu_background")
+            style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
             selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
             selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
@@ -690,8 +694,10 @@ class TreeSitterPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = get_settings()['theme']['colors']['menu.background']
-            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            # style['background'] = get_settings()['theme']['colors']['menu.background']
+            # style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            style['background'] = get_setting("menu_background")
+            style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
             selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
             selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
@@ -978,8 +984,10 @@ class LinesPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = get_settings()['theme']['colors']['menu.background']
-            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            # style['background'] = get_settings()['theme']['colors']['menu.background']
+            # style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            style['background'] = get_setting("menu_background")
+            style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
             selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
             selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
@@ -1058,8 +1066,10 @@ class ErrorPopup():
     def draw(self):
         try:
             style = {}
-            style['background'] = get_settings()['theme']['colors']['menu.background']
-            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            # style['background'] = get_settings()['theme']['colors']['menu.background']
+            # style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            style['background'] = get_setting("menu_background")
+            style['foreground'] = get_setting("menu_foreground")
 
             self.__draw_frame()
 
@@ -1071,8 +1081,10 @@ class ErrorPopup():
 
     def __draw_frame(self):
         style = {}
-        style['background'] = get_settings()['theme']['colors']['menu.background']
-        style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+        # style['background'] = get_settings()['theme']['colors']['menu.background']
+        # style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+        style['background'] = get_setting("menu_background")
+        style['foreground'] = get_setting("menu_foreground")
         frame_style = {}
         frame_style['background'] = get_setting('status_line_background')
         # frame_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
