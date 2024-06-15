@@ -156,6 +156,15 @@ class Window():
                 "col": self.buffer_cursor[0],
                 "line": self.buffer_cursor[1]
                 }
+        # elog(f"{self.jumpslist_cursor}")
+        # for j in self.jumpslist: elog(f"{json.dumps(j, indent=2)}")
+
+        # do not add jump if it is already the current one.
+        if  self.jumpslist_cursor >= 0 and \
+            self.jumpslist[self.jumpslist_cursor]['file_path'] == jump['file_path'] and \
+            self.jumpslist[self.jumpslist_cursor]['col'] == jump['col'] and \
+            self.jumpslist[self.jumpslist_cursor]['line'] == jump['line']:
+            return
         if self.jumpslist_cursor < len(self.jumpslist) - 1:
             self.discarded_jumps.append(self.jumpslist[self.jumpslist_cursor+1:])
             self.jumpslist = self.jumpslist[:self.jumpslist_cursor+1]
