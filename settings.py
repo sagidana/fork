@@ -34,7 +34,6 @@ def optimize_theme():
 
 def load_settings():
     global g_settings
-
     with open(  path.join(EDITOR_HOME_PATH, 'config.json'),
                 'r') as f:
         g_settings = json.loads(f.read())

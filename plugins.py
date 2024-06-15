@@ -2,6 +2,7 @@ from subprocess import Popen, PIPE, DEVNULL
 from datetime import datetime, date
 from os import environ
 from os import path
+import traceback
 import string
 import random
 import sys
@@ -26,7 +27,9 @@ def gotovim(editor):
                   stdout=stdout,
                   env=env)
         output, errors = p.communicate()
-    except Exception as e: elog(f"Exception: {e}")
+    except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
     return None
 
 def fzf(editor):
@@ -53,7 +56,9 @@ def fzf(editor):
         file_path = output.decode('utf-8').strip()
         file_path = file_path.replace("\n", "")
         if len(file_path) > 0: return file_path
-    except Exception as e: elog(f"Exception: {e}")
+    except Exception as e:
+        elog(f"Exception: {e}", type="ERROR")
+        elog(f"traceback: {traceback.format_exc()}", type="ERROR")
     return None
 
 def random_string(len=10):

@@ -18,6 +18,7 @@ import tree_sitter_rust
 import tree_sitter_c_sharp
 import tree_sitter_json
 from os import path
+import traceback
 
 
 PYTHON_LANGUAGE =       Language(tree_sitter_python.language())

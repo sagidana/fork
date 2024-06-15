@@ -1119,7 +1119,8 @@ class Editor():
             try:
                 comment(self, start_y, end_y)
             except Exception as e:
-                elog(f"Exception: {e}")
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
             self.change_end()
             return False
@@ -1550,7 +1551,9 @@ class Editor():
 
                 task.on_done(rg_on_done)
                 task.start()
-            except Exception as e: elog(f"Exception: {e}")
+            except Exception as e:
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             return False
         self.maps[NORMAL][ord(' ')][ord('s')][ord('c')] = leader_sc_map
         def leader_ts_map(self): # treesitter
@@ -1574,7 +1577,9 @@ class Editor():
                     self.get_curr_window().align_center()
 
                 self.get_curr_tab().draw() # need to redraw after popup
-            except Exception as e: elog(f"Exception: {e}")
+            except Exception as e:
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             return False
         self.maps[NORMAL][ord(' ')][ord('t')][ord('s')] = leader_ts_map
         def leader_tf_map(self): # tree_sitter functions
@@ -1599,7 +1604,9 @@ class Editor():
                     self.get_curr_window().align_center()
 
                 self.get_curr_tab().draw() # need to redraw after popup
-            except Exception as e: elog(f"Exception: {e}")
+            except Exception as e:
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             return False
         self.maps[NORMAL][ord(' ')][ord('t')][ord('f')] = leader_tf_map
         def leader_tc_map(self): # tree_sitter class
@@ -1624,7 +1631,9 @@ class Editor():
                     self.get_curr_window().align_center()
 
                 self.get_curr_tab().draw() # need to redraw after popup
-            except Exception as e: elog(f"Exception: {e}")
+            except Exception as e:
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             return False
         self.maps[NORMAL][ord(' ')][ord('t')][ord('c')] = leader_tc_map
         def leader_p_map(self):
@@ -1958,7 +1967,9 @@ class Editor():
                 y = self.get_curr_window().buffer_cursor[1]
                 self.get_curr_buffer().visual_set_current(x, y)
                 self.draw()
-            except Exception as e: elog(f"Exception: {e}")
+            except Exception as e:
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             return False
         self.maps[VISUAL_BLOCK][ord('f')] = f_map
         def F_map(self):
@@ -2214,7 +2225,8 @@ class Editor():
             try:
                 format(self, start_x, start_y, end_x, end_y)
             except Exception as e:
-                elog(f"Exception: {e}")
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             self.change_end()
 
             self.change_mode(NORMAL)
@@ -2229,7 +2241,8 @@ class Editor():
             try:
                 comment(self, start_y, end_y)
             except Exception as e:
-                elog(f"Exception: {e}")
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
             self.change_end()
 
@@ -2482,7 +2495,9 @@ class Editor():
                 y = self.get_curr_window().buffer_cursor[1]
                 self.get_curr_buffer().visual_set_current(x, y)
                 self.draw()
-            except Exception as e: elog(f"Exception: {e}")
+            except Exception as e:
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             return False
         self.maps[VISUAL][ord('f')] = f_map
         def F_map(self):
@@ -2946,7 +2961,9 @@ class Editor():
                     self.get_curr_window().replace_char_forward(char)
             else:
                 elog(f"REPLACE: ({key}) not printable.")
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         return False
 
     def on_multi_insert(self, key):
@@ -3007,7 +3024,9 @@ class Editor():
                 self.get_curr_window().insert_char(char)
             else:
                 elog(f"INSERT: ({key}) not printable.")
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         return ret
 
     def _find_closest_match(self, x, y, matches, forward=True):
@@ -3177,7 +3196,9 @@ class Editor():
                     if word.startswith(curr_word) and word != curr_word:
                         options.append((word, word[len(curr_word):]))
             return (start_x, list(set(options)))
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         return None
 
     def generate_path_completion_options(self):
@@ -3201,7 +3222,9 @@ class Editor():
             start_pos, options = find_files_suggestions(start_x, curr_WORD)
             # return (start_x, list(set(options)))
             return (start_pos, options)
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         return None
 
 def stdin_pending():

@@ -11,6 +11,7 @@ from utils import *
 from intervaltree import Interval, IntervalTree
 from string import printable
 from os import path
+import traceback
 import time
 import re
 
@@ -563,7 +564,9 @@ class Window():
                                         lineno,
                                         style,
                                         to_flush=False)
-            except Exception as e: elog(f"Exception: {e}")
+            except Exception as e:
+                elog(f"Exception: {e}", type="ERROR")
+                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
     def clear(self):
         for y in range(self.height):
@@ -711,7 +714,9 @@ class Window():
             # is focused?
             if self.tab.get_curr_window().id == self.id:
                 self._draw_cursor()
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         self.screen.enable_cursor()
 
     def _expanded_string_len(self, string):
@@ -944,7 +949,8 @@ class Window():
         try:
             return self.buffer.lines[line_num]
         except Exception as e:
-            elog(f"Exception: {e}")
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             return None
 
     def half_page_down(self):
@@ -1116,7 +1122,9 @@ class Window():
                                         char)
             # self.draw()
 
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
     def _find(self, char):
         x = self.buffer_cursor[0]
@@ -1660,4 +1668,5 @@ class Window():
                                     style,
                                     to_flush=to_flush)
         except Exception as e:
-            elog(f"Exception: {e}")
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")

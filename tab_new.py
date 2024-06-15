@@ -5,6 +5,8 @@ from hooks import *
 from events import *
 from idr import *
 
+import traceback
+
 SINGLE = 1
 HORIZONTAL= 2
 VERTICAL = 3

@@ -7,6 +7,7 @@ from screen import *
 from os import path
 
 from string import printable
+import traceback
 
 
 class GenericPopup():
@@ -109,7 +110,9 @@ class GenericPopup():
                                 string,
                                 style,
                                 to_flush=False)
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
     def draw(self):
         try:
@@ -137,7 +140,9 @@ class GenericPopup():
 
                 cur_index -= 1
 
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         self.screen.flush()
 
     def pop(self):
@@ -148,7 +153,9 @@ class GenericPopup():
                 self.draw()
                 key = self.screen.get_key()
                 if self.on_key(key): break
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
         self.screen.enable_cursor()
 
@@ -216,7 +223,9 @@ class DetailsPopup():
                 self.__draw(1, y+1, f"{self.details[y]}", style)
 
             self.screen.flush()
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
     def __draw_frame(self):
         style = {}
@@ -249,7 +258,9 @@ class DetailsPopup():
                                 string,
                                 style,
                                 to_flush=False)
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
 class CompletionPopup():
     def __init__(   self,
@@ -345,7 +356,8 @@ class CompletionPopup():
                     else: break
                 except: continue
         except Exception as e:
-            elog(f"[!] CompletionPop: Exception: {e}")
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         return False
 
     def pop(self):
@@ -395,7 +407,9 @@ class CompletionPopup():
                         self.__draw(0, y, f"{option}", style)
                     index -= 1
 
-        except Exception as e: elog(f"Exception: here {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         self.screen.flush()
 
     def __draw(self, x, y, string, style):
@@ -420,7 +434,8 @@ class CompletionPopup():
                                     style,
                                     to_flush=False)
         except Exception as e:
-            elog(f"Exception: {e}")
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
 class TSNode():
     def __init__(self, node, level):
@@ -673,7 +688,9 @@ class TreeSitterPopup():
                     self.draw()
 
                 return False
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
         # exit popup if unkown key pressed
         return True
@@ -687,7 +704,9 @@ class TreeSitterPopup():
                 key = self.screen.get_key()
                 to_exit = self.on_key(key)
                 if to_exit: break
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         self.screen.enable_cursor()
         return self.ret_node
 
@@ -724,7 +743,9 @@ class TreeSitterPopup():
                     else:
                         self.__draw(0, y, f"{option}", style)
                     index -= 1
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         self.screen.flush()
 
     def __draw(self, x, y, string, style):
@@ -741,7 +762,9 @@ class TreeSitterPopup():
                                 string,
                                 style,
                                 to_flush=False)
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
 class LinesNode():
     def __init__(   self,
@@ -965,7 +988,9 @@ class LinesPopup():
                     self.draw()
 
                 return False
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         return False
 
     def pop(self):
@@ -977,7 +1002,9 @@ class LinesPopup():
                 key = self.screen.get_key()
                 to_exit = self.on_key(key)
                 if to_exit: break
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         self.screen.enable_cursor()
         return self.y_ret
 
@@ -1015,7 +1042,9 @@ class LinesPopup():
                     else:
                         self.__draw(0, y, f"{line}", style)
                     index -= 1
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
         self.screen.flush()
 
     def __draw(self, x, y, string, style):
@@ -1032,7 +1061,9 @@ class LinesPopup():
                                 string,
                                 style,
                                 to_flush=False)
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
 
 class ErrorPopup():
@@ -1077,7 +1108,9 @@ class ErrorPopup():
                 self.__draw(1, y+1, f"{self.details[y]}", style)
 
             self.screen.flush()
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
     def __draw_frame(self):
         style = {}
@@ -1110,7 +1143,9 @@ class ErrorPopup():
                                 string,
                                 style,
                                 to_flush=False)
-        except Exception as e: elog(f"Exception: {e}")
+        except Exception as e:
+            elog(f"Exception: {e}", type="ERROR")
+            elog(f"traceback: {traceback.format_exc()}", type="ERROR")
 
 class QuickfixPopup():
     def __init__(self, window):
