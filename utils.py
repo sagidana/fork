@@ -30,9 +30,6 @@ def extract_destination(string):
     return file_path, file_line, file_col
 
 def find_files_suggestions(start_x, start_of_path):
-    elog("-"*10)
-    elog(f"start_of_path: {start_of_path}")
-
     # explicit relative path
     path_until_now = start_of_path.split('./', 1)
     if len(path_until_now) == 2:
