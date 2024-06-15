@@ -68,6 +68,7 @@ class Editor():
     def change_mode(self, target, effect_change=True):
         # escape while in normal mode is a no-op (or is it?;)
         if self.mode == NORMAL and target == NORMAL:
+            # just clear the search highlights, this is driving me crazy
             self.get_curr_buffer().clear_highlights()
             self.get_curr_window().draw()
         if self.mode == INSERT and target == NORMAL:
@@ -94,6 +95,9 @@ class Editor():
             self.screen.set_cursor_i_beam()
         if self.mode == VISUAL_LINE and target == NORMAL:
             self.get_curr_window().visual_end()
+        if self.mode == VISUAL_LINE and target == INSERT:
+            self.get_curr_window().visual_end()
+            self.screen.set_cursor_i_beam()
         if self.mode == VISUAL_BLOCK and target == NORMAL:
             self.get_curr_window().visual_end()
         if self.mode == NORMAL and target == REPLACE:
@@ -2056,6 +2060,29 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL_LINE][ord('d')] = d_map
+        def c_map(self):
+            scope = self.get_curr_buffer().visual_get_scope()
+            if not scope: return False
+            start_x, start_y, end_x, end_y = scope
+
+            lines = []
+            for y in range(start_y, end_y + 1):
+                lines.append(self.get_curr_buffer().lines[y])
+
+            self.change_begin()
+            for y in reversed(range(start_y, end_y)):
+                self.get_curr_window().remove_line_at(y, propagate=False)
+            self.get_curr_buffer().flush_changes()
+            self.get_curr_window().empty_line(keep_whitespaces=True)
+
+            data = {}
+            data['meta'] = 'line'
+            data['data'] = lines
+            self.registers['"'] = data
+
+            self.change_mode(INSERT)
+            return False
+        self.maps[VISUAL_LINE][ord('c')] = c_map
         def y_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
