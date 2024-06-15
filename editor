@@ -1142,7 +1142,22 @@ class Editor():
             return False
         self.maps[NORMAL][ord('g')][ord('g')] = gg_map
         def gd_map(self):
-            elog('gd()')
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_buffer().inner_word(x, y)
+            pattern = self.get_curr_buffer().get_scope_text(scope[0],
+                                                            scope[1],
+                                                            scope[2],
+                                                            scope[3])
+            if len(pattern) == 0: return False
+            pattern = pattern[0]
+            pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
+            results = self.get_curr_buffer().search_pattern(pattern)
+            if len(results) == 0: return False
+            start_x, start_y, end_x, end_y = results[0]
+            self.get_curr_window().add_jump()
+            self.get_curr_window().move_cursor_to_buf_location(start_x, start_y)
+            self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('g')][ord('d')] = gd_map
         def comment_object_map(scope):
