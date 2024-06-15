@@ -1094,7 +1094,6 @@ class Editor():
             line = line[self.get_curr_window().buffer_cursor[0]:]
             file_path, file_line, file_col = extract_destination(line)
             if not file_path: return False
-
             buffer = self.get_or_create_buffer(file_path)
             self.get_curr_window().add_jump()
             self.get_curr_window().change_buffer(buffer)
@@ -1767,7 +1766,6 @@ class Editor():
         def ctrl_xf_map(self):
             ret = self.generate_path_completion_options()
             if not ret: return False
-            elog(ret)
             x, options = ret
             if len(options) == 0: return False
             if len(options) == 1:
