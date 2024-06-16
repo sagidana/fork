@@ -381,7 +381,7 @@ class Editor():
                                                             scope[2],
                                                             scope[3])
             if len(pattern) == 0: return False
-            pattern = f"\\W{pattern[0]}\\W"
+            pattern = r"((\W+)|(^))(?P<cword>"+pattern[0]+r")\W"
 
             task = Task(ripgrep, pattern)
             self.tasks.append(task)
