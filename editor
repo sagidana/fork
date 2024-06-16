@@ -2668,7 +2668,8 @@ class Editor():
         self.maps[VISUAL][ord(',')] = comma_map
         def dollar_map(self):
             self.get_curr_window().move_line_end()
-            x = self.get_curr_window().buffer_cursor[0]
+            # dont include the new line char
+            x = self.get_curr_window().buffer_cursor[0]-1
             y = self.get_curr_window().buffer_cursor[1]
             self.get_curr_buffer().visual_set_current(x, y)
             self.draw()
