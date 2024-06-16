@@ -195,9 +195,7 @@ def format(editor, start_x, start_y, end_x, end_y):
     if len(lines) == 0: return
 
     stream = ''.join(lines)
-
     stream = trim_lines(stream)
-
     editor.get_curr_buffer().replace_scope( start_x,
                                             start_y,
                                             end_x,

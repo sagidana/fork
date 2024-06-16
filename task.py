@@ -9,10 +9,11 @@ class Task():
     def __init__(self, callback, arg):
         self.id = get_id(TASK_ID)
         self.on_done_callback = None
+        self.ret = None
         def wrapper(arg):
-            ret = callback(arg)
+            self.ret = callback(arg)
             if self.on_done_callback:
-                self.on_done_callback(ret)
+                self.on_done_callback(self.ret)
 
         self.thread = Thread(target=wrapper, args=(arg, ))
 
@@ -21,7 +22,9 @@ class Task():
 
     def start(self): self.thread.start()
 
-    def wait(self): self.thread.join()
+    def wait(self):
+        self.thread.join()
+        return self.ret
 
     def kill(self): pass # TODO: to implement
 

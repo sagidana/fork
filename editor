@@ -350,19 +350,26 @@ class Editor():
             task = Task(ripgrep, pattern)
             self.tasks.append(task)
             def rg_on_done(results):
-                if not results: return
+                if not results:
+                    # remove the task when done.
+                    self.tasks.remove(task)
+                    return False
                 results = results.decode().splitlines()
-                if len(results) == 0: return
+                if len(results) == 0:
+                    # remove the task when done.
+                    self.tasks.remove(task)
+                    return False
                 self.get_curr_window().quickfix_set(results)
 
                 # remove the task when done.
                 self.tasks.remove(task)
+                return True
+
             task.on_done(rg_on_done)
-
             task.start()
-            task.wait()
+            ret = task.wait()
 
-            self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
+            if ret: self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
             return False
         self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('c')] = ctrl_backslash_c_map
         def ctrl_backslash_s_map(self):
@@ -379,19 +386,26 @@ class Editor():
             task = Task(ripgrep, pattern)
             self.tasks.append(task)
             def rg_on_done(results):
-                if not results: return
+                if not results:
+                    # remove the task when done.
+                    self.tasks.remove(task)
+                    return False
                 results = results.decode().splitlines()
-                if len(results) == 0: return
+                if len(results) == 0:
+                    # remove the task when done.
+                    self.tasks.remove(task)
+                    return False
                 self.get_curr_window().quickfix_set(results)
 
                 # remove the task when done.
                 self.tasks.remove(task)
+                return True
 
             task.on_done(rg_on_done)
             task.start()
-            task.wait()
+            ret = task.wait()
 
-            self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
+            if ret: self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
             return False
         self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('s')] = ctrl_backslash_s_map
         def ctrl_close_bracket_map(self):
