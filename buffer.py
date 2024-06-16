@@ -213,13 +213,12 @@ class Buffer():
             first_line = self.lines[0]
             if not first_line.startswith("#!/"): return None
 
-            m = re.match("#!(?P<program>[a-zA-Z0-9/]+)\s*$", first_line)
+            m = re.match(r"#!(?P<program>[a-zA-Z0-9\./]+)\s*$", first_line)
+
             if not m:
                 return None
             program = m.groups('program')[0]
-            if  program == "/usr/bin/python3" or \
-                program == "/usr/bin/python2" or \
-                program == "/usr/bin/python":
+            if  "python" in program:
                 return "python"
             return None
 
