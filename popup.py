@@ -9,6 +9,165 @@ from os import path
 from string import printable
 import traceback
 
+class Popup():
+    def on_resize(self, width, height):
+        self.width=width
+        self.height=height
+
+    def __init__(   self,
+                    lines,
+                    selected=0,
+                    keymap=None):
+        self.screen = Screen(wrap=True)
+        self.screen.on_resize=self.on_resize
+        self.position = [0,0]
+        self.width = self.screen.width
+        self.height = self.screen.height
+        self.lines = lines
+        self.selected = selected
+        self.keymap = keymap
+        self.lines_history = []
+
+        self.ret = None
+
+    def on_key(self, key):
+        if self.keymap is not None and key in self.keymap:
+            return self.keymap[key](self)
+
+        if key == ESC_KEY or key == ord('q'):
+            if len(self.lines_history) > 0:
+                self.lines = self.lines_history.pop()
+                return False
+
+            return True
+        if key == ENTER_KEY:
+            self.ret = self.lines[self.selected]
+            return True
+        if key == ord('j'):
+            if self.selected < len(self.lines) - 1:
+                self.selected += 1
+            return False
+        if key == ord('k'):
+            if self.selected > 0:
+                self.selected -= 1
+            return False
+        if key == CTRL_U_KEY:
+            half = int(self.height / 2)
+            if self.selected < half: self.selected = 0
+            else: self.selected -= half
+            return False
+        if key == CTRL_D_KEY:
+            half = int(self.height / 2)
+            left = len(self.lines) - self.selected - 1
+            if left > half: self.selected += half
+            else: self.selected += left
+            return False
+        if key == ord('g'):
+            key = self.screen.get_key()
+            if key == ord('g'):
+                self.selected = 0
+                return False
+        if key == ord('G'):
+            self.selected = len(self.lines) - 1
+            return False
+        if key == ord('/'):
+            pattern = ""
+            success = False
+            original_lines = self.lines
+            original_selected = self.selected
+
+            self.lines_history.append(self.lines) # add current to lines history
+            while True:
+                key = self.screen.get_key()
+
+                if key == ENTER_KEY:
+                    if len(pattern) > 0: success = True
+                    break
+                if key == ESC_KEY: break
+                if key == BACKSPACE_KEY:
+                    if len(pattern) > 0: pattern = pattern[:-1]
+                else:
+                    try:
+                        char = chr(key)
+                        if char in printable:
+                            pattern += char
+                        else: break
+                    except: continue
+                filtered_lines = [line for line in original_lines if pattern in line]
+                if len(filtered_lines) > 0:
+                    self.lines = filtered_lines
+                    if self.selected >= len(self.lines):
+                        self.selected = len(self.lines) - 1
+                    self.draw()
+            if not success:
+                self.lines = original_lines
+                self.selected = original_selected
+                self.lines_history.pop() # unchanged, remove what we added at the start
+
+            return False
+
+    def __draw(self, x, y, string, style):
+        try:
+            if x >= self.width: return
+            if y >= self.height: return
+
+            if x + len(string) - 1 >= self.width:
+                space_for = self.width  - x
+                string = string[:space_for]
+
+            self.screen.write(  self.position[1] + y,
+                                self.position[0] + x,
+                                string,
+                                style,
+                                to_flush=False)
+        except Exception as e: print(f"Exception: {e}")
+
+    def draw(self):
+        try:
+            style = {}
+            style['background'] = get_settings()['theme']['colors']['menu.background']
+            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            selected_style = {}
+            selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
+            selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+
+            # clean the space of pop
+            # for y in range(self.height): self.__draw(0, y, " "*self.width, style)
+            self.screen.clear()
+
+
+            cur_index = self.height - 1
+            if self.selected >= self.height:
+                cur_index = self.selected
+
+            for y in reversed(range(self.height)):
+                try:
+                    line = self.lines[cur_index]
+                    line = line[:self.width] # fit to pop dimentions if need be
+
+                    self.__draw(0, y, line, selected_style if cur_index == self.selected else style)
+                except: pass
+
+                cur_index -= 1
+
+        except Exception as e: print(f"Exception: {e}")
+        self.screen.flush()
+
+    def pop(self):
+        self.screen.disable_cursor()
+
+        self.ret = None
+        try:
+            while True:
+                self.draw()
+                key = self.screen.get_key()
+                if self.on_key(key) is True:
+                    break
+        except Exception as e: print(f"Exception: {e}")
+
+        self.screen.enable_cursor()
+
+        return self.ret
 
 class GenericPopup():
     def __init__(   self,
