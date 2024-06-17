@@ -109,7 +109,7 @@ def _get_comment_syntax(language):
     return comment_syntax
 
 def _index_of_first_nonspace_char(string):
-    m = re.match('(\s*)', string)
+    m = re.match(r'(\s*)', string)
     if m: return len(m.group(0))
     return -1
 
@@ -135,8 +135,8 @@ def comment(editor, start_y, end_y):
     commented = True
     for y in range(start_y, end_y + 1):
         line = editor.get_curr_window().get_line(y)
-        if re.match('^\s*$', line): continue # skip empty lines
-        if not re.match(f'^\s*{comment_syntax} .*$', line):
+        if re.match(r'^\s*$', line): continue # skip empty lines
+        if not re.match(f'^\\s*{comment_syntax} .*$', line):
             commented = False
             break
 
@@ -144,7 +144,7 @@ def comment(editor, start_y, end_y):
         # lets comment
         for y in range(start_y, end_y + 1):
             line = editor.get_curr_window().get_line(y)
-            if re.match('^\s*$', line): continue # skip empty lines
+            if re.match(r'^\s*$', line): continue # skip empty lines
             i = _index_of_first_nonspace_char(line)
             if i == -1:
                 elog(f"i: {i} {line}")
@@ -155,7 +155,7 @@ def comment(editor, start_y, end_y):
         # lets uncomment
         for y in range(start_y, end_y + 1):
             line = editor.get_curr_window().get_line(y)
-            if re.match('^\s*$', line): continue # skip empty lines
+            if re.match(r'^\s*$', line): continue # skip empty lines
             i = _index_of_first_nonspace_char(line)
             if i == -1:
                 elog(f"i: {i} {line}")
@@ -173,34 +173,36 @@ def clipboard(text):
                                                     stderr=DEVNULL) as pipe:
         pipe.communicate(input=text.encode('utf-8'))
 
-def trim_lines(text, max_chars=80):
-    words = iter(text.split())
-    lines, current = [], next(words)
-    for word in words:
-        if len(current) + 1 + len(word) > max_chars:
-            lines.append(current)
-            current = word
-        else:
-            current += " " + word
-    lines.append(current)
-    return '\n'.join(lines)
-
 def format(editor, start_x, start_y, end_x, end_y):
-    start_x = 0
-    end_x = len(editor.get_curr_window().get_line(end_y)) - 2
-    lines = editor.get_curr_buffer().get_scope_text(start_x,
-                                                    start_y,
-                                                    end_x,
-                                                    end_y)
-    if len(lines) == 0: return
+    try:
+        start_x = 0
+        end_x = len(editor.get_curr_window().get_line(end_y)) - 2
+        lines = editor.get_curr_buffer().get_scope_text(start_x,
+                                                        start_y,
+                                                        end_x,
+                                                        end_y)
+        if len(lines) == 0: return
 
-    stream = ''.join(lines)
-    stream = trim_lines(stream)
-    editor.get_curr_buffer().replace_scope( start_x,
-                                            start_y,
-                                            end_x,
-                                            end_y,
-                                            stream)
+        stream = ''.join(lines)
+
+        cmd = ["fmt"]
+        env = environ.copy()
+        p = Popen(cmd,
+                  stdin=PIPE,
+                  stdout=PIPE,
+                  stderr=None,
+                  env=env)
+        output, errors = p.communicate(input=stream.encode())
+        formated_string = output.decode('utf-8')
+        editor.get_curr_buffer().replace_scope( start_x,
+                                                start_y,
+                                                end_x,
+                                                end_y,
+                                                formated_string)
+    except Exception as e:
+        elog(f"Exception: {e}", type="ERROR")
+        elog(f"traceback: {traceback.format_exc()}", type="ERROR")
+    return None
 
 def _doc_code(editor):
     time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

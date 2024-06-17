@@ -339,11 +339,6 @@ class Window():
         for node, style in get_syntax_highlights(   self.buffer.treesitter,
                                                     start_point=(screen_start_y, 0),
                                                     end_point=(screen_end_y+1, 0)):
-            # elog(f"{dir(node)}")
-            # start_pos = self.buffer.get_file_pos(node.start_point[1],node.start_point[0])
-            # end_pos = self.buffer.get_file_pos(node.end_point[1],node.end_point[0])
-            # start_pos = node.start_byte
-            # end_pos = node.end_byte
             start_pos = (node.start_point[0] * MAX_COLS) + node.start_point[1]
             end_pos = (node.end_point[0] * MAX_COLS) + node.end_point[1]
 
@@ -490,7 +485,6 @@ class Window():
                 if y < screen_start_y: continue
 
                 char = self.get_line(y)[x]
-                # elog(f"line: {self.get_line(y)} {x} {char}")
                 self._screen_write( self._expanded_x(y, x),
                                     y - screen_start_y,
                                     char,
@@ -498,7 +492,7 @@ class Window():
         except Exception as e:
             elog(f"[!] multi_cursors {e}")
 
-    def _get_curr_highlight(self):
+    def _get_curr_highlight_index(self):
         buf_x = self.buffer_cursor[0]
         buf_y = self.buffer_cursor[1]
         index = "?"
@@ -512,7 +506,7 @@ class Window():
     def _get_highlights_status(self):
         total = len(self.buffer.highlights)
         if total == 0: return ""
-        curr = self._get_curr_highlight()
+        curr = self._get_curr_highlight_index()
         return f"[{curr}/{total}]"
 
     def draw_status_line(self):
@@ -574,29 +568,7 @@ class Window():
             end_x = self.width - 1
             self._screen_clear_line_partial(y, start_x, end_x)
 
-    def _get_scope_text(self, start_x, start_y, end_x, end_y):
-        if start_y == end_y:
-            return self.buffer.lines[start_y][start_x:end_x]
-
-        # first line
-        text = self.buffer.lines[start_y][start_x:]
-
-        # middle
-        curr_line_number = start_y + 1
-        while curr_line_number < end_y:
-            text += self.buffer.lines[curr_line_number]
-            curr_line_number += 1
-
-        # last line
-        text += self.buffer.lines[end_y][:end_x]
-
-        return text
-
     def draw(self):
-        # elog(f"drawing window: {self.id}")
-        # import traceback
-        # for s in traceback.extract_stack():
-            # elog(f"    {path.basename(s.filename)}: {s.name}")
         debug = False
         self.screen.disable_cursor()
         try:
@@ -856,9 +828,6 @@ class Window():
         else:
             self.window_cursor[0] += 1
 
-        # self.buffer.visual_set_current( self.buffer_cursor[0],
-                                        # self.buffer_cursor[1])
-
     def _move_left(self):
         if self.buffer_cursor[0] == 0: return
 
@@ -870,14 +839,10 @@ class Window():
             self.window_cursor[0] -= 1
             self.remember = 0
 
-        # self.buffer.visual_set_current( self.buffer_cursor[0],
-                                        # self.buffer_cursor[1])
-
     def _align_center(self):
         center = int(self.content_height / 2)
         if self.buffer_cursor[1] < center:
             self.window_cursor[1] = self.buffer_cursor[1]
-        # elif self.buffer_cursor[1] :
         else:
             self.window_cursor[1] = center
 
@@ -1026,8 +991,6 @@ class Window():
         while self.window_cursor[1] < self.content_height - 1:
             if not self._move_down(): break
         self.draw_cursor()
-
-    def move_line(self, line): pass
 
     def _move_to_x(self, x):
         while self.buffer_cursor[0] > x: self._move_left()
