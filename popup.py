@@ -20,7 +20,6 @@ class Popup():
                     lines,
                     selected=0,
                     keymap=None):
-        # self.screen = Screen(wrap=True)
         self.screen = screen
         self.screen.on_resize=self.on_resize
         self.position = position
@@ -128,15 +127,14 @@ class Popup():
     def draw(self):
         try:
             style = {}
-            style['background'] = get_settings()['theme']['colors']['menu.background']
-            style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            style['background'] = get_setting("menu_background")
+            style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
             selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
             selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
 
-            # clean the space of pop
-            # for y in range(self.height): self.__draw(0, y, " "*self.width, style)
-            self.screen.clear()
+            # self.screen.clear()
+            for y in range(self.height): self.__draw(0, y, " "*self.width, style)
 
 
             cur_index = self.height - 1
@@ -223,8 +221,6 @@ class DetailsPopup():
     def draw(self):
         try:
             style = {}
-            # style['background'] = get_settings()['theme']['colors']['menu.background']
-            # style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
             style['background'] = get_setting("menu_background")
             style['foreground'] = get_setting("menu_foreground")
 

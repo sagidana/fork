@@ -67,11 +67,6 @@ def random_string(len=10):
 
 def ripgrep(search):
     try:
-        # results_path = f"/tmp/rg-{random_string()}"
-        # while path.isfile(results_path):
-            # results_path = f"/tmp/rg-{random_string()}"
-        # results_file = open(results_path, 'w')
-
         cmd = [ "rg",
                 "-g","!tags",
                 "--max-columns","200",
@@ -81,20 +76,6 @@ def ripgrep(search):
 
         if len(output) > 0:
             return output
-        # if path.getsize(results_path) > 0:
-            # return results_path
-        # results = []
-        # for _result in _results.splitlines():
-            # parts = _result.split(':')
-            # if len(parts) < 4: continue
-
-            # results.append({
-                # "file": parts[0],
-                # "line": parts[1],
-                # "col": parts[2],
-                # "text": parts[3]
-                # })
-        # return results
     except Exception as e: elog(f"ripgrep exception: {e}")
     return None
 
