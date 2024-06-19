@@ -25,7 +25,7 @@ from plugins import comment
 from plugins import ripgrep
 from plugins import format
 from plugins import doc, doc_get_latest_file
-from plugins import fzf
+from plugins import fzf, rg_fzf
 from plugins import gotovim
 from plugins import gd
 

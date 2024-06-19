@@ -32,6 +32,37 @@ def gotovim(editor):
             elog(f"traceback: {traceback.format_exc()}", type="ERROR")
     return None
 
+def rg_fzf(editor, pattern):
+    """
+    This is so cool, fzf print out to stderr the fuzzing options,
+    and only the chosen result spit to the stdout.. this enables scripts like
+    this to work out of the box, no redirection of the stderr is need - and
+    only the result is redirected to our pipe (which contain the result)
+    FZF - good job :)
+    """
+    try:
+        stdin = editor.screen.stdin
+        stderr = editor.screen.stdout
+
+        rg_command = f"rg -g !tags --max-columns 200 --vimgrep \"{pattern}\""
+        cmd = ["fzf"]
+        env = environ.copy()
+        env["FZF_DEFAULT_COMMAND"] = rg_command
+        env["FZF_DEFAULT_OPTS"] = "--delimiter=':' --preview-window '+{2}-/2' --preview 'clp -h {2} {1}'"
+        p = Popen(cmd,
+                  stdin=stdin,
+                  stdout=PIPE,
+                  stderr=stderr,
+                  env=env)
+        output, errors = p.communicate()
+        file_path = output.decode('utf-8').strip()
+        file_path = file_path.replace("\n", "")
+        if len(file_path) > 0: return file_path
+    except Exception as e:
+        elog(f"Exception: {e}", type="ERROR")
+        elog(f"traceback: {traceback.format_exc()}", type="ERROR")
+    return None
+
 def fzf(editor):
     """
     This is so cool, fzf print out to stderr the fuzzing options,
@@ -47,6 +78,7 @@ def fzf(editor):
         cmd = ["fzf"]
         env = environ.copy()
         env["FZF_DEFAULT_COMMAND"] = "rg --files"
+        env["FZF_DEFAULT_OPTS"] = "--preview='clp {}'"
         p = Popen(cmd,
                   stdin=stdin,
                   stdout=PIPE,
