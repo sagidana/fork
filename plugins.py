@@ -51,7 +51,8 @@ def rg_fzf(editor, pattern):
         env = environ.copy()
         fzf_options = "--bind 'ctrl-z:toggle-preview' " # p to toggle preview
         fzf_options += "--delimiter=':' "
-        fzf_options += "--no-sort "
+        # fzf_options += "--no-sort "
+        fzf_options += "--tiebreak=index "
         fzf_options += "--preview-window '+{2}-/2' "
         fzf_options += "--preview 'bat --style=full --color=always -H {2} {1}'" # preview using bat
         # fzf_options += "--preview 'clp {}'" # preview using clp
@@ -87,7 +88,8 @@ def fzf(editor):
         env = environ.copy()
         fzf_options = "--bind 'ctrl-z:toggle-preview' " # p to toggle preview
         fzf_options += "--delimiter=':' "
-        fzf_options += "--no-sort "
+        # fzf_options += "--no-sort "
+        fzf_options += "--tiebreak=index "
         fzf_options += "--preview-window '+{2}-/2' "
         fzf_options += "--preview 'bat --style=full --color=always {}'" # preview using bat
         # fzf_options += "--preview 'clp {}'" # preview using clp
