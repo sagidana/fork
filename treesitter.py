@@ -37,6 +37,17 @@ CSHARP_LANGUAGE =       Language(tree_sitter_c_sharp.language())
 JSON_LANGUAGE =         Language(tree_sitter_json.language())
 # MARKDOWN_LANGUAGE =     Language(tree_sitter_json.language())
 
+# def load_language(path, name):
+    # from ctypes import c_void_p, cdll
+    # from typing import Callable, List, Optional, Union
+    # try:
+        # lib = cdll.LoadLibrary('sql.so', 'sql')
+        # language_function: Callable[[],int] = getattr(lib, "tree_sitter_sql")
+        # language_function.restype = c_void_p
+        # return Language(language_function())
+    # except: pass
+    # return None
+
 
 def walk(node, cb, level=0, nth_child=0):
     if cb(node, level, nth_child): return True
