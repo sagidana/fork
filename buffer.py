@@ -19,6 +19,33 @@ WORD_REGEX = '[a-zA-Z0-9_]'
 W_O_R_D_REGEX = '[a-zA-Z0-9]'
 SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
 
+
+class Scope():
+    def __init__(self, src_x, src_y, dst_x, dst_y):
+        self.src_x, self.src_y = src_x, src_y
+        self.dst_x, self.dst_y = dst_x, dst_y
+
+    def start_point(self):
+        if self.src_y > self.dst_y:
+            return self.dst_x, self.dst_y
+        if self.src_y == self.dst_y and self.src_x > self.dst_x:
+            return self.dst_x, self.dst_y
+        return self.src_x, self.src_y
+
+    def end_point(self):
+        if self.src_y > self.dst_y:
+            return self.src_x, self.src_y
+        if self.src_y == self.dst_y and self.src_x > self.dst_x:
+            return self.src_x, self.src_y
+        return self.dst_x, self.dst_y
+
+    def src_point(self):
+        return self.src_x, self.src_y
+
+    def dst_point(self):
+        return self.dst_x, self.dst_y
+
+
 class Buffer():
     def on_buffer_change_callback(self, change):
         if change:
