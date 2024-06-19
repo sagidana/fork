@@ -49,8 +49,14 @@ def rg_fzf(editor, pattern):
         rg_command = f"rg -g !tags --max-columns 200 --vimgrep \"{pattern}\""
         cmd = ["fzf"]
         env = environ.copy()
+        fzf_options = "--bind 'ctrl-z:toggle-preview' " # p to toggle preview
+        fzf_options += "--delimiter=':' "
+        fzf_options += "--no-sort "
+        fzf_options += "--preview-window '+{2}-/2' "
+        fzf_options += "--preview 'bat --style=full --color=always -H {2} {1}'" # preview using bat
+        # fzf_options += "--preview 'clp {}'" # preview using clp
         env["FZF_DEFAULT_COMMAND"] = rg_command
-        env["FZF_DEFAULT_OPTS"] = "--delimiter=':' --preview-window '+{2}-/2' --preview 'clp -h {2} {1}'"
+        env["FZF_DEFAULT_OPTS"] = fzf_options
         p = Popen(cmd,
                   stdin=stdin,
                   stdout=PIPE,
@@ -79,8 +85,14 @@ def fzf(editor):
 
         cmd = ["fzf"]
         env = environ.copy()
+        fzf_options = "--bind 'ctrl-z:toggle-preview' " # p to toggle preview
+        fzf_options += "--delimiter=':' "
+        fzf_options += "--no-sort "
+        fzf_options += "--preview-window '+{2}-/2' "
+        fzf_options += "--preview 'bat --style=full --color=always {}'" # preview using bat
+        # fzf_options += "--preview 'clp {}'" # preview using clp
         env["FZF_DEFAULT_COMMAND"] = "rg --files"
-        env["FZF_DEFAULT_OPTS"] = "--preview='clp {}'"
+        env["FZF_DEFAULT_OPTS"] = fzf_options
         p = Popen(cmd,
                   stdin=stdin,
                   stdout=PIPE,
