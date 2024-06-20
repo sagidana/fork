@@ -293,7 +293,7 @@ def doc_get_latest_file():
 
 def doc(mode, editor):
     # create doc folder if not exist
-    default_doc_path = path.expanduser('~/.doc/')
+    default_doc_path = path.expanduser('~/')
     doc_path = get_setting("doc_path", default=default_doc_path)
     if not path.exists(doc_path): os.makedirs(doc_path)
     # file_name = f"{date.today()}.md"
