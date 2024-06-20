@@ -93,7 +93,7 @@ def fzf(editor):
         fzf_options += "--preview-window '+{2}-/2' "
         fzf_options += "--preview 'bat --style=full --color=always {}'" # preview using bat
         # fzf_options += "--preview 'clp {}'" # preview using clp
-        env["FZF_DEFAULT_COMMAND"] = "rg --files --hidden"
+        env["FZF_DEFAULT_COMMAND"] = "rg --files --hidden -g !.git/"
         env["FZF_DEFAULT_OPTS"] = fzf_options
         p = Popen(cmd,
                   stdin=stdin,
