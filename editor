@@ -20,7 +20,7 @@ from events import *
 from hooks import *
 from popup import *
 
-from plugins import clipboard
+from plugins import yank_to_clipboard, paste_from_clipboard
 from plugins import comment
 from plugins import ripgrep
 from plugins import format
@@ -1050,7 +1050,7 @@ class Editor():
             if len(text) == 0: return False
 
             # send yanked text to clipboard
-            clipboard(text)
+            yank_to_clipboard(text)
 
             data = {}
             data['meta'] = 'char'
@@ -1078,7 +1078,7 @@ class Editor():
             text = [self.get_curr_window().get_curr_line()]
 
             # send yanked text to clipboard
-            clipboard(text)
+            yank_to_clipboard(text)
 
             data["data"] = text
             data["meta"] = "line" # to let the paste know the data is entire line.
@@ -1718,11 +1718,34 @@ class Editor():
             return False
         self.maps[NORMAL][ord(' ')][ord('t')][ord('c')] = leader_tc_map
         def leader_p_map(self):
+            text = paste_from_clipboard()
+            if not text: return False
+            lines = text.splitlines(keepends=True)
+            # is_line_mode = True if len(lines > 1) or lines[0].endswith('\n') else False
+            # is_char_mode = not is_line_mode
+
+            self.change_begin()
+
+            _lines = []
+            for line in lines:
+                if line.endswith('\n'):
+                    _lines.append(line[:-1])
+                else:
+                    _lines.append(line)
+            lines = _lines
+            string = '\n'.join(_lines)
+            self.get_curr_window().move_right()
+            self.get_curr_window().insert_string(string)
+
+            self.change_end()
+            return False
+        self.maps[NORMAL][ord(' ')][ord('p')] = leader_p_map
+        def leader_P_map(self):
             details = DetailsPopup(self)
             details.pop()
             self.get_curr_tab().draw() # need to redraw after popup
             return False
-        self.maps[NORMAL][ord(' ')][ord('p')] = leader_p_map
+        self.maps[NORMAL][ord(' ')][ord('P')] = leader_P_map
         def leader_oc_map(self):
             config_path = os.path.expanduser('~/.config/editor/config.json')
             buffer = self.get_or_create_buffer(config_path)
@@ -1956,7 +1979,7 @@ class Editor():
             # if len(text) == 0: return False
 
             # # send yanked text to clipboard
-            # clipboard(text)
+            # yank_to_yank_to_clipboard(text)
 
             # data = {}
             # data['meta'] = 'char'
@@ -2149,7 +2172,7 @@ class Editor():
             self.change_end()
 
             # send yanked text to clipboard
-            clipboard(lines)
+            yank_to_clipboard(lines)
 
             data = {}
             data['meta'] = 'line'
@@ -2193,7 +2216,7 @@ class Editor():
             if len(lines) == 0: return False
 
             # send yanked text to clipboard
-            clipboard(lines)
+            yank_to_clipboard(lines)
 
             data = {}
             data['meta'] = 'line'
@@ -2434,7 +2457,7 @@ class Editor():
             self.registers['"'] = data
 
             # send yanked text to clipboard
-            clipboard(text)
+            yank_to_clipboard(text)
 
             self.change_begin()
 
@@ -2498,7 +2521,7 @@ class Editor():
             if len(text) == 0: return False
 
             # send yanked text to clipboard
-            clipboard(text)
+            yank_to_clipboard(text)
 
             data = {}
             data['meta'] = 'char'

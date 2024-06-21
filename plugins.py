@@ -193,7 +193,17 @@ def comment(editor, start_y, end_y):
             editor.get_curr_window().set_line(y, line, propagate=False)
     editor.get_curr_buffer().flush_changes()
 
-def clipboard(text):
+def paste_from_clipboard():
+    ''' Paste `text` from the clipboard '''
+    with Popen(['xclip','-selection', 'clipboard', '-o'],
+                stdin=DEVNULL,
+                stdout=PIPE,
+                stderr=DEVNULL) as pipe:
+        out, _ = pipe.communicate()
+        if not out: return None
+        return out.decode()
+
+def yank_to_clipboard(text):
     ''' Copy `text` to the clipboard '''
     text = ''.join(text)
 
