@@ -63,23 +63,18 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - visual block mode
 - adding kill to tasks
 - adding popup for managing tasks
-- make asterisk work as <cword> in vim
 - record jumps in all the right places
 - when pasting from clipboard it is very slow because of the insert operation
     - make it faster by pasting it directly from the clipboard instead of inserting
     char by char
-- make ALL delete operations to also yank the text...
-    - never thought this is something I used so much, I actually useless without it.
 - add support for diff output
 - add support for bash scripts
-- add support to <ctrl><x><f> in insert mode: auto complete filesystem paths
 
 - in visual line mode, when highlights are one and we change the selected lines,
   the highlight do not drawing smoothly
 - take influence from helix/kakoun
     - mutli lines selection
     - server/client architecture
-- make gq take into account the indent level..
 - horizontal scrolling
 - add tabs status line like in vim
     - adding set_position() and resize() methods in Tab class
@@ -95,8 +90,6 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - adding marks?
 
 - FIX: on search, the prompt isn't draw smoothly as we write more and more characters
-- BUG: difflib is extremely slow or maybe even freezes
-    - try to comment/indent all lines of a large file
 - BUG: tab._adjust_sizes() corner case:
     - vsplit, split, move_left, split
     - close a window will cause colition of windows
@@ -104,12 +97,4 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 - BUG: status line dont show if cursor is on last line
 
 - ctags
-- maybe add AST-based text object?
-    - `if`/`af` inner/arround if
-    - `ir`/`ar` inner/arround for
-    - `ie`/`ae` inner/arround while
-    - `iy`/`ay` inner/arround try
-    - `im`/`am` inner/arround method/function
-- goto
-    - start of function
 

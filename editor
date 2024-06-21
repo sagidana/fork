@@ -320,29 +320,40 @@ class Editor():
             if len(pattern) == 0: return False
             pattern = f"\\W{pattern[0]}\\("
 
-            task = Task(ripgrep, pattern)
-            self.tasks.append(task)
-            def rg_on_done(results):
-                if not results:
-                    # remove the task when done.
-                    self.tasks.remove(task)
-                    return False
-                results = results.decode().splitlines()
-                if len(results) == 0:
-                    # remove the task when done.
-                    self.tasks.remove(task)
-                    return False
-                self.get_curr_window().quickfix_set(results)
+            location = rg_fzf(self, pattern)
+            if location is None: return False
 
-                # remove the task when done.
-                self.tasks.remove(task)
-                return True
+            file_path, file_line, file_col = extract_destination(location)
+            buffer = self.get_or_create_buffer(file_path)
+            self.get_curr_window().add_jump()
+            self.get_curr_window().change_buffer(buffer)
+            self.get_curr_window().move_cursor_to_buf_location(file_col, file_line)
+            self.get_curr_window().add_jump()
+            self.get_curr_window().align_center()
 
-            task.on_done(rg_on_done)
-            task.start()
-            ret = task.wait()
+            # task = Task(ripgrep, pattern)
+            # self.tasks.append(task)
+            # def rg_on_done(results):
+                # if not results:
+                    # # remove the task when done.
+                    # self.tasks.remove(task)
+                    # return False
+                # results = results.decode().splitlines()
+                # if len(results) == 0:
+                    # # remove the task when done.
+                    # self.tasks.remove(task)
+                    # return False
+                # self.get_curr_window().quickfix_set(results)
 
-            if ret: self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
+                # # remove the task when done.
+                # self.tasks.remove(task)
+                # return True
+
+            # task.on_done(rg_on_done)
+            # task.start()
+            # ret = task.wait()
+
+            # if ret: self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
             return False
         self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('c')] = ctrl_backslash_c_map
         def ctrl_backslash_s_map(self):
@@ -356,29 +367,40 @@ class Editor():
             if len(pattern) == 0: return False
             pattern = r"((\W+)|(^))(?P<cword>"+pattern[0]+r")\W"
 
-            task = Task(ripgrep, pattern)
-            self.tasks.append(task)
-            def rg_on_done(results):
-                if not results:
-                    # remove the task when done.
-                    self.tasks.remove(task)
-                    return False
-                results = results.decode().splitlines()
-                if len(results) == 0:
-                    # remove the task when done.
-                    self.tasks.remove(task)
-                    return False
-                self.get_curr_window().quickfix_set(results)
+            location = rg_fzf(self, pattern)
+            if location is None: return False
 
-                # remove the task when done.
-                self.tasks.remove(task)
-                return True
+            file_path, file_line, file_col = extract_destination(location)
+            buffer = self.get_or_create_buffer(file_path)
+            self.get_curr_window().add_jump()
+            self.get_curr_window().change_buffer(buffer)
+            self.get_curr_window().move_cursor_to_buf_location(file_col, file_line)
+            self.get_curr_window().add_jump()
+            self.get_curr_window().align_center()
 
-            task.on_done(rg_on_done)
-            task.start()
-            ret = task.wait()
+            # task = Task(ripgrep, pattern)
+            # self.tasks.append(task)
+            # def rg_on_done(results):
+                # if not results:
+                    # # remove the task when done.
+                    # self.tasks.remove(task)
+                    # return False
+                # results = results.decode().splitlines()
+                # if len(results) == 0:
+                    # # remove the task when done.
+                    # self.tasks.remove(task)
+                    # return False
+                # self.get_curr_window().quickfix_set(results)
 
-            if ret: self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
+                # # remove the task when done.
+                # self.tasks.remove(task)
+                # return True
+
+            # task.on_done(rg_on_done)
+            # task.start()
+            # ret = task.wait()
+
+            # if ret: self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
             return False
         self.maps[NORMAL][CTRL_BACKSLASH_KEY][ord('s')] = ctrl_backslash_s_map
         def ctrl_close_bracket_map(self):
@@ -1597,20 +1619,19 @@ class Editor():
         self.maps[NORMAL][ord(' ')][ord('s')][ord('f')] = leader_sf_map
         def leader_sc_map(self): # search content
             try:
-                text = self.prompt("rg: ")
-                if len(text) == 0: return False
+                pattern = self.prompt("rg: ")
+                if len(pattern) == 0: return False
 
-                task = Task(ripgrep, text)
-                self.tasks.append(task)
-                def rg_on_done(results):
-                    if not results: return
-                    self.get_curr_tab().split(Buffer(data_in_bytes=results))
+                location = rg_fzf(self, pattern)
+                if location is None: return False
 
-                    # remove the task when done.
-                    self.tasks.remove(task)
-
-                task.on_done(rg_on_done)
-                task.start()
+                file_path, file_line, file_col = extract_destination(location)
+                buffer = self.get_or_create_buffer(file_path)
+                self.get_curr_window().add_jump()
+                self.get_curr_window().change_buffer(buffer)
+                self.get_curr_window().move_cursor_to_buf_location(file_col, file_line)
+                self.get_curr_window().add_jump()
+                self.get_curr_window().align_center()
             except Exception as e:
                 elog(f"Exception: {e}", type="ERROR")
                 elog(f"traceback: {traceback.format_exc()}", type="ERROR")
@@ -2656,21 +2677,33 @@ class Editor():
             start_x, start_y, end_x, end_y = scope
             text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
             if len(text) == 0: return False
-            text = text[0]
+            pattern = text[0]
 
-            task = Task(ripgrep, text)
-            self.tasks.append(task)
-            def rg_on_done(results):
-                if not results: return
-                self.get_curr_tab().split(Buffer(data_in_bytes=results))
-
-                # remove the task when done.
-                self.tasks.remove(task)
-
-            task.on_done(rg_on_done)
-            task.start()
+            location = rg_fzf(self, pattern)
+            if location is None: return False
 
             self.change_mode(NORMAL)
+
+            file_path, file_line, file_col = extract_destination(location)
+            buffer = self.get_or_create_buffer(file_path)
+            self.get_curr_window().add_jump()
+            self.get_curr_window().change_buffer(buffer)
+            self.get_curr_window().move_cursor_to_buf_location(file_col, file_line)
+            self.get_curr_window().add_jump()
+            self.get_curr_window().align_center()
+
+            # task = Task(ripgrep, text)
+            # self.tasks.append(task)
+            # def rg_on_done(results):
+                # if not results: return
+                # self.get_curr_tab().split(Buffer(data_in_bytes=results))
+
+                # # remove the task when done.
+                # self.tasks.remove(task)
+
+            # task.on_done(rg_on_done)
+            # task.start()
+
             return False
 
         self.maps[VISUAL][ord(' ')] = {}

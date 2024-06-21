@@ -21,23 +21,6 @@ from os import path
 import traceback
 
 
-PYTHON_LANGUAGE =       Language(tree_sitter_python.language())
-C_LANGUAGE =            Language(tree_sitter_c.language())
-BASH_LANGUAGE =         Language(tree_sitter_bash.language())
-CPP_LANGUAGE =          Language(tree_sitter_cpp.language())
-CSS_LANGUAGE =          Language(tree_sitter_css.language())
-GO_LANGUAGE =           Language(tree_sitter_go.language())
-HTML_LANGUAGE =         Language(tree_sitter_html.language())
-JAVA_LANGUAGE =         Language(tree_sitter_java.language())
-JAVASCRIPT_LANGUAGE =   Language(tree_sitter_javascript.language())
-PHP_LANGUAGE =          Language(tree_sitter_php.language_php())
-RUBY_LANGUAGE =         Language(tree_sitter_ruby.language())
-RUST_LANGUAGE =         Language(tree_sitter_rust.language())
-CSHARP_LANGUAGE =       Language(tree_sitter_c_sharp.language())
-JSON_LANGUAGE =         Language(tree_sitter_json.language())
-# MARKDOWN_LANGUAGE =     Language(tree_sitter_json.language())
-
-
 def walk(node, cb, level=0, nth_child=0):
     if cb(node, level, nth_child): return True
     curr_nth_child = 0
@@ -80,7 +63,46 @@ def traverse_tree(tree, cb):
                 nth_child[level] += 1
                 retracing = False
 
+
+def static_init(cls):
+    if getattr(cls, "static_init", None):
+        cls.static_init()
+        return cls
+
+@static_init
 class TreeSitter():
+    @classmethod
+    def static_init(cls):
+        def load_language(path, name):
+            from ctypes import c_void_p, cdll
+            from typing import Callable, List, Optional, Union
+            try:
+                lib = cdll.LoadLibrary(path)
+                language_function: Callable[[],int] = getattr(lib, f"tree_sitter_{name}")
+                language_function.restype = c_void_p
+                return Language(language_function())
+            except Exception as e:
+                elog(f"Exception: {e}")
+            return None
+
+        cls.PYTHON_LANGUAGE =       Language(tree_sitter_python.language())
+        cls.C_LANGUAGE =            Language(tree_sitter_c.language())
+        cls.BASH_LANGUAGE =         Language(tree_sitter_bash.language())
+        cls.CPP_LANGUAGE =          Language(tree_sitter_cpp.language())
+        cls.CSS_LANGUAGE =          Language(tree_sitter_css.language())
+        cls.GO_LANGUAGE =           Language(tree_sitter_go.language())
+        cls.HTML_LANGUAGE =         Language(tree_sitter_html.language())
+        cls.JAVA_LANGUAGE =         Language(tree_sitter_java.language())
+        cls.JAVASCRIPT_LANGUAGE =   Language(tree_sitter_javascript.language())
+        cls.PHP_LANGUAGE =          Language(tree_sitter_php.language_php())
+        cls.RUBY_LANGUAGE =         Language(tree_sitter_ruby.language())
+        cls.RUST_LANGUAGE =         Language(tree_sitter_rust.language())
+        cls.CSHARP_LANGUAGE =       Language(tree_sitter_c_sharp.language())
+        cls.JSON_LANGUAGE =         Language(tree_sitter_json.language())
+        lib_path = path.join(INSTALLATION_PATH,
+                            "ts_parsers/tree-sitter-markdown/tree-sitter-markdown/libtree-sitter-markdown.so")
+        cls.MARKDOWN_LANGUAGE =     load_language(lib_path, 'markdown')
+
     def __init__(self, file_bytes, language):
         self._initialize_language(language)
         self.language = language
@@ -94,60 +116,60 @@ class TreeSitter():
 
         try:
             if language == 'python':
-                self._language = PYTHON_LANGUAGE
+                self._language = TreeSitter.PYTHON_LANGUAGE
                 with open(query_path.format("python"),"r") as f: query = f.read()
-                self.query = PYTHON_LANGUAGE.query(query)
-                self.parser.set_language(PYTHON_LANGUAGE)
+                self.query = TreeSitter.PYTHON_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.PYTHON_LANGUAGE)
             elif language == 'c':
-                self._language = C_LANGUAGE
+                self._language = TreeSitter.C_LANGUAGE
                 with open(query_path.format("c"),"r") as f: query = f.read()
-                self.query = C_LANGUAGE.query(query)
-                self.parser.set_language(C_LANGUAGE)
+                self.query = TreeSitter.C_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.C_LANGUAGE)
             elif language == 'json':
-                self._language = JSON_LANGUAGE
+                self._language = TreeSitter.JSON_LANGUAGE
                 with open(query_path.format("json"),"r") as f: query = f.read()
-                self.query = JSON_LANGUAGE.query(query)
-                self.parser.set_language(JSON_LANGUAGE)
+                self.query = TreeSitter.JSON_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.JSON_LANGUAGE)
             elif language == 'java':
-                self._language = JAVA_LANGUAGE
+                self._language = TreeSitter.JAVA_LANGUAGE
                 with open(query_path.format("java"),"r") as f: query = f.read()
-                self.query = JAVA_LANGUAGE.query(query)
-                self.parser.set_language(JAVA_LANGUAGE)
+                self.query = TreeSitter.JAVA_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.JAVA_LANGUAGE)
             elif language == 'javascript':
-                self._language = JAVASCRIPT_LANGUAGE
+                self._language = TreeSitter.JAVASCRIPT_LANGUAGE
                 with open(query_path.format("javascript"),"r") as f: query = f.read()
-                self.query = JAVASCRIPT_LANGUAGE.query(query)
-                self.parser.set_language(JAVASCRIPT_LANGUAGE)
+                self.query = TreeSitter.JAVASCRIPT_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.JAVASCRIPT_LANGUAGE)
             elif language == 'smali':
-                self._language = SMALI_LANGUAGE
+                self._language = TreeSitter.SMALI_LANGUAGE
                 with open(query_path.format("smali"),"r") as f: query = f.read()
-                self.query = SMALI_LANGUAGE.query(query)
-                self.parser.set_language(SMALI_LANGUAGE)
-            # elif language == 'markdown':
-                # self._language = MARKDOWN_LANGUAGE
-                # with open(query_path.format("markdown"),"r") as f: query = f.read()
-                # self.query = MARKDOWN_LANGUAGE.query(query)
-                # self.parser.set_language(MARKDOWN_LANGUAGE)
+                self.query = TreeSitter.SMALI_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.SMALI_LANGUAGE)
+            elif language == 'markdown':
+                self._language = TreeSitter.MARKDOWN_LANGUAGE
+                with open(query_path.format("markdown"),"r") as f: query = f.read()
+                self.query = TreeSitter.MARKDOWN_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.MARKDOWN_LANGUAGE)
             elif language == 'cpp':
-                self._language = CPP_LANGUAGE
+                self._language = TreeSitter.CPP_LANGUAGE
                 with open(query_path.format("cpp"),"r") as f: query = f.read()
-                self.query = CPP_LANGUAGE.query(query)
-                self.parser.set_language(CPP_LANGUAGE)
+                self.query = TreeSitter.CPP_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.CPP_LANGUAGE)
             elif language == 'rust':
-                self._language = RUST_LANGUAGE
+                self._language = TreeSitter.RUST_LANGUAGE
                 with open(query_path.format("rust"),"r") as f: query = f.read()
-                self.query = RUST_LANGUAGE.query(query)
-                self.parser.set_language(RUST_LANGUAGE)
+                self.query = TreeSitter.RUST_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.RUST_LANGUAGE)
             elif language == 'go':
-                self._language = GO_LANGUAGE
+                self._language = TreeSitter.GO_LANGUAGE
                 with open(query_path.format("go"),"r") as f: query = f.read()
-                self.query = GO_LANGUAGE.query(query)
-                self.parser.set_language(GO_LANGUAGE)
+                self.query = TreeSitter.GO_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.GO_LANGUAGE)
             elif language == 'bash':
-                self._language = BASH_LANGUAGE
+                self._language = TreeSitter.BASH_LANGUAGE
                 with open(query_path.format("bash"),"r") as f: query = f.read()
-                self.query = BASH_LANGUAGE.query(query)
-                self.parser.set_language(BASH_LANGUAGE)
+                self.query = TreeSitter.BASH_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.BASH_LANGUAGE)
             else:
                 raise Exception("treesitter not support that language.. :(")
         except Exception as e: elog(f"Exception: {e}")

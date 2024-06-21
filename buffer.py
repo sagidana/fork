@@ -15,9 +15,9 @@ import json
 import re
 import os
 
-WORD_REGEX = '[a-zA-Z0-9_]'
-W_O_R_D_REGEX = '[a-zA-Z0-9]'
-SINGLE_REGEX = '[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
+WORD_REGEX = r'[a-zA-Z0-9_]'
+W_O_R_D_REGEX = r'[a-zA-Z0-9]'
+SINGLE_REGEX = r'[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
 
 
 class Scope():
@@ -817,7 +817,7 @@ class Buffer():
         cur = 0
         while cur < len(lines) - 1:
             cmd = lines[cur]
-            m = re.match("^(?P<a_start>\d+)(,(?P<a_end>\d+))?(?P<cmd>[adc])(?P<b_start>\d+)(,(?P<b_end>\d+))?\s*$", cmd)
+            m = re.match(r"^(?P<a_start>\d+)(,(?P<a_end>\d+))?(?P<cmd>[adc])(?P<b_start>\d+)(,(?P<b_end>\d+))?\s*$", cmd)
             if not m:
                 raise Exception("Failed to diff the edit!")
             a_start = int(m.group('a_start'))
@@ -1085,12 +1085,12 @@ class Buffer():
         # skip current word
         found = pos + 1 if skip_current else pos
         for c in stream[found:]:
-            if re.match('\s', c): break
+            if re.match(r'\s', c): break
             found += 1
 
         if found >= len(stream) - 1: return None
         for c in stream[found:]:
-            if not re.match('\s', c):
+            if not re.match(r'\s', c):
                 return self.get_file_x_y(found)
             found += 1
         return None
@@ -1103,11 +1103,11 @@ class Buffer():
         # skip current word begin
         found = pos - 1 if skip_current else pos
         for c in stream[:found+1][::-1]:
-            if not re.match('\s', c): break
+            if not re.match(r'\s', c): break
             found -= 1
         if found <= 0: return None
         for c in stream[:found][::-1]:
-            if re.match('\s', c):
+            if re.match(r'\s', c):
                 return self.get_file_x_y(found)
             found -= 1
         return None
@@ -1155,12 +1155,12 @@ class Buffer():
         # skip current end
         found = pos + 1 if skip_current else pos
         for c in stream[found:]:
-            if not re.match('\s', c): break
+            if not re.match(r'\s', c): break
             found += 1
 
         if found >= len(stream) - 1: return None
         for c in stream[found:]:
-            if re.match('\s', c):
+            if re.match(r'\s', c):
                 return self.get_file_x_y(found - 1)
             found += 1
         return None
