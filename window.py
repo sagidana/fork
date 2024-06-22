@@ -935,24 +935,6 @@ class Window():
         x = min(x, len(self.get_line(y)) - 1)
         return x, y
 
-    def _scroll_up_half_page(self):
-        half = int(self.content_height / 2)
-        for i in range(half): self._move_up()
-        self._align_center()
-
-    def scroll_up_half_page(self):
-        self._scroll_up_half_page()
-        self.draw()
-
-    def _scroll_down_half_page(self):
-        half = int(self.content_height / 2)
-        for i in range(half): self._move_down()
-        self._align_center()
-
-    def scroll_down_half_page(self):
-        self._scroll_down_half_page()
-        self.draw()
-
     def move_begin(self):
         self.window_cursor[0] = 0
         self.window_cursor[1] = 0
@@ -994,10 +976,6 @@ class Window():
         while self.buffer_cursor[0] > x: self._move_left()
         while self.buffer_cursor[0] < x: self._move_right()
 
-    def move_to_x(self, x):
-        self._move_to_x(x)
-        self.draw_cursor()
-
     def _move_line_begin(self, ignore_spaces=False):
         while self.buffer_cursor[0] > 0: self._move_left()
 
@@ -1016,48 +994,6 @@ class Window():
         while self.buffer_cursor[0] < len(self.get_curr_line()) - 1:
             self._move_right()
         self.draw_cursor()
-
-    def move_word_forward(self):
-        ret = self.buffer.find_next_word(   self.buffer_cursor[0],
-                                            self.buffer_cursor[1])
-        if not ret: return
-        x, y = ret
-        self.move_cursor_to_buf_location(x, y)
-
-    def move_word_backward(self):
-        ret = self.buffer.find_prev_word(   self.buffer_cursor[0],
-                                            self.buffer_cursor[1])
-        if not ret: return
-        x, y = ret
-        self.move_cursor_to_buf_location(x, y)
-
-    def move_WORD_forward(self):
-        ret = self.buffer.find_next_WORD(   self.buffer_cursor[0],
-                                            self.buffer_cursor[1])
-        if not ret: return
-        x, y = ret
-        self.move_cursor_to_buf_location(x, y)
-
-    def move_WORD_backward(self):
-        ret = self.buffer.find_prev_WORD(   self.buffer_cursor[0],
-                                            self.buffer_cursor[1])
-        if not ret: return
-        x, y = ret
-        self.move_cursor_to_buf_location(x, y)
-
-    def move_word_end(self):
-        ret = self.buffer.find_word_end(    self.buffer_cursor[0],
-                                            self.buffer_cursor[1])
-        if not ret: return
-        x, y = ret
-        self.move_cursor_to_buf_location(x, y)
-
-    def move_WORD_end(self):
-        ret = self.buffer.find_WORD_end(    self.buffer_cursor[0],
-                                            self.buffer_cursor[1])
-        if not ret: return
-        x, y = ret
-        self.move_cursor_to_buf_location(x, y)
 
     def get_key(self):
         return self.screen.get_key()
@@ -1086,80 +1022,6 @@ class Window():
         except Exception as e:
             elog(f"Exception: {e}", type="ERROR")
             elog(f"traceback: {traceback.format_exc()}", type="ERROR")
-
-    def _find(self, char):
-        x = self.buffer_cursor[0]
-        y = self.buffer_cursor[1]
-        loc = self.buffer.find_next_char(x, y, char)
-        if not loc: return
-        x, y = loc[0], loc[1]
-        self.move_cursor_to_buf_location(x, y)
-
-    def find(self):
-        try: key = self.get_key()
-        except: key = None
-
-        try:
-            char = chr(key)
-            self._find(char)
-            return char
-        except: pass
-
-    def _find_back(self, char):
-        x = self.buffer_cursor[0]
-        y = self.buffer_cursor[1]
-        loc = self.buffer.find_prev_char(x, y, char)
-        if not loc: return
-        x, y = loc[0], loc[1]
-        self.move_cursor_to_buf_location(x, y)
-
-    def find_back(self):
-        try: key = self.get_key()
-        except: key = None
-
-        try:
-            char = chr(key)
-            self._find_back(char)
-            return char
-        except: pass
-
-    def _till(self, char):
-        x = self.buffer_cursor[0]
-        y = self.buffer_cursor[1]
-        loc = self.buffer.find_next_char(x, y, char)
-        if not loc: return
-        x, y = loc[0], loc[1]
-        x = x - 1 if x > 0 else x
-        self.move_cursor_to_buf_location(x, y)
-
-    def till(self):
-        try: key = self.get_key()
-        except: key = None
-
-        try:
-            char = chr(key)
-            self._till(char)
-            return char
-        except: pass
-
-    def _till_back(self, char):
-        x = self.buffer_cursor[0]
-        y = self.buffer_cursor[1]
-        loc = self.buffer.find_prev_char(x, y, char)
-        if not loc: return
-        x, y = loc[0], loc[1]
-        x = x + 1 if x < len(self.get_line(y)) - 1 else x
-        self.move_cursor_to_buf_location(x, y)
-
-    def till_back(self):
-        try: key = self.get_key()
-        except: key = None
-
-        try:
-            char = chr(key)
-            self._till_back(char)
-            return char
-        except: pass
 
     def remove_line_at(self, y, propagate=True):
         y = self.buffer.remove_line(y, propagate=propagate)
