@@ -495,29 +495,17 @@ class Editor():
         maps[ord('l')] = move_l
 
         def move_w(self):
-            start_x = self.get_curr_window().buffer_cursor[0]
-            start_y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_next_word(start_x, start_y)
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_next_word(src_x, src_y)
             if not ret: return False
-            end_x, end_y = ret
-            if end_y > start_y:
-                end_y = start_y
-                end_x = len(self.get_curr_window().get_line(end_y)) - 1
-            scope = Scope(start_x, start_y, end_x - 1, end_y)
+            dst_x, dst_y = ret
+            if dst_y > src_y:
+                dst_y = src_y
+                dst_x = len(self.get_curr_window().get_line(dst_y)) - 1
+            scope = Scope(src_x, src_y, dst_x - 1, dst_y)
             if scope: return cb(scope)
         maps[ord('w')] = move_w
-        def move_dash(self):
-            start_x = self.get_curr_window().buffer_cursor[0]
-            start_y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_next_w_o_r_d(start_x, start_y)
-            if not ret: return False
-            end_x, end_y = ret
-            if end_y > start_y:
-                end_y = start_y
-                end_x = len(self.get_curr_window().get_line(end_y)) - 1
-            scope = Scope(start_x, start_y, end_x - 1, end_y)
-            if scope: return cb(scope)
-        maps[ord('-')] = move_dash
         def move_W(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
@@ -530,6 +518,18 @@ class Editor():
             scope = Scope(start_x, start_y, end_x - 1, end_y)
             if scope: return cb(scope)
         maps[ord('W')] = move_W
+        def move_dash(self):
+            start_x = self.get_curr_window().buffer_cursor[0]
+            start_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_next_w_o_r_d(start_x, start_y)
+            if not ret: return False
+            end_x, end_y = ret
+            if end_y > start_y:
+                end_y = start_y
+                end_x = len(self.get_curr_window().get_line(end_y)) - 1
+            scope = Scope(start_x, start_y, end_x - 1, end_y)
+            if scope: return cb(scope)
+        maps[ord('-')] = move_dash
         def move_b(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
@@ -658,8 +658,8 @@ class Editor():
         maps[ord('T')] = move_T_map
 
         maps[ord('g')] = {} # TODO
-        maps[ord('g')][ord('g')] = move_ # TODO
-        maps[ord('G')] = move_ # TODO
+        # maps[ord('g')][ord('g')] = move_ # TODO
+        # maps[ord('G')] = move_ # TODO
 
         # maps[ord('H')] = move_ # TODO
         # maps[ord('M')] = move_ # TODO
@@ -2159,7 +2159,7 @@ class Editor():
                 lines.append(self.get_curr_buffer().lines[y])
 
             self.change_begin()
-            for y in reversed(range(start_y, end_y)):
+            for y in reversed(range(scope.start.y, scope.end.y)):
                 self.get_curr_window().remove_line_at(y, propagate=False)
             self.get_curr_buffer().flush_changes()
             self.get_curr_window().empty_line(keep_whitespaces=True)
