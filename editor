@@ -443,15 +443,16 @@ class Editor():
                 cb = callbacks.get(ord('j'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('j')] = move_j
-        def move_k(self):
-            end_x = self.get_curr_window().buffer_cursor[0]
-            end_y = self.get_curr_window().buffer_cursor[1]
+        def move_k(self): # FIXED, TODO: remove comment once all fixed
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
 
-            end_x = len(self.get_curr_buffer().lines[end_y]) - 2
-            start_y = max(0, end_y - 1)
-            start_x = 0
+            self.get_curr_window()._move_up()
 
-            scope = Scope(start_x, start_y, end_x, end_y)
+            dst_x = self.get_curr_window().buffer_cursor[0]
+            dst_y = self.get_curr_window().buffer_cursor[1]
+
+            scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('k'), default_callback)
                 if cb is not None: return cb(scope)
@@ -1118,6 +1119,10 @@ class Editor():
             scope.src.x = 0
             scope.dst.x = len(self.get_curr_buffer().lines[scope.dst.y]) - 2
             return scope
+        def operation_movement_k(scope):
+            scope.src.x = len(self.get_curr_buffer().lines[scope.src.y]) - 2
+            scope.dst.x = 0
+            return scope
 
         # ----------------------------------------------------------------
         # change operator
@@ -1134,6 +1139,11 @@ class Editor():
             change_object_map(scope)
             return False
         change_object_callbacks[ord('j')] = change_j_map
+        def change_k_map(scope):
+            scope = operation_movement_k(scope)
+            change_object_map(scope)
+            return False
+        change_object_callbacks[ord('k')] = change_k_map
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_callbacks)
         # in the case of change, thw word movement is acting like the end movement.
         self.maps[NORMAL][ord('c')][ord('w')] = self.maps[NORMAL][ord('c')][ord('e')]
@@ -1160,6 +1170,11 @@ class Editor():
             delete_object_map(scope)
             return False
         delete_object_callbacks[ord('j')] = delete_j_map
+        def delete_k_map(scope):
+            scope = operation_movement_k(scope)
+            delete_object_map(scope)
+            return False
+        delete_object_callbacks[ord('k')] = delete_k_map
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_callbacks)
         # ----------------------------------------------------------------
         # yank operator
@@ -1183,6 +1198,11 @@ class Editor():
             yank_object_map(scope)
             return False
         yank_object_callbacks[ord('j')] = yank_j_map
+        def yank_k_map(scope):
+            scope = operation_movement_k(scope)
+            yank_object_map(scope)
+            return False
+        yank_object_callbacks[ord('k')] = yank_k_map
         self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_callbacks)
         # ----------------------------------------------------------------
         # > operator
@@ -1238,15 +1258,6 @@ class Editor():
         normal_movement_callbacks['default'] = default_movement_cb
         self.__initialize_movement_objects_maps(self.maps[NORMAL], normal_movement_callbacks)
 
-        def k_map(self):
-            num = 1
-            if len(self._number) > 0:
-                num = int(self._number)
-
-            for _ in range(num):
-                self.get_curr_window().move_up()
-            return False
-        self.maps[NORMAL][ord('k')] = k_map
         def l_map(self):
             self.get_curr_window().move_right()
             return False
@@ -2681,22 +2692,6 @@ class Editor():
             self.change_mode(NORMAL)
             return False
         self.maps[VISUAL][ord('y')] = y_map
-        # def j_map(self):
-            # self.get_curr_window()._move_down()
-            # x = self.get_curr_window().buffer_cursor[0]
-            # y = self.get_curr_window().buffer_cursor[1]
-            # self.get_curr_buffer().visual_set_current(x, y)
-            # self.draw()
-            # return False
-        # self.maps[VISUAL][ord('j')] = j_map
-        def k_map(self):
-            self.get_curr_window()._move_up()
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_buffer().visual_set_current(x, y)
-            self.draw()
-            return False
-        self.maps[VISUAL][ord('k')] = k_map
         def l_map(self):
             self.get_curr_window()._move_right()
             x = self.get_curr_window().buffer_cursor[0]
