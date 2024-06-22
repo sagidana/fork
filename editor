@@ -1812,7 +1812,7 @@ class Editor():
             if not ret: return
             end_x, end_y = ret
 
-            window.remove_scope(scope(end_x, end_y, start_x, start_y))
+            window.remove_scope(Scope(end_x, end_y, start_x, start_y))
             self.get_curr_window().draw_cursor()
             return False
         self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
