@@ -455,7 +455,8 @@ class Editor():
             return False
         self.maps[NORMAL][ord('~')] = tilda_map
 
-    def __initialize_movement_objects_maps(self, maps, cb):
+    def __initialize_movement_objects_maps(self, maps, callbacks):
+        default_callback = callbacks.get('default', None)
         def move_(self): pass
         def move_j(self):
             start_x = self.get_curr_window().buffer_cursor[0]
@@ -466,7 +467,9 @@ class Editor():
             end_x = len(self.get_curr_buffer().lines[end_y]) - 2
 
             scope = Scope(start_x, start_y, end_x, end_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('j'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('j')] = move_j
         def move_k(self):
             end_x = self.get_curr_window().buffer_cursor[0]
@@ -477,23 +480,28 @@ class Editor():
             start_x = 0
 
             scope = Scope(start_x, start_y, end_x, end_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('k'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('k')] = move_k
         def move_h(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
             scope = Scope(x - 1, y, x - 1, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('h'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('h')] = move_h
         def move_l(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
             scope = Scope(x + 1, y, x + 1, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('l'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('l')] = move_l
-
         def move_w(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
@@ -504,7 +512,9 @@ class Editor():
                 dst_y = src_y
                 dst_x = len(self.get_curr_window().get_line(dst_y)) - 1
             scope = Scope(src_x, src_y, dst_x - 1, dst_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('w'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('w')] = move_w
         def move_W(self):
             start_x = self.get_curr_window().buffer_cursor[0]
@@ -516,7 +526,9 @@ class Editor():
                 end_y = start_y
                 end_x = len(self.get_curr_window().get_line(end_y)) - 1
             scope = Scope(start_x, start_y, end_x - 1, end_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('W'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('W')] = move_W
         def move_dash(self):
             start_x = self.get_curr_window().buffer_cursor[0]
@@ -528,7 +540,9 @@ class Editor():
                 end_y = start_y
                 end_x = len(self.get_curr_window().get_line(end_y)) - 1
             scope = Scope(start_x, start_y, end_x - 1, end_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('-'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('-')] = move_dash
         def move_b(self):
             src_x = self.get_curr_window().buffer_cursor[0]
@@ -537,7 +551,9 @@ class Editor():
             if not ret: return False
             dst_x, dst_y = ret
             scope = Scope(src_x, src_y, dst_x - 1, dst_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('b'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('b')] = move_b
         def move_underscore(self):
             src_x = self.get_curr_window().buffer_cursor[0]
@@ -546,7 +562,9 @@ class Editor():
             if not ret: return False
             dst_x, dst_y = ret
             scope = Scope(src_x, src_y, dst_x - 1, dst_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('_'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('_')] = move_underscore
         def move_B(self):
             elog('move_B()')
@@ -556,7 +574,9 @@ class Editor():
             if not ret: return False
             dst_x, dst_y = ret
             scope = Scope(src_x, src_y, dst_x - 1, dst_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('B'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('B')] = move_B
         def move_e(self):
             start_x = self.get_curr_window().buffer_cursor[0]
@@ -565,7 +585,9 @@ class Editor():
             if not ret: return False
             end_x, end_y = ret
             scope = Scope(start_x, start_y, end_x, end_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('e'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('e')] = move_e
         def move_E(self):
             start_x = self.get_curr_window().buffer_cursor[0]
@@ -574,24 +596,28 @@ class Editor():
             if not ret: return False
             end_x, end_y = ret
             scope = Scope(start_x, start_y, end_x, end_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(ord('E'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('E')] = move_E
-
         def ctrl_u_map(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             end_x, end_y = self.get_curr_window().half_page_up()
             scope = Scope(start_x, start_y, end_x, end_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(CTRL_U_KEY, default_callback)
+                if cb is not None: return cb(scope)
         maps[CTRL_U_KEY] = ctrl_u_map
         def ctrl_d_map(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             end_x, end_y = self.get_curr_window().half_page_down()
             scope = Scope(start_x, start_y, end_x, end_y)
-            if scope: return cb(scope)
+            if scope:
+                cb = callbacks.get(CTRL_D_KEY, default_callback)
+                if cb is not None: return cb(scope)
         maps[CTRL_D_KEY] = ctrl_d_map
-
         def move_f_map(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
@@ -604,7 +630,9 @@ class Editor():
                 if not loc: return False
                 end_x, end_y = loc[0], loc[1]
                 scope = Scope(start_x, start_y, end_x, end_y)
-                if scope: return cb(scope)
+                if scope:
+                    cb = callbacks.get(ord('f'), default_callback)
+                    if cb is not None: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('f')] = move_f_map
         def move_F_map(self):
@@ -619,7 +647,9 @@ class Editor():
                 if not loc: return False
                 start_x, start_y = loc[0], loc[1]
                 scope = Scope(start_x, start_y, end_x, end_y)
-                if scope: return cb(scope)
+                if scope:
+                    cb = callbacks.get(ord('F'), default_callback)
+                    if cb is not None: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('F')] = move_F_map
         def move_t_map(self):
@@ -636,7 +666,9 @@ class Editor():
                 end_x = end_x - 1 if end_x > 0 else end_x
 
                 scope = Scope(start_x, start_y, end_x, end_y)
-                if scope: return cb(scope)
+                if scope:
+                    cb = callbacks.get(ord('t'), default_callback)
+                    if cb is not None: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('t')] = move_t_map
         def move_T_map(self):
@@ -653,7 +685,9 @@ class Editor():
                 start_x = start_x + 1 if start_x < len(self.get_curr_window().get_line(start_y)) - 1 else start_x
 
                 scope = Scope(start_x, start_y, end_x, end_y)
-                if scope: return cb(scope)
+                if scope:
+                    cb = callbacks.get(ord('T'), default_callback)
+                    if cb is not None: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('T')] = move_T_map
 
@@ -668,13 +702,19 @@ class Editor():
         # maps[ord('n')] = move_ # TODO
         # maps[ord('N')] = move_ # TODO
 
-    def __initialize_inner_around_objects_maps(self, maps, cb):
+    def __initialize_inner_around_objects_maps(self, maps, callbacks):
+        default_callback = callbacks.get('default', None)
+        default_i_callbacks = callbacks.get(ord('i'), {})
+        default_a_callbacks = callbacks.get(ord('a'), {})
         maps[ord('i')] = {}
         def inner_parentheses(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_parentheses(x, y)
             if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord('('), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord('(')] = inner_parentheses
         maps[ord('i')][ord(')')] = inner_parentheses
         maps[ord(')')] = inner_parentheses
@@ -683,7 +723,9 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_square_brackets(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord('['), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord('[')] = inner_square_brackets
         maps[ord('i')][ord(']')] = inner_square_brackets
         maps[ord('[')] = inner_square_brackets
@@ -692,7 +734,9 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_curly_brackets(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord('{'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord('{')] = inner_curly_brackets
         maps[ord('i')][ord('}')] = inner_curly_brackets
         maps[ord('}')] = inner_curly_brackets
@@ -701,7 +745,9 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_greater_than(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord('<'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord('<')] = inner_greater_than
         maps[ord('i')][ord('>')] = inner_greater_than
         maps[ord('<')] = inner_greater_than
@@ -710,40 +756,52 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_quotation(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord('"'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord('"')] = inner_quotation
         maps[ord('"')] = inner_quotation
         def inner_apostrophe(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_apostrophe(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("'"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("'")] = inner_apostrophe
         maps[ord("'")] = inner_apostrophe
         def inner_backtick(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_backtick(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("`"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("`")] = inner_backtick
         maps[ord("`")] = inner_backtick
         def inner_word(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_word(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("w"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("w")] = inner_word
         def inner_w_o_r_d(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_w_o_r_d(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("_"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("_")] = inner_w_o_r_d
         def inner_WORD(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_WORD(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("W"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("W")] = inner_WORD
 
         # code objects here...
@@ -751,85 +809,113 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_if(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("f"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("f")] = inner_if
         def inner_IF(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_IF(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("F"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("F")] = inner_IF
         def inner_for(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_for(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("r"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("r")] = inner_for
         def inner_FOR(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_FOR(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("R"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("R")] = inner_FOR
         def inner_else(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_else(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("l"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("l")] = inner_else
         def inner_while(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_while(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("e"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("e")] = inner_while
         def inner_WHILE(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_WHILE(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("E"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("E")] = inner_WHILE
         def inner_method(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_method(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("m"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("m")] = inner_method
         def inner_METHOD(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_METHOD(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("M"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("M")] = inner_METHOD
         def inner_class(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_class(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("s"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("s")] = inner_class
         def inner_CLASS(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_CLASS(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("S"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("S")] = inner_CLASS
         def inner_try(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_try(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("y"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("y")] = inner_try
         def inner_except(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_except(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("x"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("x")] = inner_except
         def inner_EXCEPT(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.inner_EXCEPT(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_i_callbacks.get(ord("X"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('i')][ord("X")] = inner_EXCEPT
 
         maps[ord('a')] = {}
@@ -837,65 +923,85 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_parentheses(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("("), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord('(')] = arround_parentheses
         maps[ord('a')][ord(')')] = arround_parentheses
         def arround_square_brackets(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_square_brackets(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("["), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord('[')] = arround_square_brackets
         maps[ord('a')][ord(']')] = arround_square_brackets
         def arround_curly_brackets(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_curly_brackets(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("{"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord('{')] = arround_curly_brackets
         maps[ord('a')][ord('}')] = arround_curly_brackets
         def arround_greater_than(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_greater_than(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("<"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord('<')] = arround_greater_than
         maps[ord('a')][ord('>')] = arround_greater_than
         def arround_quotation(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_quotation(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord('"'), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord('"')] = arround_quotation
         def arround_apostrophe(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_apostrophe(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("'"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("'")] = arround_apostrophe
         def arround_backtick(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_backtick(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("`"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("`")] = arround_backtick
         def arround_word(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_word(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("w"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("w")] = arround_word
         def arround_w_o_r_d(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_w_o_r_d(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("_"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("_")] = arround_w_o_r_d
         def arround_WORD(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_WORD(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("W"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("W")] = arround_WORD
 
         # code objects here...
@@ -903,97 +1009,127 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_if(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("f"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("f")] = arround_if
         def arround_IF(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_IF(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("F"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("F")] = arround_IF
         def arround_for(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_for(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("r"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("r")] = arround_for
         def arround_FOR(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_FOR(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("R"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("R")] = arround_FOR
         def arround_else(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_else(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("l"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("l")] = arround_else
         def arround_while(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_while(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("e"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("e")] = arround_while
         def arround_WHILE(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_WHILE(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("E"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("E")] = arround_WHILE
         def arround_method(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_method(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("m"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("m")] = arround_method
         def arround_METHOD(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_METHOD(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("M"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("M")] = arround_METHOD
         def arround_class(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_class(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("s"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("s")] = arround_class
         def arround_CLASS(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_CLASS(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("S"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("S")] = arround_CLASS
         def arround_try(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_try(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("y"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("y")] = arround_try
         def arround_except(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_except(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("x"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("x")] = arround_except
         def arround_EXCEPT(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_EXCEPT(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("X"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("X")] = arround_EXCEPT
         def arround_argument(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_window().buffer.arround_argument(x, y)
-            if scope: return cb(scope)
+            if scope:
+                cb = default_a_callbacks.get(ord("a"), default_callback)
+                if cb is not None: return cb(scope)
         maps[ord('a')][ord("a")] = arround_argument
         maps[ord('p')] = arround_argument
 
-    def _initialize_objects_maps(self, maps, cb):
-        self.__initialize_movement_objects_maps(maps, cb)
-        self.__initialize_inner_around_objects_maps(maps, cb)
+    def _initialize_objects_maps(self, maps, cbs):
+        self.__initialize_movement_objects_maps(maps, cbs)
+        self.__initialize_inner_around_objects_maps(maps, cbs)
 
     def _initialize_normal_mainstream_maps(self):
         # operations
@@ -1009,7 +1145,9 @@ class Editor():
             self.get_curr_window().remove_scope(scope)
             self.change_mode(INSERT, effect_change=False)
             return False
-        self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
+        change_object_callbacks = {}
+        change_object_callbacks['default'] = change_object_map
+        self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_callbacks)
         # in the case of change, thw word movement is acting like the end movement.
         self.maps[NORMAL][ord('c')][ord('w')] = self.maps[NORMAL][ord('c')][ord('e')]
         def delete_object_map(scope):
@@ -1025,7 +1163,9 @@ class Editor():
             self.get_curr_window().remove_scope(scope)
             self.change_end()
             return False
-        self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
+        delete_object_callbacks = {}
+        delete_object_callbacks['default'] = delete_object_map
+        self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_callbacks)
         # in the case of delete, the j/k movements are acting like VISUAL_LINE
         # TODO: self.maps[NORMAL][ord('d')][ord('j')] =
         # TODO: self.maps[NORMAL][ord('d')][ord('k')] =
@@ -1041,19 +1181,25 @@ class Editor():
             data['data'] = text
             self.registers['"'] = data
             return False
-        self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_map)
+        yank_object_callbacks = {}
+        yank_object_callbacks['default'] = yank_object_map
+        self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_callbacks)
         def indent_right_object_map(scope):
             self.change_begin()
             self.get_curr_window().indent_lines(scope.start.y, scope.end.y, True)
             self.change_end()
             return False
-        self._initialize_objects_maps(self.maps[NORMAL][ord('>')], indent_right_object_map)
+        indent_right_object_callbacks = {}
+        indent_right_object_callbacks['default'] = indent_right_object_map
+        self._initialize_objects_maps(self.maps[NORMAL][ord('>')], indent_right_object_callbacks)
         def indent_left_object_map(scope):
             self.change_begin()
             self.get_curr_window().indent_lines(scope.start.y, scope.end.y, False)
             self.change_end()
             return False
-        self._initialize_objects_maps(self.maps[NORMAL][ord('<')], indent_left_object_map)
+        indent_left_object_callbacks = {}
+        indent_left_object_callbacks['default'] = indent_left_object_map
+        self._initialize_objects_maps(self.maps[NORMAL][ord('<')], indent_left_object_callbacks)
 
         def yy_map(self):
             data = {}
@@ -1159,18 +1305,30 @@ class Editor():
 
             self.change_end()
             return False
+        comment_object_callbacks = {}
+        comment_object_callbacks['default'] = comment_object_map
         self.maps[NORMAL][ord('g')][ord('c')] = {}
-        self._initialize_objects_maps(self.maps[NORMAL][ord('g')][ord('c')], comment_object_map)
+        self._initialize_objects_maps(self.maps[NORMAL][ord('g')][ord('c')], comment_object_callbacks)
+
+        def default_movement_cb(scope):
+            elog(f"default_movement_cb(): {scope.src.x, scope.src.y, scope.dst.x, scope.dst.y}")
+            self.get_curr_window().move_cursor_to_buf_location(scope.dst.x+1, scope.dst.y)
+            return False
+
+        normal_movement_callbacks = {}
+        normal_movement_callbacks['default'] = default_movement_cb
+        self.__initialize_movement_objects_maps(self.maps[NORMAL], normal_movement_callbacks)
+
         def G_map(self):
             self.get_curr_window().add_jump()
             self.get_curr_window().move_end()
             self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('G')] = G_map
-        def w_map(self):
-            self.get_curr_window().move_word_forward()
-            return False
-        self.maps[NORMAL][ord('w')] = w_map
+        # def w_map(self):
+            # self.get_curr_window().move_word_forward()
+            # return False
+        # self.maps[NORMAL][ord('w')] = w_map
         def dash_map(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -2394,7 +2552,9 @@ class Editor():
 
             self.draw()
             return False
-        self.__initialize_inner_around_objects_maps(self.maps[VISUAL], visual_object_map)
+        visual_object_callbacks = {}
+        visual_object_callbacks['default'] = visual_object_map
+        self.__initialize_inner_around_objects_maps(self.maps[VISUAL], visual_object_callbacks)
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
@@ -2772,8 +2932,8 @@ class Editor():
         self._initialize_normal_maps()
         self._initialize_insert_maps()
         self._initialize_visual_maps()
-        self._initialize_visual_block_maps()
         self._initialize_visual_line_maps()
+        self._initialize_visual_block_maps()
         self._initialize_replace_maps()
         self._initialize_multi_cursor_normal_maps()
         self._initialize_multi_cursor_insert_maps()
