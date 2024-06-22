@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from log import elog
 
 from settings import *
@@ -21,29 +22,30 @@ SINGLE_REGEX = r'[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
 
 
 class Scope():
+    class Point():
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+
     def __init__(self, src_x, src_y, dst_x, dst_y):
-        self.src_x, self.src_y = src_x, src_y
-        self.dst_x, self.dst_y = dst_x, dst_y
+        self.src = self.Point(src_x, src_y)
+        self.dst = self.Point(dst_x, dst_y)
 
-    def start_point(self):
-        if self.src_y > self.dst_y:
-            return self.dst_x, self.dst_y
-        if self.src_y == self.dst_y and self.src_x > self.dst_x:
-            return self.dst_x, self.dst_y
-        return self.src_x, self.src_y
+    @property
+    def start(self):
+        if self.src.y > self.dst.y:
+            return self.dst
+        if self.src.y == self.dst.y and self.src.x > self.dst.x:
+            return self.dst
+        return self.src
 
-    def end_point(self):
-        if self.src_y > self.dst_y:
-            return self.src_x, self.src_y
-        if self.src_y == self.dst_y and self.src_x > self.dst_x:
-            return self.src_x, self.src_y
-        return self.dst_x, self.dst_y
-
-    def src_point(self):
-        return self.src_x, self.src_y
-
-    def dst_point(self):
-        return self.dst_x, self.dst_y
+    @property
+    def end(self):
+        if self.src.y > self.dst.y:
+            return self.src
+        if self.src.y == self.dst.y and self.src.x > self.dst.x:
+            return self.src
+        return self.dst
 
 
 class Buffer():
@@ -1523,3 +1525,27 @@ class Buffer():
                     results.append((start_x, y, end_x, y))
         except: pass
         return results
+
+if __name__=='__main__':
+    scope = Scope(  16,10,
+                    15,10)
+
+    print('-'*80)
+    print(scope.src.x)
+    print(scope.src.y)
+    print(scope.dst.x)
+    print(scope.dst.y)
+
+    print('-'*80)
+    print(scope.start.x)
+    print(scope.start.y)
+    print(scope.end.x)
+    print(scope.end.y)
+
+    scope.start.y = 11
+    print('-'*80)
+    print(scope.start.x)
+    print(scope.start.y)
+    print(scope.end.x)
+    print(scope.end.y)
+
