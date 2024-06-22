@@ -397,35 +397,6 @@ class Editor():
             return False
         self.maps[NORMAL][CTRL_CLOSE_BRACKET_KEY] = ctrl_close_bracket_map
 
-    def _initialize_normal_symbol_maps(self):
-        def zero_map(self):
-            self.get_curr_window().move_line_begin()
-            return False
-        self.maps[NORMAL][ord('0')] = zero_map
-        def dollar_map(self):
-            self.get_curr_window().move_line_end()
-            return False
-        self.maps[NORMAL][ord('$')] = dollar_map
-        def caret_map(self):
-            self.get_curr_window().move_line_begin(ignore_spaces=True)
-            return False
-        self.maps[NORMAL][ord('^')] = caret_map
-        def slash_map(self):
-            self.on_search(True)
-            return False
-        self.maps[NORMAL][ord('/')] = slash_map
-        def question_mark_map(self):
-            self.on_search(False)
-            return False
-        self.maps[NORMAL][ord('?')] = question_mark_map
-        def tilda_map(self):
-            self.change_begin()
-            self.get_curr_window().upper()
-            self.change_end()
-            self.get_curr_window().move_right()
-            return False
-        self.maps[NORMAL][ord('~')] = tilda_map
-
     def __initialize_movement_objects_maps(self, maps, callbacks):
         default_callback = callbacks.get('default', None)
         def move_(self): pass
@@ -573,6 +544,125 @@ class Editor():
                 cb = callbacks.get(ord('B'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('B')] = move_B
+        def move_dollar(self): # FIXED, TODO: remove comment once all fixed
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+
+            self.get_curr_window().move_line_end()
+
+            dst_x = self.get_curr_window().buffer_cursor[0] - 1 # exclude newline
+            dst_y = self.get_curr_window().buffer_cursor[1]
+            scope = Scope(src_x, src_y, dst_x, dst_y)
+            if scope:
+                cb = callbacks.get(ord('$'), default_callback)
+                if cb is not None: return cb(scope)
+        maps[ord('$')] = move_dollar
+        def move_caret(self): # FIXED, TODO: remove comment once all fixed
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+
+            self.get_curr_window().move_line_begin(ignore_spaces=True)
+
+            dst_x = self.get_curr_window().buffer_cursor[0]
+            dst_y = self.get_curr_window().buffer_cursor[1]
+            scope = Scope(src_x, src_y, dst_x, dst_y)
+            if scope:
+                cb = callbacks.get(ord('^'), default_callback)
+                if cb is not None: return cb(scope)
+        maps[ord('^')] = move_caret
+        def move_zero(self): # FIXED, TODO: remove comment once all fixed
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+
+            self.get_curr_window().move_line_begin(ignore_spaces=False)
+
+            dst_x = self.get_curr_window().buffer_cursor[0]
+            dst_y = self.get_curr_window().buffer_cursor[1]
+            scope = Scope(src_x, src_y, dst_x, dst_y)
+            if scope:
+                cb = callbacks.get(ord('0'), default_callback)
+                if cb is not None: return cb(scope)
+        maps[ord('0')] = move_zero
+        def move_f_map(self): # FIXED, TODO: remove comment once all fixed
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+
+            try:
+                char = chr(self.screen.get_key())
+                loc = self.get_curr_buffer().find_next_char(src_x,
+                                                            src_y,
+                                                            char)
+                if not loc: return False
+                self._action = 'f'
+                self._char = char
+                dst_x, dst_y = loc[0], loc[1]
+                scope = Scope(src_x, src_y, dst_x, dst_y)
+                if scope:
+                    cb = callbacks.get(ord('f'), default_callback)
+                    if cb is not None: return cb(scope)
+            except Exception as e: elog(f"{e}")
+        maps[ord('f')] = move_f_map
+        def move_F_map(self): # FIXED, TODO: remove comment once all fixed
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+
+            try:
+                char = chr(self.screen.get_key())
+                loc = self.get_curr_buffer().find_prev_char(src_x,
+                                                            src_y,
+                                                            char)
+                if not loc: return False
+                self._action = 'F'
+                self._char = char
+                dst_x, dst_y = loc[0], loc[1]
+                scope = Scope(src_x, src_y, dst_x, dst_y)
+                if scope:
+                    cb = callbacks.get(ord('F'), default_callback)
+                    if cb is not None: return cb(scope)
+            except Exception as e: elog(f"{e}")
+        maps[ord('F')] = move_F_map
+        def move_t_map(self): # FIXED, TODO: remove comment once all fixed
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+
+            try:
+                char = chr(self.screen.get_key())
+                loc = self.get_curr_buffer().find_next_char(src_x,
+                                                            src_y,
+                                                            char)
+                if not loc: return False
+                self._action = 't'
+                self._char = char
+                dst_x, dst_y = loc[0], loc[1]
+                dst_x = dst_x - 1 if dst_x > 0 else dst_x
+
+                scope = Scope(src_x, src_y, dst_x, dst_y)
+                if scope:
+                    cb = callbacks.get(ord('t'), default_callback)
+                    if cb is not None: return cb(scope)
+            except Exception as e: elog(f"{e}")
+        maps[ord('t')] = move_t_map
+        def move_T_map(self): # FIXED, TODO: remove comment once all fixed
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+
+            try:
+                char = chr(self.screen.get_key())
+                loc = self.get_curr_buffer().find_prev_char(src_x,
+                                                            src_y,
+                                                            char)
+                if not loc: return False
+                self._action = 'T'
+                self._char = char
+                dst_x, dst_y = loc[0], loc[1]
+                dst_x = dst_x + 1 if dst_x < len(self.get_curr_window().get_line(dst_y)) - 1 else dst_x
+
+                scope = Scope(src_x, src_y, dst_x, dst_y)
+                if scope:
+                    cb = callbacks.get(ord('T'), default_callback)
+                    if cb is not None: return cb(scope)
+            except Exception as e: elog(f"{e}")
+        maps[ord('T')] = move_T_map
         def ctrl_u_map(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
@@ -591,78 +681,6 @@ class Editor():
                 cb = callbacks.get(CTRL_D_KEY, default_callback)
                 if cb is not None: return cb(scope)
         maps[CTRL_D_KEY] = ctrl_d_map
-        def move_f_map(self):
-            start_x = self.get_curr_window().buffer_cursor[0]
-            start_y = self.get_curr_window().buffer_cursor[1]
-
-            try:
-                char = chr(self.screen.get_key())
-                loc = self.get_curr_buffer().find_next_char(start_x,
-                                                            start_y,
-                                                            char)
-                if not loc: return False
-                end_x, end_y = loc[0], loc[1]
-                scope = Scope(start_x, start_y, end_x, end_y)
-                if scope:
-                    cb = callbacks.get(ord('f'), default_callback)
-                    if cb is not None: return cb(scope)
-            except Exception as e: elog(f"{e}")
-        maps[ord('f')] = move_f_map
-        def move_F_map(self):
-            end_x = self.get_curr_window().buffer_cursor[0]
-            end_y = self.get_curr_window().buffer_cursor[1]
-
-            try:
-                char = chr(self.screen.get_key())
-                loc = self.get_curr_buffer().find_prev_char(end_x,
-                                                            end_y,
-                                                            char)
-                if not loc: return False
-                start_x, start_y = loc[0], loc[1]
-                scope = Scope(start_x, start_y, end_x, end_y)
-                if scope:
-                    cb = callbacks.get(ord('F'), default_callback)
-                    if cb is not None: return cb(scope)
-            except Exception as e: elog(f"{e}")
-        maps[ord('F')] = move_F_map
-        def move_t_map(self):
-            start_x = self.get_curr_window().buffer_cursor[0]
-            start_y = self.get_curr_window().buffer_cursor[1]
-
-            try:
-                char = chr(self.screen.get_key())
-                loc = self.get_curr_buffer().find_next_char(start_x,
-                                                            start_y,
-                                                            char)
-                if not loc: return False
-                end_x, end_y = loc[0], loc[1]
-                end_x = end_x - 1 if end_x > 0 else end_x
-
-                scope = Scope(start_x, start_y, end_x, end_y)
-                if scope:
-                    cb = callbacks.get(ord('t'), default_callback)
-                    if cb is not None: return cb(scope)
-            except Exception as e: elog(f"{e}")
-        maps[ord('t')] = move_t_map
-        def move_T_map(self):
-            end_x = self.get_curr_window().buffer_cursor[0]
-            end_y = self.get_curr_window().buffer_cursor[1]
-
-            try:
-                char = chr(self.screen.get_key())
-                loc = self.get_curr_buffer().find_prev_char(end_x,
-                                                            end_y,
-                                                            char)
-                if not loc: return False
-                start_x, start_y = loc[0], loc[1]
-                start_x = start_x + 1 if start_x < len(self.get_curr_window().get_line(start_y)) - 1 else start_x
-
-                scope = Scope(start_x, start_y, end_x, end_y)
-                if scope:
-                    cb = callbacks.get(ord('T'), default_callback)
-                    if cb is not None: return cb(scope)
-            except Exception as e: elog(f"{e}")
-        maps[ord('T')] = move_T_map
 
         # maps[ord('g')] = {} # TODO
         # maps[ord('g')][ord('g')] = move_ # TODO
@@ -1166,6 +1184,8 @@ class Editor():
             return False
         change_object_callbacks[ord('b')] = change_b_map
         change_object_callbacks[ord('B')] = change_b_map
+        change_object_callbacks[ord('^')] = change_b_map
+        change_object_callbacks[ord('0')] = change_b_map
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_callbacks)
         # in the case of change, thw word movement is acting like the end movement.
         self.maps[NORMAL][ord('c')][ord('w')] = self.maps[NORMAL][ord('c')][ord('e')]
@@ -1211,6 +1231,8 @@ class Editor():
             return False
         delete_object_callbacks[ord('b')] = delete_b_map
         delete_object_callbacks[ord('B')] = delete_b_map
+        delete_object_callbacks[ord('^')] = delete_b_map
+        delete_object_callbacks[ord('0')] = delete_b_map
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_callbacks)
         # ----------------------------------------------------------------
         # yank operator
@@ -1252,6 +1274,8 @@ class Editor():
             return False
         yank_object_callbacks[ord('b')] = yank_b_map
         yank_object_callbacks[ord('B')] = yank_b_map
+        yank_object_callbacks[ord('^')] = yank_b_map
+        yank_object_callbacks[ord('0')] = yank_b_map
         self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_callbacks)
         # ----------------------------------------------------------------
         # > operator
@@ -1307,30 +1331,6 @@ class Editor():
         normal_movement_callbacks['default'] = default_movement_cb
         self.__initialize_movement_objects_maps(self.maps[NORMAL], normal_movement_callbacks)
 
-        def f_map(self):
-            char = self.get_curr_window().find()
-            self._action = 'f'
-            self._char = char
-            return False
-        self.maps[NORMAL][ord('f')] = f_map
-        def F_map(self):
-            char = self.get_curr_window().find_back()
-            self._action = 'F'
-            self._char = char
-            return False
-        self.maps[NORMAL][ord('F')] = F_map
-        def t_map(self):
-            char = self.get_curr_window().till()
-            self._action = 't'
-            self._char = char
-            return False
-        self.maps[NORMAL][ord('t')] = t_map
-        def T_map(self):
-            char = self.get_curr_window().till_back()
-            self._dir = 'backward'
-            self._char = char
-            return False
-        self.maps[NORMAL][ord('T')] = T_map
         def semicolon_map(self):
             if self._action == 'f':
                 self.get_curr_window()._find(self._char)
@@ -1353,32 +1353,6 @@ class Editor():
                 self.get_curr_window()._till(self._char)
             return False
         self.maps[NORMAL][ord(',')] = comma_map
-        def hash_map(self):
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            scope = self.get_curr_buffer().inner_word(x, y)
-            pattern = self.get_curr_buffer().get_scope_text(scope)
-            if len(pattern) == 0: return False
-            pattern = pattern[0]
-            pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
-            self.registers['/'] = pattern
-            self._search_forward = False
-            self._on_search(x, y, pattern, self._search_forward)
-            return False
-        self.maps[NORMAL][ord('#')] = hash_map
-        def asterisk_map(self):
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            scope = self.get_curr_buffer().inner_word(x, y)
-            pattern = self.get_curr_buffer().get_scope_text(scope)
-            if len(pattern) == 0: return False
-            pattern = pattern[0]
-            pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
-            self.registers['/'] = pattern
-            self._search_forward = True
-            self._on_search(x, y, pattern, self._search_forward)
-            return False
-        self.maps[NORMAL][ord('*')] = asterisk_map
         def precent_map(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -1416,6 +1390,101 @@ class Editor():
             self.get_curr_window().add_jump()
             return False
         self.maps[NORMAL][ord('L')] = L_map
+        def n_map(self):
+            last_pattern = self.registers['/']
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self._on_search(x, y, last_pattern, self._search_forward, add_to_jumplist=True)
+            return False
+        self.maps[NORMAL][ord('n')] = n_map
+        def N_map(self):
+            last_pattern = self.registers['/']
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self._on_search(x, y, last_pattern, not self._search_forward, add_to_jumplist=True)
+            return False
+        self.maps[NORMAL][ord('N')] = N_map
+        def bracket_close_m_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_next_method(x, y)
+            if not ret: return False
+            x, y = ret
+            self.get_curr_window().move_cursor_to_buf_location(x, y)
+            return False
+        self.maps[NORMAL][ord(']')][ord('m')] = bracket_close_m_map
+        def bracket_close_M_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_method_end(x, y)
+            if not ret: return False
+            x, y = ret
+            self.get_curr_window().move_cursor_to_buf_location(x, y)
+            return False
+        self.maps[NORMAL][ord(']')][ord('M')] = bracket_close_M_map
+        def bracket_open_m_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_method(x, y)
+            if not ret: return False
+            x, y = ret
+            self.get_curr_window().move_cursor_to_buf_location(x, y)
+            return False
+        self.maps[NORMAL][ord('[')][ord('m')] = bracket_open_m_map
+        def G_map(self):
+            self.get_curr_window().add_jump()
+            self.get_curr_window().move_end()
+            self.get_curr_window().add_jump()
+            return False
+        self.maps[NORMAL][ord('G')] = G_map
+        def gg_map(self):
+            self.get_curr_window().add_jump()
+            self.get_curr_window().move_begin()
+            self.get_curr_window().add_jump()
+            return False
+        self.maps[NORMAL][ord('g')][ord('g')] = gg_map
+
+        def hash_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_buffer().inner_word(x, y)
+            pattern = self.get_curr_buffer().get_scope_text(scope)
+            if len(pattern) == 0: return False
+            pattern = pattern[0]
+            pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
+            self.registers['/'] = pattern
+            self._search_forward = False
+            self._on_search(x, y, pattern, self._search_forward)
+            return False
+        self.maps[NORMAL][ord('#')] = hash_map
+        def asterisk_map(self):
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            scope = self.get_curr_buffer().inner_word(x, y)
+            pattern = self.get_curr_buffer().get_scope_text(scope)
+            if len(pattern) == 0: return False
+            pattern = pattern[0]
+            pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
+            self.registers['/'] = pattern
+            self._search_forward = True
+            self._on_search(x, y, pattern, self._search_forward)
+            return False
+        self.maps[NORMAL][ord('*')] = asterisk_map
+        def slash_map(self):
+            self.on_search(True)
+            return False
+        self.maps[NORMAL][ord('/')] = slash_map
+        def question_mark_map(self):
+            self.on_search(False)
+            return False
+        self.maps[NORMAL][ord('?')] = question_mark_map
+        def tilda_map(self):
+            self.change_begin()
+            self.get_curr_window().upper()
+            self.change_end()
+            self.get_curr_window().move_right()
+            return False
+        self.maps[NORMAL][ord('~')] = tilda_map
         def o_map(self):
             self.change_mode(INSERT)
             self.get_curr_window().new_line_after()
@@ -1531,20 +1600,6 @@ class Editor():
             self.change_mode(VISUAL)
             return False
         self.maps[NORMAL][ord('v')] = v_map
-        def n_map(self):
-            last_pattern = self.registers['/']
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self._on_search(x, y, last_pattern, self._search_forward, add_to_jumplist=True)
-            return False
-        self.maps[NORMAL][ord('n')] = n_map
-        def N_map(self):
-            last_pattern = self.registers['/']
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self._on_search(x, y, last_pattern, not self._search_forward, add_to_jumplist=True)
-            return False
-        self.maps[NORMAL][ord('N')] = N_map
         def J_map(self):
             self.change_begin()
 
@@ -1612,33 +1667,6 @@ class Editor():
         self.maps[NORMAL][ord('[')] = {}
         self.maps[NORMAL][ord(']')] = {}
 
-        def bracket_close_m_map(self):
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_next_method(x, y)
-            if not ret: return False
-            x, y = ret
-            self.get_curr_window().move_cursor_to_buf_location(x, y)
-            return False
-        self.maps[NORMAL][ord(']')][ord('m')] = bracket_close_m_map
-        def bracket_close_M_map(self):
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_method_end(x, y)
-            if not ret: return False
-            x, y = ret
-            self.get_curr_window().move_cursor_to_buf_location(x, y)
-            return False
-        self.maps[NORMAL][ord(']')][ord('M')] = bracket_close_M_map
-        def bracket_open_m_map(self):
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_prev_method(x, y)
-            if not ret: return False
-            x, y = ret
-            self.get_curr_window().move_cursor_to_buf_location(x, y)
-            return False
-        self.maps[NORMAL][ord('[')][ord('m')] = bracket_open_m_map
         def yy_map(self):
             data = {}
             text = [self.get_curr_window().get_curr_line()]
@@ -1710,18 +1738,6 @@ class Editor():
             self.get_curr_window().align_center()
             return False
         self.maps[NORMAL][ord('g')][ord('f')] = gf_map
-        def G_map(self):
-            self.get_curr_window().add_jump()
-            self.get_curr_window().move_end()
-            self.get_curr_window().add_jump()
-            return False
-        self.maps[NORMAL][ord('G')] = G_map
-        def gg_map(self):
-            self.get_curr_window().add_jump()
-            self.get_curr_window().move_begin()
-            self.get_curr_window().add_jump()
-            return False
-        self.maps[NORMAL][ord('g')][ord('g')] = gg_map
         def gd_map(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
@@ -1740,7 +1756,6 @@ class Editor():
         self.maps[NORMAL][ord('g')][ord('d')] = gd_map
 
         self._initialize_normal_ctrl_maps()
-        self._initialize_normal_symbol_maps()
 
     def _initialize_leader_maps(self):
         self.maps[NORMAL][ord(' ')] = {}        # leader
@@ -2689,96 +2704,6 @@ class Editor():
             return False
         self.maps[VISUAL][ord('y')] = y_map
 
-        def f_map(self):
-            try:
-                char = self.get_curr_window().find()
-                self._action = 'f'
-                self._char = char
-
-                x = self.get_curr_window().buffer_cursor[0]
-                y = self.get_curr_window().buffer_cursor[1]
-                self.get_curr_buffer().visual_set_current(x, y)
-                self.draw()
-            except Exception as e:
-                elog(f"Exception: {e}", type="ERROR")
-                elog(f"traceback: {traceback.format_exc()}", type="ERROR")
-            return False
-        self.maps[VISUAL][ord('f')] = f_map
-        def F_map(self):
-            char = self.get_curr_window().find_back()
-            self._action = 'F'
-            self._char = char
-
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_buffer().visual_set_current(x, y)
-            self.draw()
-            return False
-        self.maps[VISUAL][ord('F')] = F_map
-        def t_map(self):
-            char = self.get_curr_window().till()
-            self._action = 't'
-            self._char = char
-
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_buffer().visual_set_current(x, y)
-            self.draw()
-            return False
-        self.maps[VISUAL][ord('t')] = t_map
-        def T_map(self):
-            char = self.get_curr_window().till_back()
-            self._action = 'T'
-            self._char = char
-
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_buffer().visual_set_current(x, y)
-            self.draw()
-            return False
-        self.maps[VISUAL][ord('T')] = T_map
-        def semicolon_map(self):
-            if self._action == 'f':
-                self.get_curr_window()._find(self._char)
-            if self._action == 'F':
-                self.get_curr_window()._find_back(self._char)
-            if self._action == 't':
-                self.get_curr_window()._till(self._char)
-            if self._action == 'T':
-                self.get_curr_window()._till_back(self._char)
-
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_buffer().visual_set_current(x, y)
-            self.draw()
-            return False
-        self.maps[VISUAL][ord(';')] = semicolon_map
-        def comma_map(self):
-            if self._action == 'f':
-                self.get_curr_window()._find_back(self._char)
-            if self._action == 'F':
-                self.get_curr_window()._find(self._char)
-            if self._action == 't':
-                self.get_curr_window()._till_back(self._char)
-            if self._action == 'T':
-                self.get_curr_window()._till(self._char)
-
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_buffer().visual_set_current(x, y)
-            self.draw()
-            return False
-        self.maps[VISUAL][ord(',')] = comma_map
-        def dollar_map(self):
-            self.get_curr_window().move_line_end()
-            # dont include the new line char
-            x = self.get_curr_window().buffer_cursor[0]-1
-            y = self.get_curr_window().buffer_cursor[1]
-            self.get_curr_buffer().visual_set_current(x, y)
-            self.draw()
-            return False
-        self.maps[VISUAL][ord('$')] = dollar_map
-
         def leader_s_c_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
@@ -2813,7 +2738,6 @@ class Editor():
             # task.start()
 
             return False
-
         self.maps[VISUAL][ord(' ')] = {}
         self.maps[VISUAL][ord(' ')][ord('s')] = {}
         self.maps[VISUAL][ord(' ')][ord('s')][ord('c')] = leader_s_c_map
@@ -2866,6 +2790,39 @@ class Editor():
             self._on_search(x, y, text, self._search_forward)
             return False
         self.maps[VISUAL][ord('?')] = question_map
+
+        def semicolon_map(self):
+            if self._action == 'f':
+                self.get_curr_window()._find(self._char)
+            if self._action == 'F':
+                self.get_curr_window()._find_back(self._char)
+            if self._action == 't':
+                self.get_curr_window()._till(self._char)
+            if self._action == 'T':
+                self.get_curr_window()._till_back(self._char)
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord(';')] = semicolon_map
+        def comma_map(self):
+            if self._action == 'f':
+                self.get_curr_window()._find_back(self._char)
+            if self._action == 'F':
+                self.get_curr_window()._find(self._char)
+            if self._action == 't':
+                self.get_curr_window()._till_back(self._char)
+            if self._action == 'T':
+                self.get_curr_window()._till(self._char)
+
+            x = self.get_curr_window().buffer_cursor[0]
+            y = self.get_curr_window().buffer_cursor[1]
+            self.get_curr_buffer().visual_set_current(x, y)
+            self.draw()
+            return False
+        self.maps[VISUAL][ord(',')] = comma_map
 
     def _initialize_replace_maps(self):
         pass
