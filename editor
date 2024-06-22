@@ -2884,7 +2884,6 @@ class Editor():
         self._initialize_visual_maps()
         self._initialize_visual_line_maps()
         self._initialize_visual_block_maps()
-        self._initialize_replace_maps()
         self._initialize_multi_cursor_normal_maps()
         self._initialize_multi_cursor_insert_maps()
 
