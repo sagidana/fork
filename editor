@@ -1741,7 +1741,7 @@ class Editor():
             end_x, end_y = end
 
             self.change_begin()
-            self.get_curr_window().search_replace_scope(scope,
+            self.get_curr_window().search_replace_scope(Scope(start_x, start_y, end_x, end_y),
                                                         last_pattern,
                                                         text)
             self.change_end()
