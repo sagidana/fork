@@ -10,6 +10,7 @@ import os
 
 from buffer import Buffer
 from window import Window
+from common import Scope
 from settings import *
 from task import Task
 from screen import *
@@ -313,10 +314,7 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_buffer().inner_word(x, y)
-            pattern = self.get_curr_buffer().get_scope_text(scope[0],
-                                                            scope[1],
-                                                            scope[2],
-                                                            scope[3])
+            pattern = self.get_curr_buffer().get_scope_text(scope)
             if len(pattern) == 0: return False
             pattern = f"\\W{pattern[0]}\\("
 
@@ -360,10 +358,7 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_buffer().inner_word(x, y)
-            pattern = self.get_curr_buffer().get_scope_text(scope[0],
-                                                            scope[1],
-                                                            scope[2],
-                                                            scope[3])
+            pattern = self.get_curr_buffer().get_scope_text(scope)
             if len(pattern) == 0: return False
             pattern = r"((\W+)|(^))(?P<cword>"+pattern[0]+r")\W"
 
@@ -407,10 +402,7 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_buffer().inner_word(x, y)
-            pattern = self.get_curr_buffer().get_scope_text(scope[0],
-                                                            scope[1],
-                                                            scope[2],
-                                                            scope[3])
+            pattern = self.get_curr_buffer().get_scope_text(scope)
             if len(pattern) == 0: return False
             pattern = pattern[0]
 
@@ -473,7 +465,7 @@ class Editor():
             end_y = min(start_y + 1, len(self.get_curr_buffer().lines) - 1)
             end_x = len(self.get_curr_buffer().lines[end_y]) - 2
 
-            scope = (start_x, start_y, end_x, end_y)
+            scope = Scope(start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[ord('j')] = move_j
         def move_k(self):
@@ -484,21 +476,21 @@ class Editor():
             start_y = max(0, end_y - 1)
             start_x = 0
 
-            scope = (start_x, start_y, end_x, end_y)
+            scope = Scope(start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[ord('k')] = move_k
         def move_h(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
-            scope = (x - 1, y, x - 1, y)
+            scope = Scope(x - 1, y, x - 1, y)
             if scope: return cb(scope)
         maps[ord('h')] = move_h
         def move_l(self):
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             # TODO: check boundries
-            scope = (x + 1, y, x + 1, y)
+            scope = Scope(x + 1, y, x + 1, y)
             if scope: return cb(scope)
         maps[ord('l')] = move_l
 
@@ -511,7 +503,7 @@ class Editor():
             if end_y > start_y:
                 end_y = start_y
                 end_x = len(self.get_curr_window().get_line(end_y)) - 1
-            scope = (start_x, start_y, end_x - 1, end_y)
+            scope = Scope(start_x, start_y, end_x - 1, end_y)
             if scope: return cb(scope)
         maps[ord('w')] = move_w
         def move_dash(self):
@@ -523,7 +515,7 @@ class Editor():
             if end_y > start_y:
                 end_y = start_y
                 end_x = len(self.get_curr_window().get_line(end_y)) - 1
-            scope = (start_x, start_y, end_x - 1, end_y)
+            scope = Scope(start_x, start_y, end_x - 1, end_y)
             if scope: return cb(scope)
         maps[ord('-')] = move_dash
         def move_W(self):
@@ -535,34 +527,35 @@ class Editor():
             if end_y > start_y:
                 end_y = start_y
                 end_x = len(self.get_curr_window().get_line(end_y)) - 1
-            scope = (start_x, start_y, end_x - 1, end_y)
+            scope = Scope(start_x, start_y, end_x - 1, end_y)
             if scope: return cb(scope)
         maps[ord('W')] = move_W
         def move_b(self):
-            end_x = self.get_curr_window().buffer_cursor[0]
-            end_y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_prev_word(end_x, end_y)
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_word(src_x, src_y)
             if not ret: return False
-            start_x, start_y = ret
-            scope = (start_x, start_y, end_x - 1, end_y)
+            dst_x, dst_y = ret
+            scope = Scope(src_x, src_y, dst_x - 1, dst_y)
             if scope: return cb(scope)
         maps[ord('b')] = move_b
         def move_underscore(self):
-            end_x = self.get_curr_window().buffer_cursor[0]
-            end_y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_prev_w_o_r_d(end_x, end_y)
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_w_o_r_d(src_x, src_y)
             if not ret: return False
-            start_x, start_y = ret
-            scope = (start_x, start_y, end_x - 1, end_y)
+            dst_x, dst_y = ret
+            scope = Scope(src_x, src_y, dst_x - 1, dst_y)
             if scope: return cb(scope)
         maps[ord('_')] = move_underscore
         def move_B(self):
-            end_x = self.get_curr_window().buffer_cursor[0]
-            end_y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_prev_WORD(end_x, end_y)
+            elog('move_B()')
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_prev_WORD(src_x, src_y)
             if not ret: return False
-            start_x, start_y = ret
-            scope = (start_x, start_y, end_x - 1, end_y)
+            dst_x, dst_y = ret
+            scope = Scope(src_x, src_y, dst_x - 1, dst_y)
             if scope: return cb(scope)
         maps[ord('B')] = move_B
         def move_e(self):
@@ -571,7 +564,7 @@ class Editor():
             ret = self.get_curr_buffer().find_word_end(start_x, start_y)
             if not ret: return False
             end_x, end_y = ret
-            scope = (start_x, start_y, end_x, end_y)
+            scope = Scope(start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[ord('e')] = move_e
         def move_E(self):
@@ -580,7 +573,7 @@ class Editor():
             ret = self.get_curr_buffer().find_WORD_end(start_x, start_y)
             if not ret: return False
             end_x, end_y = ret
-            scope = (start_x, start_y, end_x, end_y)
+            scope = Scope(start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[ord('E')] = move_E
 
@@ -588,14 +581,14 @@ class Editor():
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             end_x, end_y = self.get_curr_window().half_page_up()
-            scope = (start_x, start_y, end_x, end_y)
+            scope = Scope(start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[CTRL_U_KEY] = ctrl_u_map
         def ctrl_d_map(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             end_x, end_y = self.get_curr_window().half_page_down()
-            scope = (start_x, start_y, end_x, end_y)
+            scope = Scope(start_x, start_y, end_x, end_y)
             if scope: return cb(scope)
         maps[CTRL_D_KEY] = ctrl_d_map
 
@@ -610,7 +603,7 @@ class Editor():
                                                             char)
                 if not loc: return False
                 end_x, end_y = loc[0], loc[1]
-                scope = (start_x, start_y, end_x, end_y)
+                scope = Scope(start_x, start_y, end_x, end_y)
                 if scope: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('f')] = move_f_map
@@ -625,7 +618,7 @@ class Editor():
                                                             char)
                 if not loc: return False
                 start_x, start_y = loc[0], loc[1]
-                scope = (start_x, start_y, end_x, end_y)
+                scope = Scope(start_x, start_y, end_x, end_y)
                 if scope: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('F')] = move_F_map
@@ -642,7 +635,7 @@ class Editor():
                 end_x, end_y = loc[0], loc[1]
                 end_x = end_x - 1 if end_x > 0 else end_x
 
-                scope = (start_x, start_y, end_x, end_y)
+                scope = Scope(start_x, start_y, end_x, end_y)
                 if scope: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('t')] = move_t_map
@@ -659,7 +652,7 @@ class Editor():
                 start_x, start_y = loc[0], loc[1]
                 start_x = start_x + 1 if start_x < len(self.get_curr_window().get_line(start_y)) - 1 else start_x
 
-                scope = (start_x, start_y, end_x, end_y)
+                scope = Scope(start_x, start_y, end_x, end_y)
                 if scope: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('T')] = move_T_map
@@ -1012,20 +1005,15 @@ class Editor():
         self.maps[NORMAL][ord('<')] = {}    # indent left
 
         def change_object_map(scope):
-            start_x, start_y, end_x, end_y = scope
             self.change_begin()
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(scope)
             self.change_mode(INSERT, effect_change=False)
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('c')], change_object_map)
         # in the case of change, thw word movement is acting like the end movement.
         self.maps[NORMAL][ord('c')][ord('w')] = self.maps[NORMAL][ord('c')][ord('e')]
         def delete_object_map(scope):
-            start_x, start_y, end_x, end_y = scope
-            text = self.get_curr_buffer().get_scope_text(   start_x,
-                                                            start_y,
-                                                            end_x,
-                                                            end_y)
+            text = self.get_curr_buffer().get_scope_text(scope)
             if len(text) == 0: return False
 
             data = {}
@@ -1034,7 +1022,7 @@ class Editor():
             self.registers['"'] = data
 
             self.change_begin()
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(scope)
             self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('d')], delete_object_map)
@@ -1042,11 +1030,7 @@ class Editor():
         # TODO: self.maps[NORMAL][ord('d')][ord('j')] =
         # TODO: self.maps[NORMAL][ord('d')][ord('k')] =
         def yank_object_map(scope):
-            start_x, start_y, end_x, end_y = scope
-            text = self.get_curr_buffer().get_scope_text(   start_x,
-                                                            start_y,
-                                                            end_x,
-                                                            end_y)
+            text = self.get_curr_buffer().get_scope_text(scope)
             if len(text) == 0: return False
 
             # send yanked text to clipboard
@@ -1059,16 +1043,14 @@ class Editor():
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('y')], yank_object_map)
         def indent_right_object_map(scope):
-            start_x, start_y, end_x, end_y = scope
             self.change_begin()
-            self.get_curr_window().indent_lines(start_y, end_y, True)
+            self.get_curr_window().indent_lines(scope.start.y, scope.end.y, True)
             self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('>')], indent_right_object_map)
         def indent_left_object_map(scope):
-            start_x, start_y, end_x, end_y = scope
             self.change_begin()
-            self.get_curr_window().indent_lines(start_y, end_y, False)
+            self.get_curr_window().indent_lines(scope.start.y, scope.end.y, False)
             self.change_end()
             return False
         self._initialize_objects_maps(self.maps[NORMAL][ord('<')], indent_left_object_map)
@@ -1154,10 +1136,7 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_buffer().inner_word(x, y)
-            pattern = self.get_curr_buffer().get_scope_text(scope[0],
-                                                            scope[1],
-                                                            scope[2],
-                                                            scope[3])
+            pattern = self.get_curr_buffer().get_scope_text(scope)
             if len(pattern) == 0: return False
             pattern = pattern[0]
             pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
@@ -1170,11 +1149,10 @@ class Editor():
             return False
         self.maps[NORMAL][ord('g')][ord('d')] = gd_map
         def comment_object_map(scope):
-            start_x, start_y, end_x, end_y = scope
             self.change_begin()
 
             try:
-                comment(self, start_y, end_y)
+                comment(self, scope.start.y, scope.end.y)
             except Exception as e:
                 elog(f"Exception: {e}", type="ERROR")
                 elog(f"traceback: {traceback.format_exc()}", type="ERROR")
@@ -1281,10 +1259,7 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_buffer().inner_word(x, y)
-            pattern = self.get_curr_buffer().get_scope_text(scope[0],
-                                                            scope[1],
-                                                            scope[2],
-                                                            scope[3])
+            pattern = self.get_curr_buffer().get_scope_text(scope)
             if len(pattern) == 0: return False
             pattern = pattern[0]
             pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
@@ -1297,10 +1272,7 @@ class Editor():
             x = self.get_curr_window().buffer_cursor[0]
             y = self.get_curr_window().buffer_cursor[1]
             scope = self.get_curr_buffer().inner_word(x, y)
-            pattern = self.get_curr_buffer().get_scope_text(scope[0],
-                                                            scope[1],
-                                                            scope[2],
-                                                            scope[3])
+            pattern = self.get_curr_buffer().get_scope_text(scope)
             if len(pattern) == 0: return False
             pattern = pattern[0]
             pattern = r"((\W+)|(^))(?P<cword>"+pattern+r")\W"
@@ -1494,7 +1466,7 @@ class Editor():
             end_y = y
 
             self.change_begin()
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(Scope(start_x, start_y, end_x, end_y))
             # self.change_end()
             self.change_mode(INSERT, effect_change=False)
             return False
@@ -1515,7 +1487,7 @@ class Editor():
             self.registers['"'] = data
 
             self.change_begin()
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(Scope(start_x, start_y, end_x, end_y))
             self.change_end()
 
             return False
@@ -1769,10 +1741,7 @@ class Editor():
             end_x, end_y = end
 
             self.change_begin()
-            self.get_curr_window().search_replace_scope(start_x,
-                                                        start_y,
-                                                        end_x,
-                                                        end_y,
+            self.get_curr_window().search_replace_scope(scope,
                                                         last_pattern,
                                                         text)
             self.change_end()
@@ -1843,7 +1812,7 @@ class Editor():
             if not ret: return
             end_x, end_y = ret
 
-            window.remove_scope(end_x, end_y, start_x, start_y)
+            window.remove_scope(scope(end_x, end_y, start_x, start_y))
             self.get_curr_window().draw_cursor()
             return False
         self.maps[INSERT][CTRL_W_KEY] = ctrl_w_map
@@ -2158,14 +2127,13 @@ class Editor():
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
 
             lines = []
-            for y in range(start_y, end_y + 1):
+            for y in range(scope.start.y, scope.end.y + 1):
                 lines.append(self.get_curr_buffer().lines[y])
 
             self.change_begin()
-            for y in reversed(range(start_y, end_y + 1)):
+            for y in reversed(range(scope.start.y, scope.end.y + 1)):
                 self.get_curr_window().remove_line_at(y, propagate=False)
             self.get_curr_buffer().flush_changes()
 
@@ -2185,10 +2153,9 @@ class Editor():
         def c_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
 
             lines = []
-            for y in range(start_y, end_y + 1):
+            for y in range(scope.start.y, scope.end.y + 1):
                 lines.append(self.get_curr_buffer().lines[y])
 
             self.change_begin()
@@ -2208,10 +2175,9 @@ class Editor():
         def y_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
 
             lines = []
-            for y in range(start_y, end_y + 1):
+            for y in range(scope.start.y, scope.end.y + 1):
                 lines.append(self.get_curr_buffer().lines[y])
             if len(lines) == 0: return False
 
@@ -2229,15 +2195,14 @@ class Editor():
         def p_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
 
             lines = []
-            for y in range(start_y, end_y + 1):
+            for y in range(scope.start.y, scope.end.y + 1):
                 lines.append(self.get_curr_buffer().lines[y])
 
             self.change_begin()
             # remove current lines
-            for y in reversed(range(start_y, end_y + 1)):
+            for y in reversed(range(scope.start.y, scope.end.y + 1)):
                 self.get_curr_window().remove_line_at(y, propagate=False)
             self.get_curr_buffer().flush_changes()
 
@@ -2326,15 +2291,14 @@ class Editor():
         def gq_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
 
-            start_x = 0
-            end_x = len(self.get_curr_window().get_line(end_y)) - 2
+            scope.start.x = 0
+            scope.end.x = len(self.get_curr_window().get_line(scope.end.y)) - 2
 
-            self.get_curr_window().move_cursor_to_buf_location(start_x, start_y)
+            self.get_curr_window().move_cursor_to_buf_location(scope.start.x, scope.start.y)
             self.change_begin()
             try:
-                format(self, start_x, start_y, end_x, end_y)
+                format(self, scope)
             except Exception as e:
                 elog(f"Exception: {e}", type="ERROR")
                 elog(f"traceback: {traceback.format_exc()}", type="ERROR")
@@ -2346,11 +2310,10 @@ class Editor():
         def gc_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
             self.change_begin()
 
             try:
-                comment(self, start_y, end_y)
+                comment(self, scope.start.y, scope.end.y)
             except Exception as e:
                 elog(f"Exception: {e}", type="ERROR")
                 elog(f"traceback: {traceback.format_exc()}", type="ERROR")
@@ -2381,27 +2344,24 @@ class Editor():
         def lt_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
             self.change_begin()
-            self.get_curr_window().indent_lines(start_y, end_y, False)
+            self.get_curr_window().indent_lines(scope.start.y, scope.end.y, False)
             self.change_end()
         self.maps[VISUAL_LINE][ord('<')] = lt_map
         def gt_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
             self.change_begin()
-            self.get_curr_window().indent_lines(start_y, end_y, True)
+            self.get_curr_window().indent_lines(scope.start.y, scope.end.y, True)
             self.change_end()
             return False
         self.maps[VISUAL_LINE][ord('>')] = gt_map
         def leader_r_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
             # Xs are matter in this case, so make them right
-            start_x = 0
-            end_x = len(self.get_curr_window().get_line(end_y)) - 1
+            scope.start.x = 0
+            scope.end.x = len(self.get_curr_window().get_line(scope.end.y)) - 1
 
             text = self.prompt("replace: ")
             if len(text) == 0: return False
@@ -2409,10 +2369,7 @@ class Editor():
             if not last_pattern or len(last_pattern) == 0: return False
 
             self.change_begin()
-            self.get_curr_window().search_replace_scope(start_x,
-                                                        start_y,
-                                                        end_x,
-                                                        end_y,
+            self.get_curr_window().search_replace_scope(scope,
                                                         last_pattern,
                                                         text)
             self.change_end()
@@ -2432,10 +2389,8 @@ class Editor():
 
     def _initialize_visual_maps(self):
         def visual_object_map(scope):
-            start_x, start_y, end_x, end_y = scope
-
-            self.get_curr_buffer().visual_set_scope(start_x, start_y, end_x, end_y)
-            self.get_curr_window().move_cursor_to_buf_location(end_x, end_y)
+            self.get_curr_buffer().visual_set_scope(scope)
+            self.get_curr_window().move_cursor_to_buf_location(scope.end.x, scope.end.y)
 
             self.draw()
             return False
@@ -2443,12 +2398,8 @@ class Editor():
         def d_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
 
-            text = self.get_curr_buffer().get_scope_text(   start_x,
-                                                            start_y,
-                                                            end_x,
-                                                            end_y)
+            text = self.get_curr_buffer().get_scope_text(scope)
             if len(text) == 0: return False
 
             data = {}
@@ -2461,7 +2412,7 @@ class Editor():
 
             self.change_begin()
 
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(scope)
 
             self.change_end()
 
@@ -2471,11 +2422,10 @@ class Editor():
         def p_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
 
             self.change_begin()
 
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(scope)
             data = self.registers['"']
             if data:
                 if data['meta'] == 'line':
@@ -2506,8 +2456,7 @@ class Editor():
             if not scope: return False
             self.change_begin()
 
-            start_x, start_y, end_x, end_y = scope
-            self.get_curr_window().remove_scope(start_x, start_y, end_x, end_y)
+            self.get_curr_window().remove_scope(scope)
 
             self.change_mode(INSERT, effect_change=False)
             return False
@@ -2516,8 +2465,7 @@ class Editor():
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
 
-            start_x, start_y, end_x, end_y = scope
-            text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+            text = self.get_curr_buffer().get_scope_text(scope)
             if len(text) == 0: return False
 
             # send yanked text to clipboard
@@ -2697,8 +2645,7 @@ class Editor():
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
 
-            start_x, start_y, end_x, end_y = scope
-            text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+            text = self.get_curr_buffer().get_scope_text(scope)
             if len(text) == 0: return False
             pattern = text[0]
 
@@ -2735,7 +2682,6 @@ class Editor():
         def leader_r_map(self):
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
-            start_x, start_y, end_x, end_y = scope
 
             text = self.prompt("replace: ")
             if len(text) == 0: return False
@@ -2743,10 +2689,7 @@ class Editor():
             if not last_pattern or len(last_pattern) == 0: return False
 
             self.change_begin()
-            self.get_curr_window().search_replace_scope(start_x,
-                                                        start_y,
-                                                        end_x,
-                                                        end_y,
+            self.get_curr_window().search_replace_scope(scope,
                                                         last_pattern,
                                                         text)
             self.change_end()
@@ -2757,8 +2700,7 @@ class Editor():
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
 
-            start_x, start_y, end_x, end_y = scope
-            text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+            text = self.get_curr_buffer().get_scope_text(scope)
             if len(text) == 0: return False
             text = re.escape(text[0])
 
@@ -2774,8 +2716,7 @@ class Editor():
             scope = self.get_curr_buffer().visual_get_scope()
             if not scope: return False
 
-            start_x, start_y, end_x, end_y = scope
-            text = self.get_curr_buffer().get_scope_text(start_x, start_y, end_x, end_y)
+            text = self.get_curr_buffer().get_scope_text(scope)
             if len(text) == 0: return False
             text = text[0]
 
@@ -3162,19 +3103,19 @@ class Editor():
 
     def _find_closest_match(self, x, y, matches, forward=True):
         if forward:
-            for start_x, start_y, end_x, end_y in matches:
-                if start_y < y: continue
-                if start_y == y and start_x <= x: continue
-                return (start_x, start_y)
+            for scope in matches:
+                if scope.start.y < y: continue
+                if scope.start.y == y and scope.start.x <= x: continue
+                return (scope.start.x, scope.start.y)
             # wrap to start
-            return matches[0][0], matches[0][1]
+            return matches[0].start.x, matches[0].start.y
         else:
-            for start_x, start_y, end_x, end_y in reversed(matches):
-                if start_y > y: continue
-                if start_y == y and start_x >= x: continue
-                return (start_x, start_y)
+            for scope in reversed(matches):
+                if scope.start.y > y: continue
+                if scope.start.y == y and scope.start.x >= x: continue
+                return (scope.start.x, scope.start.y)
             # wrap to end
-            return matches[-1][0], matches[-1][1]
+            return matches[-1].start.x, matches[-1].start.y
 
     def _on_search(self, x, y, pattern, forward, add_to_jumplist=False):
         results = self.get_curr_buffer().search_pattern(pattern)

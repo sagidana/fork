@@ -291,28 +291,29 @@ class Window():
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.content_height, buffer_height)
 
-        for start_x, start_y, end_x, end_y, style in self.buffer.highlights:
-            if start_y >= screen_end_y: return
-            if end_y < screen_start_y: continue
+        for scope, style in self.buffer.highlights:
+            if scope.start.y >= screen_end_y: return
+            if scope.end.y < screen_start_y: continue
 
-            if start_y == end_y:
-                string = self.get_line(start_y)[start_x:end_x]
+            # one line
+            if scope.start.y == scope.end.y:
+                string = self.get_line(scope.start.y)[scope.start.x:scope.end.x]
 
-                self._screen_write( self._expanded_x(start_y, start_x),
-                                    start_y - screen_start_y,
+                self._screen_write( self._expanded_x(scope.start.y, scope.start.x),
+                                    scope.start.y - screen_start_y,
                                     string,
                                     style)
                 continue
 
             # first line
-            string = self.get_line(start_y)[start_x:]
-            self._screen_write( self._expanded_x(start_y, start_x),
-                                start_y - screen_start_y,
+            string = self.get_line(scope.start.y)[scope.start.x:]
+            self._screen_write( self._expanded_x(scope.start.y, scope.start.x),
+                                scope.start.y - screen_start_y,
                                 string,
                                 style)
 
             # lines in between
-            for y in range(start_y + 1, end_y):
+            for y in range(scope.start.y + 1, scope.end.y):
                 string = self.get_line(y)
                 self._screen_write( 0,
                                     y - screen_start_y,
@@ -320,9 +321,9 @@ class Window():
                                     style)
 
             # last line
-            string = self.get_line(end_y)[:end_x]
+            string = self.get_line(scope.end.y)[:scope.end.x]
             self._screen_write( 0,
-                                end_y - screen_start_y,
+                                scope.end.y - screen_start_y,
                                 string,
                                 style)
 
@@ -352,25 +353,21 @@ class Window():
         style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
         style['background'] = get_settings()['theme']['colors']['selection.background']
 
-        orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
-        if orig_start_x > orig_end_x:
-            temp = orig_start_x
-            orig_start_x = orig_end_x
-            orig_end_x = temp
-        orig_end_x += 1
+        orig = self.buffer.visual_get_scope()
+        orig.end.x += 1
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.content_height, buffer_height)
 
-        if orig_start_y > screen_end_y: return
-        if orig_end_y < screen_start_y: return
+        if orig.start.y > screen_end_y: return
+        if orig.end.y < screen_start_y: return
 
-        start_y = max(orig_start_y, screen_start_y)
-        if start_y == orig_start_y: start_x = orig_start_x
+        start_y = max(orig.start.y, screen_start_y)
+        if start_y == orig.start.y: start_x = orig.start.x
         else: start_x = 0
 
-        end_y = min(orig_end_y, screen_end_y)
-        if end_y == orig_end_y: end_x = orig_end_x
+        end_y = min(orig.end.y, screen_end_y)
+        if end_y == orig.end.y: end_x = orig.end.x
         else: end_x = len(self.get_line(end_y)) - 1
 
         for y in range(start_y, end_y+1):
@@ -388,21 +385,22 @@ class Window():
         style['background'] = get_settings()['theme']['colors']['selection.background']
         # style['reverse'] = None
 
-        orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
-        orig_end_x += 1
+        # orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
+        orig = self.buffer.visual_get_scope()
+        orig.end.x += 1
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.content_height, buffer_height)
 
-        if orig_start_y > screen_end_y: return
-        if orig_end_y < screen_start_y: return
+        if orig.start.y > screen_end_y: return
+        if orig.end.y < screen_start_y: return
 
-        start_y = max(orig_start_y, screen_start_y)
-        if start_y == orig_start_y: start_x = orig_start_x
+        start_y = max(orig.start.y, screen_start_y)
+        if start_y == orig.start.y: start_x = orig.start.x
         else: start_x = 0
 
-        end_y = min(orig_end_y, screen_end_y)
-        if end_y == orig_end_y: end_x = orig_end_x
+        end_y = min(orig.end.y, screen_end_y)
+        if end_y == orig.end.y: end_x = orig.end.x
         else: end_x = len(self.get_line(end_y)) - 1
 
         if start_y == end_y:
@@ -440,17 +438,17 @@ class Window():
         style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
         style['background'] = get_settings()['theme']['colors']['selection.background']
         # style['reverse'] = None
-        start_x, start_y, end_x, end_y = self.buffer.visual_get_scope()
+        scope = self.buffer.visual_get_scope()
 
         buffer_height = len(self.buffer.lines) - 1
         screen_start_y = self.buffer_cursor[1] - self.window_cursor[1]
         screen_end_y = min(screen_start_y + self.content_height, buffer_height)
 
-        if start_y > screen_end_y: return
-        if end_y < screen_start_y: return
+        if scope.start.y > screen_end_y: return
+        if scope.end.y < screen_start_y: return
 
-        start_y = max(start_y, screen_start_y)
-        end_y = min(end_y, screen_end_y)
+        start_y = max(scope.start.y, screen_start_y)
+        end_y = min(scope.end.y, screen_end_y)
 
         for y in range(start_y, end_y + 1):
             string = self.get_line(y)
@@ -496,9 +494,9 @@ class Window():
         buf_x = self.buffer_cursor[0]
         buf_y = self.buffer_cursor[1]
         index = "?"
-        for i, (start_x, start_y, end_x, end_y, style) in enumerate(self.buffer.highlights):
-            if start_x <= buf_x <= end_x and \
-               start_y <= buf_y <= end_y:
+        for i, (scope, style) in enumerate(self.buffer.highlights):
+            if scope.start.x <= buf_x <= scope.end.x and \
+               scope.start.y <= buf_y <= scope.end.y:
                 index = str(i+1)
                 break
         return index
@@ -1249,28 +1247,16 @@ class Window():
         self.buffer.flush_changes()
         self.draw_cursor()
 
-    def remove_scope(   self,
-                        start_x,
-                        start_y,
-                        end_x,
-                        end_y):
-        self.move_cursor_to_buf_location(start_x, start_y, to_draw=False)
-        x, y = self.buffer.remove_scope(start_x, start_y, end_x, end_y)
+    def remove_scope(self, scope):
+        self.move_cursor_to_buf_location(scope.start.x, scope.start.y, to_draw=False)
+        x, y = self.buffer.remove_scope(scope)
 
     def search_replace_scope(   self,
-                                start_x,
-                                start_y,
-                                end_x,
-                                end_y,
+                                scope,
                                 pattern,
                                 dest):
-        self.move_cursor_to_buf_location(start_x, start_y, to_draw=False)
-        self.buffer.search_replace_scope(   start_x,
-                                            start_y,
-                                            end_x,
-                                            end_y,
-                                            pattern,
-                                            dest)
+        self.move_cursor_to_buf_location(scope.start.x, scope.start.y, to_draw=False)
+        self.buffer.search_replace_scope(scope, pattern, dest)
 
     def new_line_after(self):
         line = self.get_curr_line()

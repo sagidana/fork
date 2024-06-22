@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from settings import INSTALLATION_PATH
+from common import Scope
 from log import elog
 
 from tree_sitter import Language, Parser
@@ -254,7 +255,7 @@ class TreeSitter():
             end_y = node.end_point[0]
             end_x = node.end_point[1]
             end_x -= 1 # exclude the new line char
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
 
         if self.language == 'c':
             query = self._language.query("(if_statement (compound_statement) @name)")
@@ -269,7 +270,7 @@ class TreeSitter():
             start_x += 1 # exclude the curly braces
             end_x -= 1 # exclude the curly braces
 
-            return start_x, start_y, end_x-1, end_y
+            return Scope(start_x, start_y, end_x-1, end_y)
         return None
 
     def get_arround_if(self, x, y):
@@ -287,7 +288,7 @@ class TreeSitter():
             end_y = node.end_point[0]
             end_x = node.end_point[1]
             end_x -= 1 # exclude the new line char
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
 
         if self.language == 'c':
             query = self._language.query("(if_statement) @name")
@@ -299,7 +300,7 @@ class TreeSitter():
             end_y = node.end_point[0]
             end_x = node.end_point[1]
 
-            return start_x, start_y, end_x-1, end_y
+            return Scope(start_x, start_y, end_x-1, end_y)
         return None
 
     def get_inner_IF(self, x, y):
@@ -339,7 +340,7 @@ class TreeSitter():
                     end_x += 1
             end_x -= 1 # remove the ':' from the range
 
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
 
         if self.language == 'c':
             query = self._language.query("(if_statement) @name")
@@ -357,7 +358,7 @@ class TreeSitter():
             end_x -= 1 # exclude the parenthesize
             start_x += 1 # exclude the parenthesize
 
-            return start_x, start_y, end_x-1, end_y
+            return Scope(start_x, start_y, end_x-1, end_y)
         return None
 
     def get_inner_method(self, x, y):
@@ -372,7 +373,7 @@ class TreeSitter():
             end_y = node.end_point[0]
             end_x = node.end_point[1]
             end_x -= 1 # exclude the new line char
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
 
         if self.language == 'c':
             query = self._language.query("(function_definition (compound_statement) @name)")
@@ -388,7 +389,7 @@ class TreeSitter():
             end_x -= 1 # exclude the parenthesize
             start_x += 1 # exclude the parenthesize
 
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
         return None
 
     def get_arround_method(self, x, y):
@@ -403,7 +404,7 @@ class TreeSitter():
             end_y = node.end_point[0]
             end_x = node.end_point[1]
             end_x -= 1 # exclude the new line char
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
 
         if self.language == 'c':
             query = self._language.query("(function_definition) @name")
@@ -415,7 +416,7 @@ class TreeSitter():
             end_y = node.end_point[0]
             end_x = node.end_point[1]
 
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
         return None
 
     def get_inner_METHOD(self, x, y):
@@ -435,7 +436,7 @@ class TreeSitter():
             end_x -= 1 # why python parser returns the end exclusive?
             start_x += 1 # exclude the parenthesize
             end_x -= 1 # exclude the parenthesize
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
 
         if self.language == 'c':
             query = self._language.query("(function_definition) @name")
@@ -454,7 +455,7 @@ class TreeSitter():
             end_x -= 1 # exclude the parenthesize
             start_x += 1 # exclude the parenthesize
 
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
         return None
 
     def get_arround_METHOD(self, x, y):
@@ -472,7 +473,7 @@ class TreeSitter():
             end_y = node.end_point[0]
             end_x = node.end_point[1]
             end_x -= 1 # why python parser returns the end exclusive?
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
 
         if self.language == 'c':
             query = self._language.query("(function_definition) @name")
@@ -488,7 +489,7 @@ class TreeSitter():
             end_x = node.end_point[1]
 
             end_x -= 1 # why c parser returns the end exclusive?
-            return start_x, start_y, end_x, end_y
+            return Scope(start_x, start_y, end_x, end_y)
         return None
 
     def get_arround_argument(self, x, y):
@@ -512,7 +513,7 @@ class TreeSitter():
                 if end_y == y and end_x < x: continue
 
                 end_x -= 1 # why python parser returns the end exclusive?
-                return start_x, start_y, end_x, end_y
+                return Scope(start_x, start_y, end_x, end_y)
 
         if self.language == 'c':
             query = self._language.query("""
@@ -533,7 +534,7 @@ class TreeSitter():
                 if end_y == y and end_x < x: continue
 
                 end_x -= 1 # why c parser returns the end exclusive?
-                return start_x, start_y, end_x, end_y
+                return Scope(start_x, start_y, end_x, end_y)
         return None
 
     def get_next_method(self, x, y):

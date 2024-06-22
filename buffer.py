@@ -8,6 +8,7 @@ from hooks import *
 from idr import *
 
 from treesitter import TreeSitter
+from common import Scope
 
 from difflib import Differ
 from subprocess import run
@@ -19,33 +20,6 @@ import os
 WORD_REGEX = r'[a-zA-Z0-9_]'
 W_O_R_D_REGEX = r'[a-zA-Z0-9]'
 SINGLE_REGEX = r'[\)\(\}\{\]\[\,\.\/\"\'\;\:\=]'
-
-
-class Scope():
-    class Point():
-        def __init__(self, x, y):
-            self.x = x
-            self.y = y
-
-    def __init__(self, src_x, src_y, dst_x, dst_y):
-        self.src = self.Point(src_x, src_y)
-        self.dst = self.Point(dst_x, dst_y)
-
-    @property
-    def start(self):
-        if self.src.y > self.dst.y:
-            return self.dst
-        if self.src.y == self.dst.y and self.src.x > self.dst.x:
-            return self.dst
-        return self.src
-
-    @property
-    def end(self):
-        if self.src.y > self.dst.y:
-            return self.src
-        if self.src.y == self.dst.y and self.src.x > self.dst.x:
-            return self.src
-        return self.dst
 
 
 class Buffer():
@@ -113,8 +87,9 @@ class Buffer():
         self.highlights = []
 
         self.visual_mode = None
-        self.visual_start_point = None
-        self.visual_current_point = None
+        self.visual_scope = None
+        # self.visual_start_point = None
+        # self.visual_current_point = None
 
         self.events = {}
         self.lines = []
@@ -333,9 +308,8 @@ class Buffer():
             pattern, style = self.highlights_meta[k]
             results = self.search_pattern(pattern)
             if len(results) == 0: continue
-            for result in results:
-                start_x, start_y, end_x, end_y = result
-                self.highlights.append((start_x, start_y, end_x, end_y, style))
+            for scope in results:
+                self.highlights.append((scope, style))
 
     def clear_highlights(self):
         self.highlights = []
@@ -361,50 +335,27 @@ class Buffer():
 
     def visual_begin(self, mode, x, y):
         self.visual_mode = mode
-        self.visual_start_point = [x, y]
-        self.visual_current_point = [x, y]
+        self.visual_scope = Scope(x, y, x, y)
+        # self.visual_start_point = [x, y]
+        # self.visual_current_point = [x, y]
         self._raise_event(ON_BUFFER_CHANGE, None)
 
-    def visual_set_scope(self, start_x, start_y, end_x, end_y):
-        self.visual_start_point[0] = start_x
-        self.visual_start_point[1] = start_y
-        self.visual_current_point[0] = end_x
-        self.visual_current_point[1] = end_y
+    def visual_set_scope(self, scope):
+        self.visual_scope = scope
 
     def visual_set_current(self, x, y):
         if not self.visual_mode: return
 
-        self.visual_current_point[0] = x
-        self.visual_current_point[1] = y
+        self.visual_scope.dst.x = x
+        self.visual_scope.dst.y = y
 
     def visual_get_scope(self):
         if not self.visual_mode: return None
-
-        if self.visual_start_point[1] < self.visual_current_point[1]:
-            return  self.visual_start_point[0],     \
-                    self.visual_start_point[1],     \
-                    self.visual_current_point[0],   \
-                    self.visual_current_point[1]
-        if self.visual_current_point[1] < self.visual_start_point[1]:
-            return  self.visual_current_point[0],   \
-                    self.visual_current_point[1],   \
-                    self.visual_start_point[0],     \
-                    self.visual_start_point[1]
-
-        if self.visual_start_point[0] < self.visual_current_point[0]:
-            return  self.visual_start_point[0],     \
-                    self.visual_start_point[1],     \
-                    self.visual_current_point[0],   \
-                    self.visual_current_point[1]
-        return  self.visual_current_point[0],   \
-                self.visual_current_point[1],   \
-                self.visual_start_point[0],     \
-                self.visual_start_point[1]
+        return self.visual_scope.copy()
 
     def visual_end(self):
         self.visual_mode = None
-        self.visual_start_point = None
-        self.visual_current_point = None
+        self.visual_scope = None
         self._raise_event(ON_BUFFER_CHANGE, None)
 
     def _insert_char_to_line(self, x, y, char):
@@ -596,14 +547,11 @@ class Buffer():
 
     # CORE: change
     def remove_scope(   self,
-                        start_x,
-                        start_y,
-                        end_x,
-                        end_y,
+                        scope,
                         propagate=True):
-        start_pos = self.get_file_pos(start_x, start_y)
+        start_pos = self.get_file_pos(scope.start.x, scope.start.y)
         if start_pos == -1: return 0
-        end_pos = self.get_file_pos(end_x, end_y)
+        end_pos = self.get_file_pos(scope.end.x, scope.end.y)
         if end_pos == -1: return 0
         end_pos += 1
         stream = self.get_file_stream()
@@ -615,25 +563,22 @@ class Buffer():
         change['start_byte'] = start_pos
         change['old_end_byte'] = end_pos
         change['new_end_byte'] = start_pos
-        change['start_point'] = (start_y, start_x)
-        change['old_end_point'] = (end_y, end_x)
-        change['new_end_point'] = (start_y, start_x)
+        change['start_point'] = (scope.start.y, scope.start.x)
+        change['old_end_point'] = (scope.end.y, scope.end.x)
+        change['new_end_point'] = (scope.start.y, scope.start.x)
 
         if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
-        return start_x, start_y
+        return scope.start.x, scope.start.y
 
     # CORE: change
     def replace_scope(  self,
-                        start_x,
-                        start_y,
-                        end_x,
-                        end_y,
+                        scope,
                         dest,
                         propagate=True):
-        start_pos = self.get_file_pos(start_x, start_y)
+        start_pos = self.get_file_pos(scope.start.x, scope.start.y)
         if start_pos == -1: return 0
-        end_pos = self.get_file_pos(end_x, end_y)
+        end_pos = self.get_file_pos(scope.end.x, scope.end.y)
         if end_pos == -1: return 0
         end_pos += 1
 
@@ -653,16 +598,13 @@ class Buffer():
 
     # CORE: change
     def search_replace_scope( self,
-                              start_x,
-                              start_y,
-                              end_x,
-                              end_y,
+                              scope,
                               pattern,
                               dest,
                               propagate=True):
-        start_pos = self.get_file_pos(start_x, start_y)
+        start_pos = self.get_file_pos(scope.start.x, scope.start.y)
         if start_pos == -1: return 0
-        end_pos = self.get_file_pos(end_x, end_y)
+        end_pos = self.get_file_pos(scope.end.x, scope.end.y)
         if end_pos == -1: return 0
         end_pos += 1
 
@@ -691,45 +633,33 @@ class Buffer():
         self.remove_line(y, propagate=propagate)
         self.insert_line(y, new_line, propagate=propagate)
 
-    def get_scope_text( self,
-                        start_x,
-                        start_y,
-                        end_x,
-                        end_y):
+    def get_scope_text(self, scope):
         text = []
-        if start_y > len(self.lines) - 1: return text
-        if end_y > len(self.lines) - 1: return text
-
-        # switch
-        if  (start_y > end_y) or \
-            (start_y == end_y and start_x > end_x):
-            tmp_y, tmp_x, = start_y, start_x
-            start_y, start_x = end_y, end_x
-            end_y, end_x = tmp_y, tmp_x
+        if scope.start.y > len(self.lines) - 1: return None
+        if scope.end.y > len(self.lines) - 1: return None
 
         # one line
-        if start_y == end_y:
-            if start_x > end_x: return text
-            line = self.lines[start_y]
-            if end_x > len(line) + 1: return text
-            text.append(line[start_x:end_x+1])
+        if scope.start.y == scope.end.y:
+            line = self.lines[scope.start.y]
+            if scope.end.x > len(line) + 1: return None
+            text.append(line[scope.start.x:scope.end.x+1])
             return text
 
         # multiple lines
 
         # first_line
-        line = self.lines[start_y]
-        line = line[start_x:]
+        line = self.lines[scope.start.y]
+        line = line[scope.start.x:]
         text.append(line)
 
         # middle
-        for y in range((end_y - start_y) - 1):
-            line = self.lines[start_y + y + 1]
+        for y in range((scope.end.y - scope.start.y) - 1):
+            line = self.lines[scope.start.y + y + 1]
             text.append(line)
 
         # last_line
-        line = self.lines[end_y]
-        line = line[:end_x+1]
+        line = self.lines[scope.end.y]
+        line = line[:scope.end.x+1]
         text.append(line)
 
         return text
@@ -1213,45 +1143,45 @@ class Buffer():
                 end_x = end - curr_offset
                 break
             curr_offset += len(self.lines[i])
-        return start_x, start_y, end_x, end_y
+        return Scope(start_x, start_y, end_x, end_y)
 
     def arround_parentheses(self, x, y):
         prev = self.find_prev_char(x, y, '(', smart=True)
         if not prev: return None
         next = self.find_next_char(x, y, ')', smart=True)
         if not next: return None
-        return prev[0], prev[1], next[0], next[1]
+        return Scope(prev[0], prev[1], next[0], next[1])
 
     def arround_quotation(self, x, y):
         ret = self.find_prev_and_next_char(x, y, '"')
         if not ret: return None
-        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
+        return Scope(ret[0][0], ret[0][1], ret[1][0], ret[1][1])
 
     def arround_square_brackets(self, x, y):
         prev = self.find_prev_char(x, y, '[', smart=True)
         if not prev: return None
         next = self.find_next_char(x, y, ']', smart=True)
         if not next: return None
-        return prev[0], prev[1], next[0], next[1]
+        return Scope(prev[0], prev[1], next[0], next[1])
 
     def arround_curly_brackets(self, x, y):
         prev = self.find_prev_char(x, y, '{', smart=True)
         if not prev: return None
         next = self.find_next_char(x, y, '}', smart=True)
         if not next: return None
-        return prev[0], prev[1], next[0], next[1]
+        return Scope(prev[0], prev[1], next[0], next[1])
 
     def arround_greater_than(self, x, y):
         prev = self.find_prev_char(x, y, '<', smart=True)
         if not prev: return None
         next = self.find_next_char(x, y, '>', smart=True)
         if not next: return None
-        return prev[0], prev[1], next[0], next[1]
+        return Scope(prev[0], prev[1], next[0], next[1])
 
     def arround_apostrophe(self, x, y):
         ret = self.find_prev_and_next_char(x, y, '\'')
         if not ret: return None
-        return ret[0][0], ret[0][1], ret[1][0], ret[1][1]
+        return Scope(ret[0][0], ret[0][1], ret[1][0], ret[1][1])
 
     def arround_backtick(self, x, y):
         ret = self.find_prev_and_next_char(x, y, '`')
@@ -1263,134 +1193,120 @@ class Buffer():
         if not begin: return None
         end = self.find_word_end(x, y, skip_current=False)
         if not end: return None
-        return begin[0]-1, begin[1], end[0]+1, end[1]
+        return Scope(begin[0]-1, begin[1], end[0]+1, end[1])
 
     def arround_w_o_r_d(self, x, y):
         begin = self.find_prev_w_o_r_d(x, y, skip_current=False)
         if not begin: return None
         end = self.find_w_o_r_d_end(x, y, skip_current=False)
         if not end: return None
-        return begin[0]-1, begin[1], end[0]+1, end[1]
+        return Scope(begin[0]-1, begin[1], end[0]+1, end[1])
 
     def arround_WORD(self, x, y):
         begin = self.find_prev_WORD(x, y, skip_current=False)
         if not begin: return None
         end = self.find_WORD_end(x, y, skip_current=False)
         if not end: return None
-        return begin[0]-1, begin[1], end[0]+1, end[1]
+        return Scope(begin[0]-1, begin[1], end[0]+1, end[1])
 
     def inner_parentheses(self, x, y):
         ret = self.arround_parentheses(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_quotation(self, x, y):
         ret = self.arround_quotation(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_square_brackets(self, x, y):
         ret = self.arround_square_brackets(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_curly_brackets(self, x, y):
         ret = self.arround_curly_brackets(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_greater_than(self, x, y):
         ret = self.arround_greater_than(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_apostrophe(self, x, y):
         ret = self.arround_apostrophe(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_backtick(self, x, y):
         ret = self.arround_backtick(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_word(self, x, y):
         ret = self.arround_word(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_w_o_r_d(self, x, y):
         ret = self.arround_w_o_r_d(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_WORD(self, x, y):
         ret = self.arround_WORD(x, y)
         if not ret: return None
-        start_x, start_y, end_x, end_y = ret
 
-        start_x += 1
-        end_x -= 1
+        ret.start.x += 1
+        ret.end.x -= 1
 
-        return start_x, start_y, end_x, end_y
+        return ret
 
     def inner_if(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_inner_if(x, y)
-        if not range: return None
-        start_x, start_y, end_x, end_y = range
-        return start_x, start_y, end_x, end_y
+        return range
     def inner_IF(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_inner_IF(x, y)
-        if not range: return None
-        start_x, start_y, end_x, end_y = range
-        return start_x, start_y, end_x, end_y
+        return range
     def inner_else(self, x, y):
         if not self.treesitter: return None
         # TODO
@@ -1414,15 +1330,11 @@ class Buffer():
     def inner_method(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_inner_method(x, y)
-        if not range: return None
-        start_x, start_y, end_x, end_y = range
-        return start_x, start_y, end_x, end_y
+        return range
     def inner_METHOD(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_inner_METHOD(x, y)
-        if not range: return None
-        start_x, start_y, end_x, end_y = range
-        return start_x, start_y, end_x, end_y
+        return range
     def inner_class(self, x, y):
         if not self.treesitter: return None
         # TODO
@@ -1447,9 +1359,7 @@ class Buffer():
     def arround_if(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_arround_if(x, y)
-        if not range: return None
-        start_x, start_y, end_x, end_y = range
-        return start_x, start_y, end_x, end_y
+        return range
     def arround_IF(self, x, y):
         if not self.treesitter: return None
         # TODO
@@ -1477,15 +1387,11 @@ class Buffer():
     def arround_method(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_arround_method(x, y)
-        if not range: return None
-        start_x, start_y, end_x, end_y = range
-        return start_x, start_y, end_x, end_y
+        return range
     def arround_METHOD(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_arround_METHOD(x, y)
-        if not range: return None
-        start_x, start_y, end_x, end_y = range
-        return start_x, start_y, end_x, end_y
+        return range
     def arround_class(self, x, y):
         if not self.treesitter: return None
         # TODO
@@ -1509,9 +1415,7 @@ class Buffer():
     def arround_argument(self, x, y):
         if not self.treesitter: return None
         range = self.treesitter.get_arround_argument(x, y)
-        if not range: return None
-        start_x, start_y, end_x, end_y = range
-        return start_x, start_y, end_x, end_y
+        return range
 
     def search_pattern(self, pattern):
         results = []
@@ -1522,7 +1426,7 @@ class Buffer():
                         start_x, end_x = m.span(m.lastindex)
                     else:
                         start_x, end_x = m.span()
-                    results.append((start_x, y, end_x, y))
+                    results.append(Scope(start_x, y, end_x, y))
         except: pass
         return results
 

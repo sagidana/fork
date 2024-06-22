@@ -9,6 +9,7 @@ import sys
 import re
 import os
 
+from common import Scope
 from settings import *
 from log import elog
 
@@ -212,14 +213,11 @@ def yank_to_clipboard(text):
                                                     stderr=DEVNULL) as pipe:
         pipe.communicate(input=text.encode('utf-8'))
 
-def format(editor, start_x, start_y, end_x, end_y):
+def format(editor, scope):
     try:
-        start_x = 0
-        end_x = len(editor.get_curr_window().get_line(end_y)) - 2
-        lines = editor.get_curr_buffer().get_scope_text(start_x,
-                                                        start_y,
-                                                        end_x,
-                                                        end_y)
+        scope.start.x = 0
+        scope.end.x = len(editor.get_curr_window().get_line(scope.end.y)) - 2
+        lines = editor.get_curr_buffer().get_scope_text(scope)
         if len(lines) == 0: return
 
         stream = ''.join(lines)
@@ -233,11 +231,7 @@ def format(editor, start_x, start_y, end_x, end_y):
                   env=env)
         output, errors = p.communicate(input=stream.encode())
         formated_string = output.decode('utf-8')
-        editor.get_curr_buffer().replace_scope( start_x,
-                                                start_y,
-                                                end_x,
-                                                end_y,
-                                                formated_string)
+        editor.get_curr_buffer().replace_scope(scope, formated_string)
     except Exception as e:
         elog(f"Exception: {e}", type="ERROR")
         elog(f"traceback: {traceback.format_exc()}", type="ERROR")
