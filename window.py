@@ -18,7 +18,6 @@ import re
 class Window():
     def raise_event(func):
         def event_wrapper(self):
-            # self = args[0]
             func_name = func.__name__
             event = f"on_window_{func_name}_before"
             if event in self.events:
@@ -157,9 +156,6 @@ class Window():
                 "col": self.buffer_cursor[0],
                 "line": self.buffer_cursor[1]
                 }
-        # elog(f"{self.jumpslist_cursor}")
-        # for j in self.jumpslist: elog(f"{json.dumps(j, indent=2)}")
-
         # do not add jump if it is already the current one.
         if  self.jumpslist_cursor >= 0 and \
             self.jumpslist[self.jumpslist_cursor]['file_path'] == jump['file_path'] and \
@@ -194,7 +190,6 @@ class Window():
         cursor[1] = self.window_cursor[1]
 
         x = self._expanded_x(self.buffer_cursor[1], self.buffer_cursor[0])
-        # self._screen_move(cursor[0], cursor[1])
         self._screen_move(x, cursor[1])
 
     def _translate_buf_x_y_to_win_x_y(self, x, y):
@@ -250,7 +245,6 @@ class Window():
             self._need_to_clear_pairs = True
         except Exception as e:
             elog(f"_draw_pairs bug..: {e}", type="ERROR")
-            pass
 
     def draw_cursor(self):
         if self.status_line: self.draw_status_line()
@@ -383,9 +377,7 @@ class Window():
         style = {}
         style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
         style['background'] = get_settings()['theme']['colors']['selection.background']
-        # style['reverse'] = None
 
-        # orig_start_x, orig_start_y, orig_end_x, orig_end_y = self.buffer.visual_get_scope()
         orig = self.buffer.visual_get_scope()
         orig.end.x += 1
         buffer_height = len(self.buffer.lines) - 1
@@ -437,7 +429,6 @@ class Window():
         style = {}
         style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
         style['background'] = get_settings()['theme']['colors']['selection.background']
-        # style['reverse'] = None
         scope = self.buffer.visual_get_scope()
 
         buffer_height = len(self.buffer.lines) - 1
@@ -998,7 +989,6 @@ class Window():
         self.buffer.replace_char(   self.buffer_cursor[0],
                                     self.buffer_cursor[1],
                                     char)
-        # self.draw()
 
     def replace(self):
         try:
@@ -1007,8 +997,6 @@ class Window():
             self.buffer.replace_char(   self.buffer_cursor[0],
                                         self.buffer_cursor[1],
                                         char)
-            # self.draw()
-
         except Exception as e:
             elog(f"Exception: {e}", type="ERROR")
             elog(f"traceback: {traceback.format_exc()}", type="ERROR")
@@ -1065,7 +1053,6 @@ class Window():
             x = min(x, len(dest_line) - 1)
 
         self.move_cursor_to_buf_location(x, y)
-
         self.buffer.remove_line(to_remove)
 
     def indent_lines(   self,
@@ -1159,12 +1146,10 @@ class Window():
         for i in range(num):
             self._remove_char(propagate=False)
         self.buffer.flush_changes()
-        # self.draw()
         self.draw_cursor()
 
     def remove_char(self):
         self._remove_char()
-        # self.draw()
         self.draw_cursor()
 
     def _insert_char(self, char, to_draw=True):
@@ -1219,7 +1204,6 @@ class Window():
                                 propagate=propagate)
         if propagate: self.move_line_begin()
         else: self._move_line_begin()
-        # self.draw()
 
     def insert_line_after(self, line, propagate=True):
         self.buffer.insert_line(self.buffer_cursor[1]+1,
@@ -1420,7 +1404,6 @@ class Window():
                                 to_flush=to_flush)
             return
 
-        # tab_style = get_scope_style('meta.embedded')
         tab_style = get_scope_style('comment')
 
         if not tab_style:

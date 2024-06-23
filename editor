@@ -1564,9 +1564,7 @@ class Editor():
         self.maps[NORMAL][ord('v')] = v_map
         def J_map(self):
             self.change_begin()
-
             self.get_curr_window().join_line()
-
             self.change_end()
             return False
         self.maps[NORMAL][ord('J')] = J_map
@@ -1582,7 +1580,6 @@ class Editor():
 
             self.change_begin()
             self.get_curr_window().remove_scope(Scope(start_x, start_y, end_x, end_y))
-            # self.change_end()
             self.change_mode(INSERT, effect_change=False)
             return False
         self.maps[NORMAL][ord('C')] = C_map
@@ -1604,7 +1601,6 @@ class Editor():
             self.change_begin()
             self.get_curr_window().remove_scope(Scope(start_x, start_y, end_x, end_y))
             self.change_end()
-
             return False
         self.maps[NORMAL][ord('D')] = D_map
         def dot_map(self):
@@ -1724,7 +1720,6 @@ class Editor():
         self.maps[NORMAL][CTRL_T_KEY] = ctrl_t_map
         def ctrl_v_map(self):
             self.change_mode(VISUAL_BLOCK)
-            elog("starting viusal block")
             return False
         self.maps[NORMAL][CTRL_V_KEY] = ctrl_v_map
         def ctrl_l_map(self):
@@ -1775,7 +1770,6 @@ class Editor():
             self.get_curr_window().move_cursor_to_buf_location( jump['col'],
                                                                 jump['line'])
             self.get_curr_window().align_center()
-
             return False
         self.maps[NORMAL][CTRL_O_KEY] = ctrl_o_map
 
@@ -1891,8 +1885,6 @@ class Editor():
             else:
                 self.get_curr_window().quickfix_set(_results)
                 self.get_curr_window().quickfix_pop(self.get_or_create_buffer)
-                # self.get_curr_tab().split(Buffer(data_in_bytes=results))
-
             return False
         self.maps[NORMAL][CTRL_CLOSE_BRACKET_KEY] = ctrl_close_bracket_map
 
@@ -1905,7 +1897,6 @@ class Editor():
         self.maps[NORMAL][ord(' ')][ord('d')] = {} # doc
         self.maps[NORMAL][ord(' ')][ord('m')] = {} # multi-cursor
         def leader_mm_map(self):
-            elog("multi-cursor")
             self.change_mode(MULTI_CURSOR_NORMAL)
             return False
         self.maps[NORMAL][ord(' ')][ord('m')][ord('m')] = leader_mm_map
@@ -2044,9 +2035,6 @@ class Editor():
             text = paste_from_clipboard()
             if not text: return False
             lines = text.splitlines(keepends=True)
-            # is_line_mode = True if len(lines > 1) or lines[0].endswith('\n') else False
-            # is_char_mode = not is_line_mode
-
             self.change_begin()
 
             _lines = []
@@ -2134,20 +2122,6 @@ class Editor():
             return self.on_command()
         self.maps[NORMAL][ord(':')] = colon_map
 
-        # def enter_map(self):
-            # if not self.get_curr_window().line_numbers:
-                # self.get_curr_window().enable_lines_numbers()
-            # else:
-                # self.get_curr_window().disable_lines_numbers()
-            # if not self.get_curr_window().status_line:
-                # self.get_curr_window().enable_status_line()
-            # else:
-                # self.get_curr_window().disable_status_line()
-
-            # return False
-        # self.maps[NORMAL][ENTER_KEY] = enter_map
-
-        # self._initialize_legends_maps(NORMAL)
         self._initialize_normal_mainstream_maps()
         self._initialize_normal_window_maps()
         self._initialize_leader_maps()
@@ -2156,9 +2130,7 @@ class Editor():
         self.maps[INSERT][CTRL_X_KEY] = {}
         def ctrl_w_map(self):
             window = self.get_curr_window()
-
             start_x, start_y = window.buffer_cursor[0] - 1, window.buffer_cursor[1]
-
             ret = window.buffer.find_prev_word(start_x, start_y)
             if not ret: return
             end_x, end_y = ret
@@ -2192,8 +2164,7 @@ class Editor():
             choise = completion.pop()
             self.get_curr_tab().draw() # need to redraw after completion
 
-            if choise:
-                self.get_curr_window().insert_string(choise[1])
+            if choise: self.get_curr_window().insert_string(choise[1])
             return False
         self.maps[INSERT][CTRL_N_KEY] = ctrl_n_map
         def ctrl_xf_map(self):
@@ -2888,7 +2859,6 @@ class Editor():
 
             # remove cursor
             if ret is None:
-                elog(f"remove cursor: {i}")
                 buf.cursors.pop(buf_index)
                 continue
 
@@ -3136,7 +3106,6 @@ class Editor():
         style['foreground'] = get_setting('status_line_foreground')
 
         command_position = [0, 0]
-
         command_position[1] = int(self.height - 1)
         command_length = self.width
 
@@ -3148,7 +3117,6 @@ class Editor():
                                     command_position[0] + len(command))
 
     def on_replace(self, key):
-        # elog(f"on replace: {key}")
         cur_x = self.get_curr_window().buffer_cursor[0]
         cur_y = self.get_curr_window().buffer_cursor[1]
         if key == BACKSPACE_KEY:
@@ -3228,7 +3196,6 @@ class Editor():
 
         try:
             char = chr(key)
-            # elog(f"INSERT: ({key}) -> {char}")
             if char in printable:
                 self.get_curr_window().insert_char(char)
             else:
@@ -3429,7 +3396,6 @@ class Editor():
                 curr_WORD = line[start_x:x]
 
             start_pos, options = find_files_suggestions(start_x, curr_WORD)
-            # return (start_x, list(set(options)))
             return (start_pos, options)
         except Exception as e:
             elog(f"Exception: {e}", type="ERROR")
@@ -3484,7 +3450,6 @@ def main():
             editor.get_curr_tab().draw() # need to redraw after popup
 
         k = screen.get_key()
-        # elog(f"key {k}")
 
     screen.clear()
     screen.move_cursor(0,0)

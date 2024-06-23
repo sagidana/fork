@@ -88,8 +88,6 @@ class Buffer():
 
         self.visual_mode = None
         self.visual_scope = None
-        # self.visual_start_point = None
-        # self.visual_current_point = None
 
         self.events = {}
         self.lines = []
@@ -119,8 +117,6 @@ class Buffer():
                         self.lines[-1] += '\n'
 
             self.hash = self._hash_file()
-            # if not self.hash:
-                # raise Exception('Not implemented!')
 
         self.language = self.detect_language()
         self.treesitter = None
@@ -336,8 +332,6 @@ class Buffer():
     def visual_begin(self, mode, x, y):
         self.visual_mode = mode
         self.visual_scope = Scope(x, y, x, y)
-        # self.visual_start_point = [x, y]
-        # self.visual_current_point = [x, y]
         self._raise_event(ON_BUFFER_CHANGE, None)
 
     def visual_set_scope(self, scope):
@@ -416,7 +410,6 @@ class Buffer():
                     'old_end_point': (y, x),
                     'new_end_point': (y, x - 1),
                     }
-        # self.on_buffer_change_callback(change)
         if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
     # CORE: change
@@ -437,7 +430,6 @@ class Buffer():
                     'new_end_point': (end_y, end_x),
                     }
         else:
-            # raise Exception("insert string does not support new lines")
             end_x = x
             end_y = y
             while string.find('\n') != -1:
@@ -462,7 +454,6 @@ class Buffer():
                     'new_end_point': (end_y, end_x),
                     }
 
-        # self.on_buffer_change_callback(change)
         if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
         return end_x, end_y
 
@@ -490,7 +481,6 @@ class Buffer():
                     'new_end_point': (y, x + 1),
                     }
 
-        # self.on_buffer_change_callback(change)
         if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
     # CORE: change
@@ -507,7 +497,6 @@ class Buffer():
 
         self.lines.insert(y, new_line)
 
-        # self.on_buffer_change_callback(change)
         if propagate: self._raise_event(ON_BUFFER_CHANGE, change)
 
     # CORE: change
@@ -593,7 +582,6 @@ class Buffer():
 
         self.lines = stream.splitlines(keepends=True)
 
-        # if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
         if propagate: self.flush_changes()
 
     # CORE: change
@@ -622,7 +610,6 @@ class Buffer():
 
         self.lines = stream.splitlines(keepends=True)
 
-        # if propagate: self._raise_event(ON_BUFFER_CHANGE, None)
         if propagate: self.flush_changes()
 
     def replace_char(self, x, y, char, propagate=True):
@@ -677,19 +664,16 @@ class Buffer():
             if  _from in change[line_num] and \
                 _to not in change[line_num]:
                 lines_for_deletion.append(line_num)
-                # self._remove_line(line_num)
 
             # changed lines needs to be replaced
             elif    _from in change[line_num] and \
                     _to in change[line_num]:
                 lines_for_replacement[line_num] = change[line_num][_to]
-                # self._replace_line(line_num, change[line_num]['old'])
 
             # removed lines neeeds to be reinserted
             elif    _to in change[line_num] and \
                     _from not in change[line_num]:
                 lines_for_insertion[line_num] = change[line_num][_to]
-                # self._insert_line(line_num, change[line_num]['old'])
 
         # lines removals must be in decreasing order to no mess up with the
         # line numbers
@@ -713,7 +697,6 @@ class Buffer():
         change = change_wrapper['change']
 
         self._change(change)
-        # self.write()
 
         self.redo_stack.append(change_wrapper)
         return change_wrapper['start_position']
@@ -724,7 +707,6 @@ class Buffer():
         change = change_wrapper['change']
 
         self._change(change, undo=False)
-        # self.write()
 
         self.undo_stack.append(change_wrapper)
         return change_wrapper['end_position']
