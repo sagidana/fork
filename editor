@@ -1147,6 +1147,8 @@ class Editor():
         self.maps[NORMAL][ord('y')] = {}    # yank
 
         self.maps[NORMAL][ord('g')] = {}    # go
+        self.maps[NORMAL][ord('g')][ord('c')] = {} # comment
+        self.maps[NORMAL][ord('g')][ord('p')] = {} # paste
         self.maps[NORMAL][ord('>')] = {}    # indent right
         self.maps[NORMAL][ord('<')] = {}    # indent left
 
@@ -1337,8 +1339,32 @@ class Editor():
             return False
         comment_object_callbacks = {}
         comment_object_callbacks['default'] = comment_object_map
-        self.maps[NORMAL][ord('g')][ord('c')] = {}
         self._initialize_objects_maps(self.maps[NORMAL][ord('g')][ord('c')], comment_object_callbacks)
+
+        # ----------------------------------------------------------------
+        # paste operator
+        # ----------------------------------------------------------------
+        def paste_object_map(scope):
+            self.change_begin()
+
+            self.get_curr_window().remove_scope(scope)
+            data = self.registers['"']
+            if data:
+                if data['meta'] == 'line':
+                    lines = data['data']
+                    for line in reversed(lines):
+                        self.get_curr_window().insert_line_before(line, propagate=False)
+                    self.get_curr_buffer().flush_changes()
+                elif data['meta'] == 'char':
+                    lines = data['data']
+                    string = '\n'.join(lines)
+                    self.get_curr_window().insert_string(string)
+                elif data['meta'] == 'block': pass
+            self.change_end()
+            return False
+        paste_object_callbacks = {}
+        paste_object_callbacks['default'] = paste_object_map
+        self._initialize_objects_maps(self.maps[NORMAL][ord('g')][ord('p')], paste_object_callbacks)
 
         # ----------------------------------------------------------------
         # movements
