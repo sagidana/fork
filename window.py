@@ -916,7 +916,7 @@ class Window():
             elog(f"traceback: {traceback.format_exc()}", type="ERROR")
             return None
 
-    def half_page_down(self):
+    def get_half_page_down(self):
         half = int(self.content_height / 2)
         x = self.buffer_cursor[0]
         y = self.buffer_cursor[1]
@@ -926,7 +926,7 @@ class Window():
         x = min(x, len(self.get_line(y)) - 1)
         return x, y
 
-    def half_page_up(self):
+    def get_half_page_up(self):
         half = int(self.content_height / 2)
         x = self.buffer_cursor[0]
         y = self.buffer_cursor[1]
@@ -935,42 +935,32 @@ class Window():
         x = min(x, len(self.get_line(y)) - 1)
         return x, y
 
-    def move_begin(self):
-        self.window_cursor[0] = 0
-        self.window_cursor[1] = 0
-        self.buffer_cursor[0] = 0
-        self.buffer_cursor[1] = 0
-        self.draw()
+    def get_begin_visible(self):
+        y = self.buffer_cursor[1]
+        y -= self.window_cursor[1]
+        x = min(len(self.buffer.lines[y]) - 1, self.buffer_cursor[0])
+        return x, y
 
-    def move_end(self):
-        self.window_cursor[0] = 0
-        self.buffer_cursor[0] = 0
+    def get_middle_visible(self):
+        height = min(self.content_height,
+                     len(self.buffer.lines) - \
+                         (self.buffer_cursor[1] - self.window_cursor[1]))
+        middle =  int(height / 2)
+        y = self.buffer_cursor[1]
+        y -= self.window_cursor[1]
+        y += middle
+        x = min(len(self.buffer.lines[y]) - 1, self.buffer_cursor[0])
+        return x, y
 
-        buffer_len = len(self.buffer.lines) - 1
-        self.buffer_cursor[1] = buffer_len
-
-        if buffer_len > self.content_height - 1:
-            self.window_cursor[1] = self.content_height - 1
-        else:
-            self.window_cursor[1] = buffer_len
-        self.draw()
-
-    def move_begin_visible(self):
-        while self.window_cursor[1] > 0: self._move_up()
-        self.draw_cursor()
-
-    def move_middle_visible(self):
-        middle =  int(self.content_height / 2)
-        while self.window_cursor[1] < middle:
-            if not self._move_down(): break
-        while self.window_cursor[1] > middle:
-            if not self._move_up(): break
-        self.draw_cursor()
-
-    def move_end_visible(self):
-        while self.window_cursor[1] < self.content_height - 1:
-            if not self._move_down(): break
-        self.draw_cursor()
+    def get_end_visible(self):
+        height = min(self.content_height,
+                     len(self.buffer.lines) - \
+                         (self.buffer_cursor[1] - self.window_cursor[1]))
+        y = self.buffer_cursor[1]
+        y -= self.window_cursor[1]
+        y += height - 1
+        x = min(len(self.buffer.lines[y]) - 1, self.buffer_cursor[0])
+        return x, y
 
     def _move_to_x(self, x):
         while self.buffer_cursor[0] > x: self._move_left()

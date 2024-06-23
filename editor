@@ -568,92 +568,79 @@ class Editor():
                 cb = callbacks.get(ord('%'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('%')] = precent_map
-        def H_map(self): # FIXED, TODO: remove comment once all fixed
+        def H_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window().move_begin_visible()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
+            dst_x, dst_y = self.get_curr_window().get_begin_visible()
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('H'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('H')] = H_map
-        def M_map(self): # FIXED, TODO: remove comment once all fixed
+        def M_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window().move_middle_visible()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
+            dst_x, dst_y = self.get_curr_window().get_middle_visible()
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('M'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('M')] = M_map
-        def L_map(self): # FIXED, TODO: remove comment once all fixed
+        def L_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window().move_end_visible()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
+            dst_x, dst_y = self.get_curr_window().get_end_visible()
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('L'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('L')] = L_map
-        def ctrl_u_map(self): # FIXED, TODO: remove comment once all fixed
+        def ctrl_u_map(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
-            end_x, end_y = self.get_curr_window().half_page_up()
+            end_x, end_y = self.get_curr_window().get_half_page_up()
             scope = Scope(start_x, start_y, end_x, end_y)
             if scope:
                 cb = callbacks.get(CTRL_U_KEY, default_callback)
                 if cb is not None: return cb(scope)
         maps[CTRL_U_KEY] = ctrl_u_map
-        def ctrl_d_map(self): # FIXED, TODO: remove comment once all fixed
+        def ctrl_d_map(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
-            end_x, end_y = self.get_curr_window().half_page_down()
+            end_x, end_y = self.get_curr_window().get_half_page_down()
             scope = Scope(start_x, start_y, end_x, end_y)
             if scope:
                 cb = callbacks.get(CTRL_D_KEY, default_callback)
                 if cb is not None: return cb(scope)
         maps[CTRL_D_KEY] = ctrl_d_map
-        def n_map(self): # FIXED, TODO: remove comment once all fixed
+        def n_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            last_pattern = self.registers['/']
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self._on_search(x, y, last_pattern, self._search_forward, add_to_jumplist=True)
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
-
+            pattern = self.registers['/']
+            results = self.get_curr_buffer().search_pattern(pattern)
+            if len(results) == 0: return False
+            pos = self._find_closest_match(src_x, src_y, results, self._search_forward)
+            if not pos: return False
+            dst_x, dst_y = pos[0], pos[1]
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('n'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('n')] = n_map
-        def N_map(self): # FIXED, TODO: remove comment once all fixed
+        def N_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            last_pattern = self.registers['/']
-            x = self.get_curr_window().buffer_cursor[0]
-            y = self.get_curr_window().buffer_cursor[1]
-            self._on_search(x, y, last_pattern, not self._search_forward, add_to_jumplist=True)
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
-
+            pattern = self.registers['/']
+            results = self.get_curr_buffer().search_pattern(pattern)
+            if len(results) == 0: return False
+            pos = self._find_closest_match(src_x, src_y, results, not self._search_forward)
+            if not pos: return False
+            dst_x, dst_y = pos[0], pos[1]
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('N'), default_callback)
@@ -699,14 +686,13 @@ class Editor():
                 if cb is not None: return cb(scope)
         if type(maps[ord('[')]) is dict and ord('m') not in maps[ord('[')]:
             maps[ord('[')][ord('m')] = bracket_open_m_map
-        def G_map(self): # FIXED, TODO: remove comment once all fixed
+        def G_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window().move_end()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
+            dst_y = len(self.get_curr_buffer().lines) - 1
+            dst_x = len(self.get_curr_buffer().lines[dst_y]) - 1
+            dst_x -= 1 # exclude newline
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('G'), default_callback)
@@ -714,14 +700,11 @@ class Editor():
         maps[ord('G')] = G_map
         default_g_callbacks = callbacks.get(ord('g'), {})
         if ord('g') not in maps: maps[ord('g')] = {}
-        def gg_map(self): # FIXED, TODO: remove comment once all fixed
+        def gg_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window().move_begin()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
+            dst_x, dst_y = 0, 0
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = default_g_callbacks.get(ord('g'), default_callback)
