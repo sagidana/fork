@@ -585,6 +585,23 @@ class TreeSitter():
             return method_x, method_y
         return None
 
+    def get_method_begin(self, x, y):
+        if self.language == 'python':
+            query = self._language.query("(function_definition) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
+            if not node: return None
+            method_x = node.start_point[1]
+            method_y = node.start_point[0]
+            return method_x, method_y
+        if self.language == 'c':
+            query = self._language.query("(function_definition) @name")
+            node = self._get_relevant_nodes(self.tree.root_node, query, x, y, most_relevant=True)
+            if not node: return None
+            method_x = node.start_point[1]
+            method_y = node.start_point[0]
+            return method_x, method_y
+        return None
+
 if __name__ == '__main__':
     Language.build_library(
         # Store the library in the `build` directory

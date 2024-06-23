@@ -646,8 +646,12 @@ class Editor():
                 cb = callbacks.get(ord('N'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('N')] = N_map
+
         default_close_bracket_callbacks = callbacks.get(ord(']'), {})
+        default_open_bracket_callbacks = callbacks.get(ord('['), {})
+
         if ord(']') not in maps: maps[ord(']')] = {}
+        if ord('[') not in maps: maps[ord('[')] = {}
         def bracket_close_m_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
@@ -660,20 +664,6 @@ class Editor():
                 if cb is not None: return cb(scope)
         if type(maps[ord(']')]) is dict and ord('m') not in maps[ord(']')]:
             maps[ord(']')][ord('m')] = bracket_close_m_map
-        def bracket_close_M_map(self):
-            src_x = self.get_curr_window().buffer_cursor[0]
-            src_y = self.get_curr_window().buffer_cursor[1]
-            ret = self.get_curr_buffer().find_method_end(src_x, src_y)
-            if not ret: return False
-            dst_x, dst_y = ret
-            scope = Scope(src_x, src_y, dst_x, dst_y)
-            if scope:
-                cb = default_close_bracket_callbacks.get(ord('M'), default_callback)
-                if cb is not None: return cb(scope)
-        if type(maps[ord(']')]) is dict and ord('M') not in maps[ord(']')]:
-            maps[ord(']')][ord('M')] = bracket_close_M_map
-        default_open_bracket_callbacks = callbacks.get(ord('['), {})
-        if ord('[') not in maps: maps[ord('[')] = {}
         def bracket_open_m_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
@@ -686,6 +676,30 @@ class Editor():
                 if cb is not None: return cb(scope)
         if type(maps[ord('[')]) is dict and ord('m') not in maps[ord('[')]:
             maps[ord('[')][ord('m')] = bracket_open_m_map
+        def bracket_close_M_map(self):
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_method_end(src_x, src_y)
+            if not ret: return False
+            dst_x, dst_y = ret
+            scope = Scope(src_x, src_y, dst_x, dst_y)
+            if scope:
+                cb = default_close_bracket_callbacks.get(ord('M'), default_callback)
+                if cb is not None: return cb(scope)
+        if type(maps[ord(']')]) is dict and ord('M') not in maps[ord(']')]:
+            maps[ord(']')][ord('M')] = bracket_close_M_map
+        def bracket_open_M_map(self):
+            src_x = self.get_curr_window().buffer_cursor[0]
+            src_y = self.get_curr_window().buffer_cursor[1]
+            ret = self.get_curr_buffer().find_method_begin(src_x, src_y)
+            if not ret: return False
+            dst_x, dst_y = ret
+            scope = Scope(src_x, src_y, dst_x, dst_y)
+            if scope:
+                cb = default_open_bracket_callbacks.get(ord('M'), default_callback)
+                if cb is not None: return cb(scope)
+        if type(maps[ord('[')]) is dict and ord('M') not in maps[ord('[')]:
+            maps[ord('[')][ord('M')] = bracket_open_M_map
         def G_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]

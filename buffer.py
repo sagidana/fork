@@ -1080,6 +1080,10 @@ class Buffer():
         return None
 
     # CORE: movement
+    def find_method_begin(self, x, y):
+        if not self.treesitter: return None
+        ret = self.treesitter.get_method_begin(x, y)
+        return ret
     def find_method_end(self, x, y):
         if not self.treesitter: return None
         ret = self.treesitter.get_method_end(x, y)
