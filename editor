@@ -351,46 +351,44 @@ class Editor():
                 cb = callbacks.get(ord('B'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('B')] = move_B
-        def move_dollar(self): # FIXED, TODO: remove comment once all fixed
+        def move_dollar(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window().move_line_end()
-
-            dst_x = self.get_curr_window().buffer_cursor[0] - 1 # exclude newline
-            dst_y = self.get_curr_window().buffer_cursor[1]
+            dst_y = src_y
+            dst_x = len(self.get_curr_buffer().lines[dst_y]) - 1
+            dst_x -= 1 # exclude newline
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('$'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('$')] = move_dollar
-        def move_caret(self): # FIXED, TODO: remove comment once all fixed
+        def move_caret(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window().move_line_begin(ignore_spaces=True)
+            dst_y = src_y
+            m = re.match(r'^\s*', self.get_curr_buffer().lines[dst_y])
+            dst_x = 0 if not m else len(m[0])
 
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('^'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('^')] = move_caret
-        def move_zero(self): # FIXED, TODO: remove comment once all fixed
+        def move_zero(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window().move_line_begin(ignore_spaces=False)
+            dst_y = src_y
+            dst_x = 0
 
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('0'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('0')] = move_zero
-        def move_f_map(self): # FIXED, TODO: remove comment once all fixed
+        def move_f_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
@@ -409,7 +407,7 @@ class Editor():
                     if cb is not None: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('f')] = move_f_map
-        def move_F_map(self): # FIXED, TODO: remove comment once all fixed
+        def move_F_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
@@ -428,7 +426,7 @@ class Editor():
                     if cb is not None: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('F')] = move_F_map
-        def move_t_map(self): # FIXED, TODO: remove comment once all fixed
+        def move_t_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
@@ -449,7 +447,7 @@ class Editor():
                     if cb is not None: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('t')] = move_t_map
-        def move_T_map(self): # FIXED, TODO: remove comment once all fixed
+        def move_T_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
@@ -470,7 +468,7 @@ class Editor():
                     if cb is not None: return cb(scope)
             except Exception as e: elog(f"{e}")
         maps[ord('T')] = move_T_map
-        def semicolon_map(self): # FIXED, TODO: remove comment once all fixed
+        def semicolon_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
             dst_x, dst_y = None, None
@@ -510,7 +508,7 @@ class Editor():
                 cb = callbacks.get(ord(';'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord(';')] = semicolon_map
-        def comma_map(self): # FIXED, TODO: remove comment once all fixed
+        def comma_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
             dst_x, dst_y = None, None
@@ -550,7 +548,7 @@ class Editor():
                 cb = callbacks.get(ord(','), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord(',')] = comma_map
-        def precent_map(self): # FIXED, TODO: remove comment once all fixed
+        def precent_map(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
@@ -1344,7 +1342,6 @@ class Editor():
         # comment operator
         # ----------------------------------------------------------------
         def comment_object_map(scope):
-            elog('here')
             self.change_begin()
 
             try:
