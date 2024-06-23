@@ -209,63 +209,61 @@ class Editor():
     def __initialize_movement_objects_maps(self, maps, callbacks):
         default_callback = callbacks.get('default', None)
         def move_(self): pass
-        def move_j(self): # FIXED, TODO: remove comment once all fixed
+        def move_j(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window()._move_down()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
-
+            if src_y >= len(self.get_curr_buffer().lines) - 1:
+                dst_y = src_y
+                dst_x = src_x
+            else:
+                dst_y = src_y + 1
+                dst_x = min(src_x, len(self.get_curr_buffer().lines[dst_y]) - 1)
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('j'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('j')] = move_j
-        def move_k(self): # FIXED, TODO: remove comment once all fixed
+        def move_k(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window()._move_up()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
-
+            if src_y == 0:
+                dst_y = src_y
+                dst_x = src_x
+            else:
+                dst_y = src_y - 1
+                dst_x = min(src_x, len(self.get_curr_buffer().lines[dst_y]) - 1)
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('k'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('k')] = move_k
-        def move_h(self): # FIXED, TODO: remove comment once all fixed
+        def move_h(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window()._move_left()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
+            dst_y = src_y
+            dst_x = max(src_x - 1, 0)
 
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('h'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('h')] = move_h
-        def move_l(self): # FIXED, TODO: remove comment once all fixed
+        def move_l(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
 
-            self.get_curr_window()._move_right()
-
-            dst_x = self.get_curr_window().buffer_cursor[0]
-            dst_y = self.get_curr_window().buffer_cursor[1]
+            dst_y = src_y
+            dst_x = min(src_x + 1, len(self.get_curr_buffer().lines[src_y]) - 1)
 
             scope = Scope(src_x, src_y, dst_x, dst_y)
             if scope:
                 cb = callbacks.get(ord('h'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('l')] = move_l
-        def move_w(self): # FIXED, TODO: remove comment once all fixed
+        def move_w(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_next_word(src_x, src_y)
@@ -276,7 +274,7 @@ class Editor():
                 cb = callbacks.get(ord('w'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('w')] = move_w
-        def move_W(self): # FIXED, TODO: remove comment once all fixed
+        def move_W(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_next_WORD(start_x, start_y)
@@ -287,7 +285,7 @@ class Editor():
                 cb = callbacks.get(ord('W'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('W')] = move_W
-        def move_dash(self): # FIXED, TODO: remove comment once all fixed
+        def move_dash(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_next_w_o_r_d(start_x, start_y)
@@ -298,7 +296,7 @@ class Editor():
                 cb = callbacks.get(ord('-'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('-')] = move_dash
-        def move_e(self): # FIXED, TODO: remove comment once all fixed
+        def move_e(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_word_end(start_x, start_y)
@@ -309,7 +307,7 @@ class Editor():
                 cb = callbacks.get(ord('e'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('e')] = move_e
-        def move_E(self): # FIXED, TODO: remove comment once all fixed
+        def move_E(self):
             start_x = self.get_curr_window().buffer_cursor[0]
             start_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_WORD_end(start_x, start_y)
@@ -320,7 +318,7 @@ class Editor():
                 cb = callbacks.get(ord('E'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('E')] = move_E
-        def move_underscore(self): # FIXED, TODO: remove comment once all fixed
+        def move_underscore(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_prev_w_o_r_d(src_x, src_y)
@@ -331,7 +329,7 @@ class Editor():
                 cb = callbacks.get(ord('_'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('_')] = move_underscore
-        def move_b(self): # FIXED, TODO: remove comment once all fixed
+        def move_b(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_prev_word(src_x, src_y)
@@ -342,7 +340,7 @@ class Editor():
                 cb = callbacks.get(ord('b'), default_callback)
                 if cb is not None: return cb(scope)
         maps[ord('b')] = move_b
-        def move_B(self): # FIXED, TODO: remove comment once all fixed
+        def move_B(self):
             src_x = self.get_curr_window().buffer_cursor[0]
             src_y = self.get_curr_window().buffer_cursor[1]
             ret = self.get_curr_buffer().find_prev_WORD(src_x, src_y)
@@ -1370,6 +1368,14 @@ class Editor():
             return False
         normal_movement_callbacks = {}
         normal_movement_callbacks['default'] = default_movement_cb
+        def j_map_cb(scope):
+            self.get_curr_window().move_down()
+            return False
+        normal_movement_callbacks[ord('j')] = j_map_cb
+        def k_map_cb(scope):
+            self.get_curr_window().move_up()
+            return False
+        normal_movement_callbacks[ord('k')] = k_map_cb
         self.__initialize_movement_objects_maps(self.maps[NORMAL], normal_movement_callbacks)
 
         def hash_map(self):
