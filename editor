@@ -1349,13 +1349,35 @@ class Editor():
         normal_movement_callbacks = {}
         normal_movement_callbacks['default'] = default_movement_cb
         def j_map_cb(scope):
-            self.get_curr_window().move_down()
+            number = 1
+            if len(self._number) > 0:
+                number = int(self._number)
+            for _ in range(number): self.get_curr_window().move_down()
             return False
         normal_movement_callbacks[ord('j')] = j_map_cb
         def k_map_cb(scope):
-            self.get_curr_window().move_up()
+            number = 1
+            if len(self._number) > 0:
+                number = int(self._number)
+            for _ in range(number): self.get_curr_window().move_up()
             return False
         normal_movement_callbacks[ord('k')] = k_map_cb
+        def n_map_cb(scope):
+            self.get_curr_window().move_cursor_to_buf_location(scope.dst.x, scope.dst.y)
+            self.get_curr_window().add_jump()
+            self.get_curr_window().move_cursor_to_buf_location( scope.dst.x,
+                                                                scope.dst.y)
+            self.get_curr_window().add_jump()
+
+            style = {}
+            style['foreground'] = get_setting('search_highlights_foreground')
+            style['background'] = get_setting('search_highlights_background')
+            pattern = self.registers['/']
+            self.get_curr_buffer().add_highlights("/", pattern, style)
+            self.get_curr_window().draw()
+            return False
+        normal_movement_callbacks[ord('n')] = n_map_cb
+        normal_movement_callbacks[ord('N')] = n_map_cb
         self.__initialize_movement_objects_maps(self.maps[NORMAL], normal_movement_callbacks)
 
         def hash_map(self):
