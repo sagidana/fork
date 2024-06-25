@@ -130,8 +130,8 @@ class Popup():
             style['background'] = get_setting("menu_background")
             style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
-            selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
-            selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            selected_style['background'] = get_setting("menu_selected_background")
+            selected_style['foreground'] = get_setting("menu_selected_foreground")
 
             # self.screen.clear()
             for y in range(self.height): self.__draw(0, y, " "*self.width, style)
@@ -385,8 +385,9 @@ class CompletionPopup():
             style['background'] = get_setting("menu_background")
             style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
-            selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
-            selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            selected_style['background'] = get_setting("menu_selected_background")
+            selected_style['foreground'] = get_setting("menu_selected_foreground")
+
 
             for y in range(self.height):
                 self.__draw(0, y, " "*self.width, style)
@@ -725,8 +726,8 @@ class TreeSitterPopup():
             style['background'] = get_setting("menu_background")
             style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
-            selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
-            selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            selected_style['background'] = get_setting("menu_selected_background")
+            selected_style['foreground'] = get_setting("menu_selected_foreground")
 
             for y in range(self.height):
                 self.__draw(0, y, " "*self.width, style)
@@ -1023,8 +1024,8 @@ class LinesPopup():
             style['background'] = get_setting("menu_background")
             style['foreground'] = get_setting("menu_foreground")
             selected_style = {}
-            selected_style['background'] = get_settings()['theme']['colors']['terminal.ansiMagenta']
-            selected_style['foreground'] = get_settings()['theme']['colors']['menu.foreground']
+            selected_style['background'] = get_setting("menu_selected_background")
+            selected_style['foreground'] = get_setting("menu_selected_foreground")
 
             for y in range(self.height):
                 self.__draw(0, y, " "*self.width, style)

@@ -89,10 +89,20 @@ def get_setting(key, default=None):
         return get_settings().get(key, _)
 
     if key == "menu_background":
-        _ = "#3C474B" if not default else default
+        background = get_settings()['theme']['colors'].get('menu.background', "#3C474B")
+        _ = background if not default else default
         return get_settings().get(key, _)
     if key == "menu_foreground":
-        _ = "#C0E0DE" if not default else default
+        foreground = get_settings()['theme']['colors'].get('menu.foreground', "#C0E0DE")
+        _ = foreground if not default else default
+        return get_settings().get(key, _)
+    if key == "menu_selected_background":
+        background = get_settings()['theme']['colors'].get('menu.selectionBackground', "#FFC000")
+        _ = background if not default else default
+        return get_settings().get(key, _)
+    if key == "menu_selected_foreground":
+        foreground = get_settings()['theme']['colors'].get('menu.selectionForeground', "#000000")
+        _ = foreground if not default else default
         return get_settings().get(key, _)
 
     if key == "tab_representation":
