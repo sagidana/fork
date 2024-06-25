@@ -359,7 +359,7 @@ curses_colors = {}
 curses_color_pairs = {}
 
 # Might need to add support of colors!
-# TERM='xterm-256color' 
+# TERM='xterm-256color'
 
 # def _color_to_curses(r, g, b):
     # factor = 1000 / 255

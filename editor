@@ -3,13 +3,11 @@
 from string import printable
 import traceback
 import argparse
-import time
 import json
 import re
 import os
 
 from buffer import Buffer
-from window import Window
 from common import Scope
 from settings import *
 from task import Task
@@ -126,10 +124,6 @@ class Editor():
 
         self.mode = target
         self.curr_maps = self.maps[self.mode]
-
-    def initialize_theme(self):
-        with open(self.config['theme_path'], 'r') as f:
-            self.theme = json.loads(f.read())
 
     def _initialize_normal_window_maps(self):
         self.maps[NORMAL][CTRL_W_KEY] = {}

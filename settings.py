@@ -71,7 +71,8 @@ def get_setting(key, default=None):
         _ = background if not default else default
         return get_settings().get(key, _)
     if key == "line_numbers_foreground":
-        _ = "#4C4C47" if not default else default
+        foreground = get_settings()['theme']['colors'].get('editorLineNumber.foreground', "#4C4C47")
+        _ = foreground if not default else default
         return get_settings().get(key, _)
 
     if key == "search_highlights_background":
