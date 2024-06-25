@@ -1838,7 +1838,7 @@ class Editor():
             scope = self.get_curr_buffer().inner_word(x, y)
             pattern = self.get_curr_buffer().get_scope_text(scope)
             if len(pattern) == 0: return False
-            pattern = r"((\W+)|(^))(?P<cword>"+pattern[0]+r")\W"
+            pattern = r"((\W+)|(^))(?P<cword>"+pattern[0]+r")\W*"
 
             location = rg_fzf(self, pattern)
             if location is None: return False
