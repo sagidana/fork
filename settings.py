@@ -59,14 +59,16 @@ def get_setting(key, default=None):
         _ = "#4C4C47" if not default else default
         return get_settings().get(key, _)
     if key == "status_line_background":
-        _ = "#4C4C47" if not default else default
+        background = get_settings()['theme']['colors'].get("sideBar.background", "#4C4C47")
+        _ = background if not default else default
         return get_settings().get(key, _)
     if key == "status_line_foreground":
-        _ = "#000000" if not default else default
+        foreground = get_settings()['theme']['colors'].get("sideBar.foreground", "#000000")
+        _ = foreground if not default else default
         return get_settings().get(key, _)
-
     if key == "line_numbers_background":
-        _ = "#2D2D2A" if not default else default
+        background = get_settings()['theme']['colors']['editor.background']
+        _ = background if not default else default
         return get_settings().get(key, _)
     if key == "line_numbers_foreground":
         _ = "#4C4C47" if not default else default
