@@ -38,6 +38,9 @@ class Window():
         self.draw()
 
     def on_buffer_change_callback(self, priv):
+        # this is important in case the buffer changed and now the number of lines
+        # increased (or decreased) and now the needed margin has changed.
+        self.set_lines_margin()
         # TODO: update cursor pos if needed
         if self.tab.is_window_visible(self.id):
             self.draw()
@@ -68,8 +71,6 @@ class Window():
         handlers[ON_BUFFER_CHANGE] = self.on_buffer_change_callback
         self.buffer.register_events(handlers)
 
-        self.set_lines_margin()
-
         self.position = list(position)
 
         self.width = width
@@ -79,10 +80,12 @@ class Window():
         self.content_width = self.width
         self.content_height = self.height
 
-        self._need_to_clear_pairs = False
-
         self.line_numbers = get_setting('line_numbers')
         self.status_line = get_setting('status_line')
+
+        self.set_lines_margin()
+
+        self._need_to_clear_pairs = False
 
         self.window_cursor = window_cursor.copy()
         self.buffer_cursor = buffer_cursor.copy()
@@ -119,11 +122,6 @@ class Window():
         self.remember = 0
 
         self.set_lines_margin()
-
-        if self.line_numbers:
-            self.content_position[0] = self.position[0] + self.lines_margin
-            self.content_width = self.width - self.lines_margin
-
         self.draw()
 
     def enable_status_line(self):
@@ -187,23 +185,6 @@ class Window():
             self.events[event].append(handlers[event])
 
     def _draw_cursor(self):
-        if self._prev_buffer_cursor is not None and \
-            (self._prev_buffer_cursor[0] != self.buffer_cursor[0] or \
-             self._prev_buffer_cursor[1] != self.buffer_cursor[1]):
-            # current line highlighted.
-            scope = Scope(0, self._prev_buffer_cursor[1],
-                          len(self.buffer.lines[self._prev_buffer_cursor[1]]) - 1, self._prev_buffer_cursor[1])
-            # override with the default. (un-highlight the prev cursor line)
-            self.override_style_on_scope(scope)
-
-        # current line highlighted.
-        scope = Scope(0, self.buffer_cursor[1],
-                      len(self.buffer.lines[self.buffer_cursor[1]]) - 1, self.buffer_cursor[1])
-        style = {}
-        style['background'] = get_setting("cursor_highlight_background")
-        self.override_style_on_scope(scope, style)
-        self._prev_buffer_cursor = list(self.buffer_cursor)
-
         x = self._expanded_x(self.buffer_cursor[1], self.buffer_cursor[0])
         self._screen_move(x, self.window_cursor[1])
 
@@ -342,6 +323,28 @@ class Window():
         if self.status_line: self.draw_status_line()
         if self.line_numbers: self.draw_line_numbers()
 
+        # we only try this because of the case where self._prev_buffer_cursor
+        # has position in the buffer that no longer exist. reset it.
+
+        try:
+            if self._prev_buffer_cursor is not None and \
+                (self._prev_buffer_cursor[0] != self.buffer_cursor[0] or \
+                 self._prev_buffer_cursor[1] != self.buffer_cursor[1]):
+                # current line highlighted.
+                scope = Scope(0, self._prev_buffer_cursor[1],
+                              len(self.buffer.lines[self._prev_buffer_cursor[1]]) - 1, self._prev_buffer_cursor[1])
+                # override with the default. (un-highlight the prev cursor line)
+                self.override_style_on_scope(scope)
+
+            # current line highlighted.
+            scope = Scope(0, self.buffer_cursor[1],
+                          len(self.buffer.lines[self.buffer_cursor[1]]) - 1, self.buffer_cursor[1])
+            style = {}
+            style['background'] = get_setting("cursor_highlight_background")
+            self.override_style_on_scope(scope, style)
+            self._prev_buffer_cursor = list(self.buffer_cursor)
+        except: self._prev_buffer_cursor = None
+
         self.visualize()
         self.highlight()
         self.multi_cursors()
@@ -349,7 +352,10 @@ class Window():
         self._draw_cursor()
 
     def set_lines_margin(self):
-        self.lines_margin = len(str(len(self.buffer.lines))) + 1
+        if self.line_numbers:
+            self.lines_margin = len(str(len(self.buffer.lines))) + 1
+            self.content_position[0] = self.position[0] + self.lines_margin
+            self.content_width = self.width - self.lines_margin
 
     def tailing_spaces(self):
         style = {}
@@ -1157,7 +1163,7 @@ class Window():
             for y in range(start_y, end_y + 1):
                 line = self.get_line(y)
                 if len(line) - 1 <= 0: continue
-                if not re.search('\S', line): continue
+                if not re.search(r'\S', line): continue
                 line = indent_content + line
                 self.buffer.replace_line(y, line, propagate=False)
             curr_y = self.buffer_cursor[1]
@@ -1168,7 +1174,7 @@ class Window():
             for y in range(start_y, end_y + 1):
                 line = self.get_line(y)
                 if len(line) - 1 <= 0: continue
-                m = re.search('\S', line)
+                m = re.search(r'\S', line)
                 if not m: continue
                 num_of_spaces = m.start()
                 num_to_remove = min(len(indent_content), num_of_spaces)
