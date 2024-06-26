@@ -178,6 +178,8 @@ class Buffer():
             # return "php"
         elif    self.file_path.endswith('.go'):
             return "go"
+        elif    self.file_path.endswith('.zig'):
+            return "zig"
         # elif    self.file_path.endswith('.html'):
             # return "html"
         # elif    self.file_path.endswith('.css'):

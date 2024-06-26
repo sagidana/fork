@@ -103,6 +103,9 @@ class TreeSitter():
         lib_path = path.join(INSTALLATION_PATH,
                             "ts_parsers/tree-sitter-markdown/tree-sitter-markdown/libtree-sitter-markdown.so")
         cls.MARKDOWN_LANGUAGE =     load_language(lib_path, 'markdown')
+        lib_path = path.join(INSTALLATION_PATH,
+                            "./ts_parsers/tree-sitter-zig/libtree-sitter-zig.so")
+        cls.ZIG_LANGUAGE =     load_language(lib_path, 'zig')
 
     def __init__(self, file_bytes, language):
         self._initialize_language(language)
@@ -166,6 +169,11 @@ class TreeSitter():
                 with open(query_path.format("go"),"r") as f: query = f.read()
                 self.query = TreeSitter.GO_LANGUAGE.query(query)
                 self.parser.set_language(TreeSitter.GO_LANGUAGE)
+            elif language == 'zig':
+                self._language = TreeSitter.ZIG_LANGUAGE
+                with open(query_path.format("zig"),"r") as f: query = f.read()
+                self.query = TreeSitter.ZIG_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.ZIG_LANGUAGE)
             elif language == 'bash':
                 self._language = TreeSitter.BASH_LANGUAGE
                 with open(query_path.format("bash"),"r") as f: query = f.read()
