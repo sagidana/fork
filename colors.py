@@ -305,6 +305,24 @@ def _create_dicts():
 def short2rgb(short):
     return SHORT2RGB_DICT[short]
 
+def brighten_color(hex_color, percentage):
+    # Ensure the hex color is in the correct format
+    if not hex_color.startswith('#') or len(hex_color) != 7:
+        raise ValueError("Invalid hex color format. It should be in the format #RRGGBB.")
+
+    # Remove the hash symbol and convert the hex values to integers
+    hex_color = hex_color.lstrip('#')
+    r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+
+    # Calculate the new color values
+    new_r = min(255, int(r + (255 - r) * (percentage / 100)))
+    new_g = min(255, int(g + (255 - g) * (percentage / 100)))
+    new_b = min(255, int(b + (255 - b) * (percentage / 100)))
+
+    # Convert the new color values back to hex and format them
+    new_hex_color = "#{:02x}{:02x}{:02x}".format(new_r, new_g, new_b)
+    return new_hex_color
+
 def rgb2short(rgb):
     """ Find the closest xterm-256 approximation to the given RGB value.
     @param rgb: Hex code representing an RGB value, eg, 'abcdef'

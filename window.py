@@ -10,6 +10,7 @@ from utils import *
 
 from intervaltree import Interval, IntervalTree
 from string import printable
+from copy import copy
 from os import path
 import traceback
 import time
@@ -85,6 +86,7 @@ class Window():
 
         self.window_cursor = window_cursor.copy()
         self.buffer_cursor = buffer_cursor.copy()
+        self._prev_buffer_cursor = None
         self.remember = 0
 
         self.events = {}
@@ -113,6 +115,7 @@ class Window():
 
         self.window_cursor = [0,0]
         self.buffer_cursor = [0,0]
+        self._prev_buffer_cursor = None
         self.remember = 0
 
         self.set_lines_margin()
@@ -184,13 +187,25 @@ class Window():
             self.events[event].append(handlers[event])
 
     def _draw_cursor(self):
-        cursor = [pos for pos in self.window_cursor]
+        if self._prev_buffer_cursor is not None and \
+            (self._prev_buffer_cursor[0] != self.buffer_cursor[0] or \
+             self._prev_buffer_cursor[1] != self.buffer_cursor[1]):
+            # current line highlighted.
+            scope = Scope(0, self._prev_buffer_cursor[1],
+                          len(self.buffer.lines[self._prev_buffer_cursor[1]]) - 1, self._prev_buffer_cursor[1])
+            # override with the default. (un-highlight the prev cursor line)
+            self.override_style_on_scope(scope)
 
-        cursor[0] = self.window_cursor[0]
-        cursor[1] = self.window_cursor[1]
+        # current line highlighted.
+        scope = Scope(0, self.buffer_cursor[1],
+                      len(self.buffer.lines[self.buffer_cursor[1]]) - 1, self.buffer_cursor[1])
+        style = {}
+        style['background'] = get_setting("cursor_highlight_background")
+        self.override_style_on_scope(scope, style)
+        self._prev_buffer_cursor = list(self.buffer_cursor)
 
         x = self._expanded_x(self.buffer_cursor[1], self.buffer_cursor[0])
-        self._screen_move(x, cursor[1])
+        self._screen_move(x, self.window_cursor[1])
 
     def _translate_buf_x_y_to_win_x_y(self, x, y):
         # maybe is_visible
@@ -246,9 +261,87 @@ class Window():
         except Exception as e:
             elog(f"_draw_pairs bug..: {e}", type="ERROR")
 
+    def override_style_on_scope(self, scope, style=None):
+        default_style = {}
+        default_style['background'] = get_settings()['theme']['colors']['editor.background']
+        default_style['foreground'] = get_settings()['theme']['colors']['editor.foreground']
+
+        first_visible_buf_y = self.buffer_cursor[1] - self.window_cursor[1]
+        last_visible_buf_y = min(first_visible_buf_y + self.content_height - 1, len(self.buffer.lines) - 1)
+        if scope.start.y > last_visible_buf_y: return
+        if scope.end.y < first_visible_buf_y: return
+
+        syntax_map = self.get_syntax()
+
+        buf_start_y = max(scope.start.y, first_visible_buf_y)
+        buf_end_y = min(scope.end.y, last_visible_buf_y)
+
+        y = scope.start.y - first_visible_buf_y
+        for buf_y in range(buf_start_y, buf_end_y + 1):
+            x = 0
+            line = self.buffer.lines[buf_y]
+            line_len  = len(line) - 1
+            # the 1000s here are just encoding used when craeted the syntaxc_map at get_syntax()
+            start_pos = buf_y * 1000
+            end_pos = buf_y * 1000 + line_len
+            syntax = sorted(list(syntax_map[start_pos:end_pos]))
+
+            syntax_start_x = 0
+            syntax_end_x = 0
+            while len(syntax) > 0:
+                curr_syntax = syntax.pop(0)
+                curr_style = copy(curr_syntax.data) # do not change the syntax
+
+                if curr_syntax.begin <= start_pos:
+                    syntax_start_x = 0
+                else:
+                    syntax_start_x = curr_syntax.begin - start_pos
+
+                if curr_syntax.end >= end_pos:
+                    syntax_end_x = end_pos - start_pos
+                else:
+                    syntax_end_x = curr_syntax.end - start_pos
+
+                # draw with default until the syntax portion
+                if x < syntax_start_x:
+                    style_to_use = copy(default_style)
+                    if style is not None and 'background' in style:
+                        style_to_use['background'] = style['background']
+                    if style is not None and 'foreground' in style:
+                        style_to_use['foreground'] = style['foreground']
+                    self._screen_write( self._expanded_x(buf_y, x), y,
+                                        line[x:syntax_start_x],
+                                        style_to_use,
+                                        to_flush=True)
+                # draw with syntax style
+                x = syntax_start_x
+                style_to_use = copy(curr_style)
+                if style is not None and 'background' in style:
+                    style_to_use['background'] = style['background']
+                if style is not None and 'foreground' in style:
+                    style_to_use['foreground'] = style['foreground']
+                self._screen_write( self._expanded_x(buf_y, x), y,
+                                    line[syntax_start_x:syntax_end_x],
+                                    style_to_use,
+                                    to_flush=True)
+                x = syntax_end_x
+            # draw to the end of the line with default style
+            if x < line_len:
+                style_to_use = copy(default_style)
+                if style is not None and 'background' in style:
+                    style_to_use['background'] = style['background']
+                if style is not None and 'foreground' in style:
+                    style_to_use['foreground'] = style['foreground']
+                self._screen_write( self._expanded_x(buf_y, x), y,
+                                    line[x:],
+                                    style_to_use,
+                                    to_flush=True)
+            y += 1
+
     def draw_cursor(self):
         if self.status_line: self.draw_status_line()
         if self.line_numbers: self.draw_line_numbers()
+
         self.visualize()
         self.highlight()
         self.multi_cursors()
@@ -559,7 +652,7 @@ class Window():
 
     def draw(self):
         debug = False
-        self.screen.disable_cursor()
+        self.screen.disable_cursor() # we do not want to see the cursor moves while we draw.
         try:
             before = self.window_cursor[1]
             first_line = self.buffer_cursor[1] - before

@@ -1,6 +1,7 @@
 from os import path
 import json
 
+from colors import brighten_color
 from log import elog
 
 
@@ -73,6 +74,11 @@ def get_setting(key, default=None):
     if key == "line_numbers_foreground":
         foreground = get_settings()['theme']['colors'].get('editorLineNumber.foreground', "#4C4C47")
         _ = foreground if not default else default
+        return get_settings().get(key, _)
+    if key == "cursor_highlight_background":
+        background = get_settings()['theme']['colors'].get('editor.background')
+        background = brighten_color(background, 15)
+        _ = background if not default else default
         return get_settings().get(key, _)
 
     if key == "search_highlights_background":
