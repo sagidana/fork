@@ -693,6 +693,10 @@ class Buffer():
 
         self.flush_changes()
 
+    def undo_prefetch(self):
+        if len(self.undo_stack) == 0: return None
+        change_wrapper = self.undo_stack[-1]
+        return change_wrapper['start_position']
     def undo(self):
         if len(self.undo_stack) == 0: return
         change_wrapper = self.undo_stack.pop()

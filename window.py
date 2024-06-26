@@ -1330,10 +1330,11 @@ class Window():
         self.buffer.remove_char(0, curr_line + 1) # to trigger join
 
     def undo(self):
-        position = self.buffer.undo()
+        position = self.buffer.undo_prefetch()
         if not position: return
         self.move_cursor_to_buf_location(   position[0],
                                             position[1])
+        self.buffer.undo()
 
     def redo(self):
         position = self.buffer.redo()
