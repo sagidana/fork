@@ -179,6 +179,16 @@ class TreeSitter():
                 with open(query_path.format("bash"),"r") as f: query = f.read()
                 self.query = TreeSitter.BASH_LANGUAGE.query(query)
                 self.parser.set_language(TreeSitter.BASH_LANGUAGE)
+            elif language == 'html':
+                self._language = TreeSitter.HTML_LANGUAGE
+                with open(query_path.format("html"),"r") as f: query = f.read()
+                self.query = TreeSitter.HTML_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.HTML_LANGUAGE)
+            elif language == 'css':
+                self._language = TreeSitter.CSS_LANGUAGE
+                with open(query_path.format("css"),"r") as f: query = f.read()
+                self.query = TreeSitter.CSS_LANGUAGE.query(query)
+                self.parser.set_language(TreeSitter.CSS_LANGUAGE)
             else:
                 raise Exception("treesitter not support that language.. :(")
         except Exception as e: elog(f"Exception: {e}")

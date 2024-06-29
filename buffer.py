@@ -111,6 +111,8 @@ class Buffer():
             else:
                 with open(file_path, 'r') as f:
                     self.lines = f.readlines()
+                    # if file is empty, create file with empty one line
+                    if len(self.lines) == 0: self.lines = ['\n']
                     # in the case where last char of file is not new line we add an
                     # artificial new line to it.
                     if self.lines[-1][-1] != '\n':
@@ -180,10 +182,10 @@ class Buffer():
             return "go"
         elif    self.file_path.endswith('.zig'):
             return "zig"
-        # elif    self.file_path.endswith('.html'):
-            # return "html"
-        # elif    self.file_path.endswith('.css'):
-            # return "css"
+        elif    self.file_path.endswith('.html'):
+            return "html"
+        elif    self.file_path.endswith('.css'):
+            return "css"
         elif    self.file_path.endswith('.java'):
             return "java"
         elif    self.file_path.endswith('.js'):
