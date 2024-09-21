@@ -3,10 +3,10 @@
 # VT100 escape codes:
 # https://www.csie.ntu.edu.tw/~r92094/c++/VT100.html
 
-from settings import *
-from log import elog
-from events import *
-from hooks import *
+from .settings import *
+from .log import elog
+from .events import *
+from .hooks import *
 
 from signal import signal, SIGWINCH
 

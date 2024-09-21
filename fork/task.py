@@ -1,8 +1,8 @@
 #!/usr/bin/python
 from threading import Thread
 
-from log import elog
-from idr import *
+from .log import elog
+from .idr import *
 
 
 class Task():

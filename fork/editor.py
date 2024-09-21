@@ -7,28 +7,28 @@ import json
 import re
 import os
 
-from buffer import Buffer
-from common import Scope
-from settings import *
-from task import Task
-from screen import *
-from log import elog
-from tab import Tab
+from .buffer import Buffer
+from .common import Scope
+from .settings import *
+from .task import Task
+from .screen import *
+from .log import elog
+from .tab import Tab
 
-from events import *
-from hooks import *
-from popup import *
+from .events import *
+from .hooks import *
+from .popup import *
 
-from plugins import yank_to_clipboard, paste_from_clipboard
-from plugins import comment
-from plugins import ripgrep
-from plugins import format
-from plugins import doc, doc_get_latest_file
-from plugins import fzf, rg_fzf
-from plugins import gotovim
-from plugins import gd
+from .plugins import yank_to_clipboard, paste_from_clipboard
+from .plugins import comment
+from .plugins import ripgrep
+from .plugins import format
+from .plugins import doc, doc_get_latest_file
+from .plugins import fzf, rg_fzf
+from .plugins import gotovim
+from .plugins import gd
 
-from utils import *
+from .utils import *
 
 args = None
 pending_buffer = b''

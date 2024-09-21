@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-from settings import INSTALLATION_PATH
-from common import Scope
-from log import elog
+from .settings import INSTALLATION_PATH
+from .common import Scope
+from .log import elog
 
 from tree_sitter import Language, Parser
 import tree_sitter_python

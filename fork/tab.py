@@ -1,9 +1,9 @@
-from settings import *
-from log import elog
-from window import *
-from hooks import *
-from events import *
-from idr import *
+from .settings import *
+from .log import elog
+from .window import *
+from .hooks import *
+from .events import *
+from .idr import *
 
 class Tab():
     def raise_event(func):

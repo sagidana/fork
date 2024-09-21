@@ -1,9 +1,9 @@
-from log import elog
+from .treesitter import traverse_tree
+from .settings import *
+from .log import elog
+from .screen import *
 
 from difflib import SequenceMatcher as SM
-from treesitter import traverse_tree
-from settings import *
-from screen import *
 from os import path
 
 from string import printable

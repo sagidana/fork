@@ -1,7 +1,7 @@
 from os import path, listdir
 import re
 
-from log import elog
+from .log import elog
 
 
 def is_binary_file(file):

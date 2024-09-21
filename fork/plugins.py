@@ -9,9 +9,9 @@ import sys
 import re
 import os
 
-from common import Scope
-from settings import *
-from log import elog
+from .common import Scope
+from .settings import *
+from .log import elog
 
 def gotovim(editor):
     try:

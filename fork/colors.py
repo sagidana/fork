@@ -370,7 +370,7 @@ def rgb2short(rgb):
 RGB2SHORT_DICT, SHORT2RGB_DICT = _create_dicts()
 
 
-from log import elog
+from .log import elog
 import curses
 
 curses_colors = {}

@@ -1,8 +1,8 @@
 from os import path
 import json
 
-from colors import brighten_color
-from log import elog
+from .colors import brighten_color
+from .log import elog
 
 
 EDITOR_HOME_PATH = path.expanduser('~/.config/editor/')

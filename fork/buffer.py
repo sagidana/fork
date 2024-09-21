@@ -1,14 +1,14 @@
 #!/usr/bin/python3
-from log import elog
+from .log import elog
 
-from settings import *
-from events import *
-from utils import *
-from hooks import *
-from idr import *
+from .settings import *
+from .events import *
+from .utils import *
+from .hooks import *
+from .idr import *
 
-from treesitter import TreeSitter
-from common import Scope
+from .treesitter import TreeSitter
+from .common import Scope
 
 from difflib import Differ
 from subprocess import run

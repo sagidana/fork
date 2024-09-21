@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 import json
 
-from treesitter import TreeSitter
-from settings import *
-from log import elog
+from .treesitter import TreeSitter
+from .settings import *
+from .log import elog
 
 from functools import lru_cache
 
