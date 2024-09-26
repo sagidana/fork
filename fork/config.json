@@ -1,10 +1,4 @@
 {
-        "theme_path": "themes/monokai-color-theme.json",
-        "windows_separator_color": "#4C4C47",
-        "status_line_background": "#4C4C47",
-        "status_line_foreground": "#000000",
-        "line_numbers_background": "#2D2D2A",
-        "line_numbers_foreground": "#4C4C47",
         "tab_representation": ">\u00b7\u00b7\u00b7",
         "line_numbers": true,
         "status_line": true,

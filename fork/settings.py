@@ -35,13 +35,23 @@ def optimize_theme():
 
 def load_settings():
     global g_settings
-    with open(  path.join(EDITOR_HOME_PATH, 'config.json'),
-                'r') as f:
-        g_settings = json.loads(f.read())
+    if path.isfile(path.join(EDITOR_HOME_PATH, 'config.json')):
+        with open(  path.join(EDITOR_HOME_PATH, 'config.json'),
+                    'r') as f:
+            g_settings = json.loads(f.read())
+    else:
+        with open(  path.join(INSTALLATION_PATH, 'config.json'),
+                    'r') as f:
+            g_settings = json.loads(f.read())
 
-    with open(  path.join(EDITOR_HOME_PATH, g_settings['theme_path']),
-                'r') as f:
-        g_settings['theme'] = json.loads(f.read())
+    if "theme_path" not in g_settings:
+        with open(  path.join(INSTALLATION_PATH, "themes/monokai-color-theme.json"),
+                    'r') as f:
+            g_settings['theme'] = json.loads(f.read())
+    else:
+        with open(  path.join(EDITOR_HOME_PATH, g_settings['theme_path']),
+                    'r') as f:
+            g_settings['theme'] = json.loads(f.read())
 
     optimize_theme()
 
