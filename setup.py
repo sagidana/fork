@@ -9,7 +9,7 @@ setup(
     description = 'fork editor',
     long_description = open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type = "text/markdown",
-    url = 'https://github.com/sagidana/Editor',
+    url = 'https://github.com/sagidana/fork',
     packages = find_packages(),
     include_package_data=True,
     install_requires = [open("requirements.txt", "r", encoding="utf-8").read()],

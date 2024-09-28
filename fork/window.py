@@ -326,24 +326,24 @@ class Window():
         # we only try this because of the case where self._prev_buffer_cursor
         # has position in the buffer that no longer exist. reset it.
 
-        try:
-            if self._prev_buffer_cursor is not None and \
-                (self._prev_buffer_cursor[0] != self.buffer_cursor[0] or \
-                 self._prev_buffer_cursor[1] != self.buffer_cursor[1]):
-                # current line highlighted.
-                scope = Scope(0, self._prev_buffer_cursor[1],
-                              len(self.buffer.lines[self._prev_buffer_cursor[1]]) - 1, self._prev_buffer_cursor[1])
-                # override with the default. (un-highlight the prev cursor line)
-                self.override_style_on_scope(scope)
+        # try:
+            # if self._prev_buffer_cursor is not None and \
+                # (self._prev_buffer_cursor[0] != self.buffer_cursor[0] or \
+                 # self._prev_buffer_cursor[1] != self.buffer_cursor[1]):
+                # # current line highlighted.
+                # scope = Scope(0, self._prev_buffer_cursor[1],
+                              # len(self.buffer.lines[self._prev_buffer_cursor[1]]) - 1, self._prev_buffer_cursor[1])
+                # # override with the default. (un-highlight the prev cursor line)
+                # self.override_style_on_scope(scope)
 
-            # current line highlighted.
-            scope = Scope(0, self.buffer_cursor[1],
-                          len(self.buffer.lines[self.buffer_cursor[1]]) - 1, self.buffer_cursor[1])
-            style = {}
-            style['background'] = get_setting("cursor_highlight_background")
-            self.override_style_on_scope(scope, style)
-            self._prev_buffer_cursor = list(self.buffer_cursor)
-        except: self._prev_buffer_cursor = None
+            # # current line highlighted.
+            # scope = Scope(0, self.buffer_cursor[1],
+                          # len(self.buffer.lines[self.buffer_cursor[1]]) - 1, self.buffer_cursor[1])
+            # style = {}
+            # style['background'] = get_setting("cursor_highlight_background")
+            # self.override_style_on_scope(scope, style)
+            # self._prev_buffer_cursor = list(self.buffer_cursor)
+        # except: self._prev_buffer_cursor = None
 
         self.visualize()
         self.highlight()

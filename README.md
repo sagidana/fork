@@ -1,4 +1,4 @@
-# Editor
+# fork
 
 ## Syntax Highlighting
 
@@ -52,6 +52,9 @@ Explain it perfectly. Also Atoms mapings will be used as grammars:
 
 - [C](https://raw.githubusercontent.com/atom/language-c/master/grammars/tree-sitter-c.cson)
 - [Python](https://raw.githubusercontent.com/atom/language-python/master/grammars/tree-sitter-python.cson)
+
+- installation:
+    - `rm -rf build/ dist/ fork.egg-info/ ; python setup.py sdist bdist_wheel;pip install --root-user-action=ignore dist/fork-0.0.1-py3-none-any.whl --force-reinstall`
 
 ## TODOs
 - fix window managements bugs and add move windows and resize windows
